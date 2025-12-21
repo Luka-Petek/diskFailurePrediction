@@ -1,6 +1,47 @@
 obdrzi te ce se da:
 
-smart_5_raw, smart_187_raw, smart_188_raw, smart_197_raw, smart_198_raw (Kritični faktorji).
+NIMAM:
+smart_5_raw, 
+smart_187_raw (Ta stolpec beleži število napak, ki jih strojna oprema (ECC – Error Correction Code) ni mogla popraviti sama) , 
+smart_188_raw(Ta stolpec beleži, kolikokrat je disk "zaspal" oziroma se ni odzval na ukaz v določenem času.)
+
+MAM:
+smart_197_raw, 
+smart_198_raw (Kritični faktorji).
 smart_9_raw (Ure delovanja).
 smart_194_raw (Temperatura).
 capacity_bytes in model.
+
+POSEBNOSTI: 
+    - smart_197_raw, smart_198_raw sta pri WD, HGST, Toshiba, Samsung SSD, Cruacial SSD pogosto Nan
+
+
+🚨 "Rdeči alarmi" (Najpomembnejši SMART atributi)
+To so stolpci, kjer vsaka številka, večja od 0, pomeni resno težavo:
+
+smart_5_raw: Reallocated Sectors (Sektorji so se že pokvarili in bili prestavljeni).
+
+smart_187_raw: Uncorrectable Errors (Krmilnik ni mogel popraviti napake – Kritično!).
+
+smart_188_raw: Command Timeout (Disk "zmrznil" sredi dela).
+
+smart_197_raw: Pending Sectors (Sektorji na poti, da postanejo neuporabni).
+
+smart_198_raw: Uncorrectable Sectors (Fizična poškodba površine plošče).
+
+📈 Operativni in mehanski indikatorji
+Ti stolpci kažejo na obrabo in okolje:
+
+smart_9_raw: Ure delovanja (Power-on Hours) – dejanska starost diska.
+
+smart_194_raw: Temperatura (Vročina ubija diske).
+
+smart_12_raw & smart_4_raw: Število vklopov in ciklov motorja (Start/Stop).
+
+smart_193_raw: Load Cycle Count (Kolikokrat so se glave parkirale – pomembno za WD diske).
+
+smart_7_raw & smart_1_raw: Seek in Read napake (Visoke številke pri Seagatu so OK, pri drugih pa ne).
+
+smart_10_raw: Spin Retry Count (Težave z motorjem – če se disk ne more zavrteti).
+
+smart_199_raw: UDMA CRC Errors (Ponavadi težava s kablom SATA, ne s samim diskom, a še vedno pomembno).
