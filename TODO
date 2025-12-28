@@ -45,3 +45,6 @@ smart_7_raw & smart_1_raw: Seek in Read napake (Visoke številke pri Seagatu so 
 smart_10_raw: Spin Retry Count (Težave z motorjem – če se disk ne more zavrteti).
 
 smart_199_raw: UDMA CRC Errors (Ponavadi težava s kablom SATA, ne s samim diskom, a še vedno pomembno).
+
+
+smartctl -x /dev/sda
