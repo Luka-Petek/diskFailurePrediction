@@ -1,4 +1,4 @@
-# Hard Drive Failure Prediction using Machine Learning
+# Machine Learning - Hard Drive Failure Prediction
 
 A machine learning project that predicts hard drive failures using historical SMART sensor data.
 The model learns failure patterns over time to identify disks at risk before they break.
@@ -14,11 +14,6 @@ The project is currently focused on **Data Engineering and Preprocessing**. Due 
 * **Failure-Centric Extraction:** Optimized search across quarterly datasets (Q1–Q4) to isolate all hardware failure events (`failure=1`).
 * **Feature Selection:** Dimensionality reduction focused on 19 critical SMART attributes identified as statistically significant for failure prediction.
 * **Historical Consolidation:** Aggregation of annual failure instances into a master dataset for improved model generalization.
-
-
-
-[Image of machine learning data pipeline]
-
 
 ## Technical Roadmap
 The project will evolve through the following stages:
