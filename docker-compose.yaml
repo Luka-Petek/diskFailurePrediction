@@ -9,11 +9,13 @@ services:
         FROM python:3.11-slim
         WORKDIR /app
         RUN pip install streamlit pandas joblib requests
+        # Kopiramo samo nujne datoteke v image
         COPY feature_importance.csv .
         COPY disk_model.pkl .
-        COPY app.py .
         EXPOSE 8501
         CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+    volumes:
+      - ./app.py:/app/app.py
     ports:
       - "8501:8501"
     depends_on:
