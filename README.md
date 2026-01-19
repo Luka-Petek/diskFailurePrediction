@@ -47,3 +47,7 @@ Using the **K-Means** algorithm and **t-SNE** visualization (Euclidean distance)
 * **Cluster 0:** Healthy drives (Optimal operation).
 * **Cluster 1:** Aging drives (Increased power-on hours/usage).
 * **Cluster 2:** Critical drives (High probability of failure due to critical SMART errors).
+
+---
+
+whole setup is running localy on my treunas server via portainer
