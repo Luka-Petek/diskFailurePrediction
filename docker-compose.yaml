@@ -3,21 +3,20 @@ version: '3.8'
 services:
   disk-ai-chat:
     container_name: diskML
-    build:
-      context: .
-      dockerfile_inline: |
-        FROM python:3.11-slim
-        WORKDIR /app
-        RUN pip install streamlit pandas joblib requests
-        # Kopiramo samo nujne datoteke v image
-        COPY feature_importance.csv .
-        COPY disk_model.pkl .
-        EXPOSE 8501
-        CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
-    volumes:
-      - ./app.py:/app/app.py
+    image: python:3.11-slim
+    working_dir: /app
     ports:
       - "8501:8501"
+    volumes:
+      - /mnt/pool1/projects/diskFailurePrediction:/src_data:ro
+    command: >
+      sh -c "apt-get update && apt-get install -y procps &&
+             pip install streamlit pandas joblib requests openpyxl scikit-learn &&
+             cp /src_data/app.py /app/app.py &&
+             cp /src_data/disk_model.pkl /app/disk_model.pkl &&
+             cp /src_data/feature_importance.csv /app/feature_importance.csv &&
+             cp /src_data/znacilnice.xlsx /app/znacilnice.xlsx &&
+             streamlit run app.py --server.port=8501 --server.address=0.0.0.0"
     depends_on:
       - ollama
 
@@ -27,7 +26,7 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - ollama_storage:/root/.ollama
+      - ollama_data:/root/.ollama
 
 volumes:
-  ollama_storage:
+  ollama_data:

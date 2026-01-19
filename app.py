@@ -87,7 +87,7 @@ if prompt := st.chat_input("Npr.: Zakaj je smart_5 tako pomemben?"):
                 "stream": False
             }
 
-            response = requests.post(url, json=payload, timeout=30)
+            response = requests.post(url, json=payload, timeout=120)
 
             if response.status_code == 200:
                 full_response = response.json().get('response', 'AI ni vrnil odgovora.')
