@@ -1,32 +1,49 @@
-# Machine Learning - Hard Drive Failure Prediction
+# Machine Learning - Hard Drive Failure Prediction & AI Assistant
 
-A machine learning project that predicts hard drive failures using historical SMART sensor data.
-The model learns failure patterns over time to identify disks at risk before they break.
+A machine learning project that predicts hard drive failures using historical **SMART** (Self-Monitoring, Analysis, and Reporting Technology) sensor data. This system integrates Random Forest classification, unsupervised clustering, and a local AI assistant for real-time result interpretation.
 
 ## Project Overview
-This project aims to develop a predictive maintenance pipeline for data storage reliability. Using Large-scale SMART (Self-Monitoring, Analysis, and Reporting Technology) data, the goal is to identify early warning signs of hardware failure to prevent data loss and optimize replacement cycles.
+The objective is to move from reactive maintenance to a proactive strategy. By learning disk degradation patterns, the model identifies risks before critical hardware failure and data loss occur.
 
-The project utilizes the **Backblaze** open-source dataset, processing millions of daily disk snapshots to build a robust classification and regression system.
-
-## Current Development Status
-The project is currently focused on **Data Engineering and Preprocessing**. Due to the high volume of data (30M+ records per month), the following optimizations have been implemented:
-
-* **Failure-Centric Extraction:** Optimized search across quarterly datasets (Q1–Q4) to isolate all hardware failure events (`failure=1`).
-* **Feature Selection:** Dimensionality reduction focused on 19 critical SMART attributes identified as statistically significant for failure prediction.
-* **Historical Consolidation:** Aggregation of annual failure instances into a master dataset for improved model generalization.
-
-## Technical Roadmap
-The project will evolve through the following stages:
-
-1.  **Clustering:** Unsupervised learning to group drive instances based on usage patterns and hardware specifications.
-2.  **Imbalance Correction (SMOTE):** Implementing *Synthetic Minority Over-sampling Technique* to address the extreme class imbalance between healthy and failed drives.
-3.  **RUL Regression:** Predicting the *Remaining Useful Life* (RUL) of a disk based on degradation trends.
-4.  **Ensemble Classification (Feature Stacking):** Utilizing a stacked model architecture to provide final probability scores for potential failures.
-
-
-
-## Project Goal
-The objective is to move from reactive maintenance to a proactive strategy. By leveraging historical SMART data, this project intends to demonstrate how machine learning can provide a reliable "early warning system" for large-scale data center infrastructure.
+### Key Features:
+* **Dataset:** Backblaze open-source data (Year 2025).
+* **Scale:** Processed 32M+ records, filtered into a balanced dataset of **8,828 instances**.
+* **Methodology:** Supervised learning (Random Forest) and Unsupervised learning (K-Means).
+* **AI Integration:** Local LLM (Llama 3 via Ollama) providing natural language explanations for SMART parameters.
 
 ---
-*Status: Active Development*
+
+## Technical Architecture
+The project is deployed in an isolated **Docker** environment on **TrueNAS SCALE**, ensuring data privacy and system stability.
+
+### System Components:
+1.  **ML Model:** Random Forest Classifier trained on 19 statistically significant SMART attributes.
+2.  **Streamlit UI:** A web dashboard for cluster visualization (t-SNE) and AI chat interaction.
+3.  **Ollama Service:** Local inference engine running the Llama 3 model.
+4.  **Data Pipeline:** Automated preprocessing, median imputation, and feature scaling.
+
+
+
+---
+
+## Model Performance
+The model demonstrates high reliability in identifying failure-prone drives:
+
+* **Accuracy:** 90.15%
+* **Recall:** 86.00% (Critical for capturing actual failure events)
+* **F1-Score:** 0.88
+
+### Top Predictors (Feature Importance):
+The following SMART attributes were identified as the strongest indicators of failure:
+1.  **SMART 5** (Reallocated Sectors Count)
+2.  **SMART 187** (Reported Uncorrectable Errors)
+3.  **SMART 188** (Command Timeout)
+4.  **SMART 197** (Current Pending Sector Count)
+
+---
+
+## Clustering Analysis
+Using the **K-Means** algorithm and **t-SNE** visualization (Euclidean distance), drives are categorized into 3 distinct groups:
+* **Cluster 0:** Healthy drives (Optimal operation).
+* **Cluster 1:** Aging drives (Increased power-on hours/usage).
+* **Cluster 2:** Critical drives (High probability of failure due to critical SMART errors).
