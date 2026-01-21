@@ -3,11 +3,11 @@ import joblib
 import pandas as pd
 import requests
 import json
+import os
 
-# Nastavitev strani
-st.set_page_config(page_title="DiskML Analitik", layout="wide")
+st.set_page_config(page_title="DiskML Model", layout="wide")
 
-# Funkcija za nalaganje metapodatkov modela
+
 @st.cache_resource
 def load_resources():
     try:
@@ -21,43 +21,43 @@ def load_resources():
 
 importance_df, model_rf = load_resources()
 
-# Stranska vrstica s podatki o modelu
 st.sidebar.title("📊 Podatki o modelu")
+
+if st.sidebar.button("🗑️ Počisti zgodovino pogovora"):
+    st.session_state.messages = []
+    st.rerun()
+
 if importance_df is not None:
-    st.sidebar.write("### Pomembnost značilk (Top 10)")
+    st.sidebar.write("### Pomembnost značilnic (Top 10)")
     st.sidebar.dataframe(importance_df.head(10), hide_index=True)
 
 st.sidebar.markdown("---")
 st.sidebar.write("**Natančnost:** 90.15%")
-st.sidebar.write("**Recall (Ulov odpovedi):** 86%")
+st.sidebar.write("**Recall (pravilno napovedane odpovedi):** 86%")
 st.sidebar.info("Model temelji na Random Forest algoritmu in je bil naučen na 8.828 uravnoteženih instancah.")
 
-# Glavni del vmesnika
 st.title("🤖 DiskML AI Sogovornik")
 st.markdown("""
-Ta vmesnik ti omogoča pogovor z AI modelom o logiki tvojega Random Forest modela za napovedovanje odpovedi diskov.
-Vprašaj ga karkoli o tem, kako se model odloča.
+Ta vmesnik ti omogoča pogovor z AI modelom o logiki modela za napovedovanje odpovedi diskov.
+Vprašaš ga lahko karkoli o modelu ali o vplivih na odpoved diska nasploh.
 """)
 
-# Inicializacija zgodovine chata
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Prikaz preteklih sporočil
+# pretekla sporocila
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Vnos uporabnika
+# vnos uporabnika
 if prompt := st.chat_input("Npr.: Zakaj je smart_5 tako pomemben?"):
     # Dodaj uporabnikovo vprašanje v zgodovino
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Priprava konteksta za Ollamo
-    # AI-ju podamo "znanje" iz tvojega CSV-ja, da bo vedel odgovarjati specifično o tvojem modelu
-    context_data = importance_df.head(15).to_string(index=False)
+    context_data = importance_df.head(15).to_string(index=False) if importance_df is not None else ""
 
     system_prompt = f"""
     Si strokovnjak za strojno učenje in shranjevanje podatkov. 
@@ -70,7 +70,8 @@ if prompt := st.chat_input("Npr.: Zakaj je smart_5 tako pomemben?"):
     {context_data}
 
     Tvoji odgovori morajo temeljiti na teh podatkih. Če te uporabnik vpraša o pomembnosti, 
-    poglej v zgornji seznam. Govori strokovno, a razumljivo.
+    poglej v zgornji seznam. Govori strokovno, a razumljivo. 
+    Lahko pričakuješ tudi splošna vprašanja o diskih nasploh, SMART skeniranju diskov, znanji vplivi na delovanje diskov in nasplošno karkoli glede te tematike.
     """
 
     # Klic Ollama API-ja znotraj Docker omrežja
@@ -79,11 +80,22 @@ if prompt := st.chat_input("Npr.: Zakaj je smart_5 tako pomemben?"):
         full_response = ""
 
         try:
-            # Povezava do ollama containerja (ime 'ollama' je iz docker-compose)
+            # api klic do ollama containerja
             url = "http://ollama:11434/api/generate"
+
+            #da si llama3 "zapomne" kontekst pogovora je treba vedno znova vkljuciti text od prej
+            #omejitev na zadnjih 20 sporočil, da ne presežemo limita tokenov (Sliding Window)
+            MAX_HISTORY = 20
+            recent_messages = st.session_state.messages[-MAX_HISTORY:]
+
+            history_context = ""
+            for msg in recent_messages[:-1]:  # vzamemo vse razen čisto zadnjega prompta
+                role = "Uporabnik" if msg["role"] == "user" else "AI"
+                history_context += f"{role}: {msg['content']}\n"
+
             payload = {
                 "model": "llama3",
-                "prompt": f"{system_prompt}\n\nUporabnik sprašuje: {prompt}",
+                "prompt": f"{system_prompt}\n\nZgodovina pogovora:\n{history_context}\nUporabnik sprašuje: {prompt}",
                 "stream": False
             }
 
