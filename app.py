@@ -4,9 +4,32 @@ import pandas as pd
 import requests
 import json
 import os
+import random
+import time
 
 st.set_page_config(page_title="DiskML Model", layout="wide")
 
+if "last_placeholder_update" not in st.session_state:
+    st.session_state.last_placeholder_update = 0
+if "current_placeholder" not in st.session_state:
+    st.session_state.current_placeholder = "Zakaj je smart_5 tako pomemben?"
+
+placeholder_vprasanja = [
+    "Processing your request...",
+    "Thinking...",
+    "Understanding context...",
+    "Thinking longer for better answer...",
+    "Performing algorithmic analysis...",
+    "Synthesizing information...",
+    "Formulating a response...",
+    "Analyzing logic...",
+    "Connecting the dots..."
+]
+
+trenutni_cas = time.time()
+if trenutni_cas - st.session_state.last_placeholder_update > 10:
+    st.session_state.current_placeholder = random.choice(placeholder_vprasanja)
+    st.session_state.last_placeholder_update = trenutni_cas
 
 @st.cache_resource
 def load_resources():
@@ -39,7 +62,9 @@ st.sidebar.info("Model temelji na Random Forest algoritmu in je bil naučen na 8
 st.title("🤖 DiskML AI Sogovornik")
 st.markdown("""
 Ta vmesnik ti omogoča pogovor z AI modelom o logiki modela za napovedovanje odpovedi diskov.
-Vprašaš ga lahko karkoli o modelu ali o vplivih na odpoved diska nasploh.
+Vprašaš ga lahko karkoli o modelu, strojnem učenju ali o vplivih na odpoved diska nasploh.
+
+Zaradi lightweight llama modela, ima model konkest za zadnjih 20 vprasanj uporabnika.
 """)
 
 if "messages" not in st.session_state:
@@ -71,7 +96,7 @@ if prompt := st.chat_input("Npr.: Zakaj je smart_5 tako pomemben?"):
 
     Tvoji odgovori morajo temeljiti na teh podatkih. Če te uporabnik vpraša o pomembnosti, 
     poglej v zgornji seznam. Govori strokovno, a razumljivo. 
-    Lahko pričakuješ tudi splošna vprašanja o diskih nasploh, SMART skeniranju diskov, znanji vplivi na delovanje diskov in nasplošno karkoli glede te tematike.
+    Lahko pričakuješ tudi splošna vprašanja o diskih nasploh, SMART skeniranju diskov, znanji vplivi na delovanje diskov in nasplošno karkoli glede te tematike in strojnem učenju.
     """
 
     # Klic Ollama API-ja znotraj Docker omrežja
