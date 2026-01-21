@@ -12,7 +12,7 @@ st.set_page_config(page_title="DiskML Model", layout="wide")
 if "last_placeholder_update" not in st.session_state:
     st.session_state.last_placeholder_update = 0
 if "current_placeholder" not in st.session_state:
-    st.session_state.current_placeholder = "Zakaj je smart_5 tako pomemben?"
+    st.session_state.current_placeholder = "Ready to help..."
 
 placeholder_vprasanja = [
     "Processing your request...",
@@ -30,6 +30,7 @@ trenutni_cas = time.time()
 if trenutni_cas - st.session_state.last_placeholder_update > 10:
     st.session_state.current_placeholder = random.choice(placeholder_vprasanja)
     st.session_state.last_placeholder_update = trenutni_cas
+
 
 @st.cache_resource
 def load_resources():
@@ -64,7 +65,7 @@ st.markdown("""
 Ta vmesnik ti omogoča pogovor z AI modelom o logiki modela za napovedovanje odpovedi diskov.
 Vprašaš ga lahko karkoli o modelu, strojnem učenju ali o vplivih na odpoved diska nasploh.
 
-Zaradi lightweight llama modela, ima model konkest za zadnjih 20 vprasanj uporabnika.
+Zaradi lightweight llama modela, ima model v kontekstu zadnjih 20 vprašanj uporabnika.
 """)
 
 if "messages" not in st.session_state:
@@ -75,9 +76,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# vnos uporabnika
-if prompt := st.chat_input("Npr.: Zakaj je smart_5 tako pomemben?"):
-    # Dodaj uporabnikovo vprašanje v zgodovino
+if prompt := st.chat_input(st.session_state.current_placeholder):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -105,11 +104,9 @@ if prompt := st.chat_input("Npr.: Zakaj je smart_5 tako pomemben?"):
         full_response = ""
 
         try:
-            # api klic do ollama containerja
             url = "http://ollama:11434/api/generate"
 
-            #da si llama3 "zapomne" kontekst pogovora je treba vedno znova vkljuciti text od prej
-            #omejitev na zadnjih 20 sporočil, da ne presežemo limita tokenov (Sliding Window)
+            #sliding windows, kontekst sledi samo zadnjim 20 vprasanjem..
             MAX_HISTORY = 20
             recent_messages = st.session_state.messages[-MAX_HISTORY:]
 
@@ -138,5 +135,8 @@ if prompt := st.chat_input("Npr.: Zakaj je smart_5 tako pomemben?"):
 
         message_placeholder.markdown(full_response)
 
-    # Dodaj odgovor v zgodovino
+    #dodajanje odgovorov
     st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+    #refresh
+    st.session_state.last_placeholder_update = 0
