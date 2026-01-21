@@ -16,11 +16,8 @@ if "current_placeholder" not in st.session_state:
 
 placeholder_vprasanja = [
     "Processing your request...",
-    "Thinking...",
     "Understanding context...",
     "Thinking longer for better answer...",
-    "Performing algorithmic analysis...",
-    "Synthesizing information...",
     "Formulating a response...",
     "Analyzing logic...",
     "Connecting the dots..."
@@ -64,8 +61,7 @@ st.title("🤖 DiskML AI Sogovornik")
 st.markdown("""
 Ta vmesnik ti omogoča pogovor z AI modelom o logiki modela za napovedovanje odpovedi diskov.
 Vprašaš ga lahko karkoli o modelu, strojnem učenju ali o vplivih na odpoved diska nasploh.
-
-Zaradi lightweight llama modela, ima model v kontekstu zadnjih 20 vprašanj uporabnika.
+Zaradi lightweight llama modela, ima model v kontekstu zadnjih 20 vpraščanj uporabnika.
 """)
 
 if "messages" not in st.session_state:
@@ -73,10 +69,12 @@ if "messages" not in st.session_state:
 
 # pretekla sporocila
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+    # Ohranimo ikone pri izrisu zgodovine
+    avatar = "🤖" if message["role"] == "assistant" else None
+    with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
-if prompt := st.chat_input(st.session_state.current_placeholder):
+if prompt := st.chat_input("Vprašaj me karkoli..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -84,29 +82,37 @@ if prompt := st.chat_input(st.session_state.current_placeholder):
     context_data = importance_df.head(15).to_string(index=False) if importance_df is not None else ""
 
     system_prompt = f"""
-    Si strokovnjak za strojno učenje in shranjevanje podatkov. 
-    Analiziraš moj specifičen Random Forest model za napovedovanje odpovedi diskov.
+        Si visoko strokovni svetovalec za strojno učenje in zanesljivost shranjevanja podatkov. 
+        Tvoja naloga je pomagati uporabniku interpretirati rezultate naprednega sistema za napovedovanje odpovedi diskov, 
+        ki temelji na algoritmih gručenja, klasifikacije in regresije.
 
-    TUKAJ SO PODATKI O MOJEM MODELU:
-    - Skupna natančnost: 90.15%
-    - Recall (ulov dejanskih odpovedi): 86%
-    - Najpomembnejši SMART parametri (Feature Importance):
-    {context_data}
+        TEHNIČNE SPECIFIKACIJE SISTEMA, KI JIH PREDSTAVLJAŠ UPORABNIKU:
+        - Skupna natančnost napovedi: 90.15%
+        - Recall (sposobnost zaznave dejanskih odpovedi): 86%
+        - Ključni SMART parametri, na katerih temelji odločanje sistema:
+        {context_data}
 
-    Tvoji odgovori morajo temeljiti na teh podatkih. Če te uporabnik vpraša o pomembnosti, 
-    poglej v zgornji seznam. Govori strokovno, a razumljivo. 
-    Lahko pričakuješ tudi splošna vprašanja o diskih nasploh, SMART skeniranju diskov, znanji vplivi na delovanje diskov in nasplošno karkoli glede te tematike in strojnem učenju.
-    """
+        NAVODILA ZA KOMUNIKACIJO:
+        1. Ne obravnavaj avtorja modela, temveč se posveti izključno uporabniku, ki trenutno uporablja chat.
+        2. Odgovori morajo biti objektivni in strokovni. Namesto "tvoj model" uporabi "sistem za analizo" ali "uporabljeni model".
+        3. Če uporabnik vpraša o pomembnosti parametrov, mu razloži vlogo zgoraj navedenih SMART atributov v kontekstu zanesljivosti.
+        4. Poleg specifikacij sistema si pripravljen odgovarjati tudi na splošna vprašanja o vzdrževanju diskov, delovanju SMART tehnologije, vplivih okolja na strojno opremo ter teoriji strojnega učenja.
+        5. Govori razumljivo, a ohrani avtoriteto strokovnjaka. Uporabniku nudiš vpogled v to, kako tehnologija varuje njegove podatke.
+        """
 
-    # Klic Ollama API-ja znotraj Docker omrežja
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar="🤖"):
         message_placeholder = st.empty()
+
+        # TAKOJ izpišemo naključen procesni stavek, da uporabnik vidi aktivnost
+        thinking_text = random.choice(placeholder_vprasanja)
+        message_placeholder.markdown(f"*{thinking_text}*")
+
         full_response = ""
 
         try:
             url = "http://ollama:11434/api/generate"
 
-            #sliding windows, kontekst sledi samo zadnjim 20 vprasanjem..
+            # sliding windows, kontekst sledi samo zadnjim 20 vprasanjem..
             MAX_HISTORY = 20
             recent_messages = st.session_state.messages[-MAX_HISTORY:]
 
@@ -133,10 +139,11 @@ if prompt := st.chat_input(st.session_state.current_placeholder):
         except Exception as e:
             full_response = f"Prišlo je do napake: {e}"
 
+        # Dejanski odgovor prepiše procesni stavek
         message_placeholder.markdown(full_response)
 
-    #dodajanje odgovorov
+    # dodajanje odgovorov
     st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-    #refresh
+    # refresh
     st.session_state.last_placeholder_update = 0
