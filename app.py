@@ -127,7 +127,7 @@ if prompt := st.chat_input("Vprašaj me karkoli..."):
                 "stream": False
             }
 
-            response = requests.post(url, json=payload, timeout=120)
+            response = requests.post(url, json=payload, timeout=500)
 
             if response.status_code == 200:
                 full_response = response.json().get('response', 'AI ni vrnil odgovora.')
