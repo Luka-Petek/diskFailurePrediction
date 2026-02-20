@@ -1,0 +1,8 @@
+FROM mistral-nemo:12b
+
+PARAMETER temperature 0.3
+PARAMETER num_ctx 32768
+#gpu da dela..
+PARAMETER num_gpu 99
+
+#ollama create diskml-mistral -f Modelfile

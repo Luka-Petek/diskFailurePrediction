@@ -125,12 +125,9 @@ if prompt := st.chat_input("Ask me anything..."):
                 history_context += f"{role}: {msg['content']}\n"
 
             payload = {
-                "model": "mistral-nemo:12b",
+                "model": "diskml-mistral",
                 "prompt": f"{system_prompt}\n\nHistory:\n{history_context}\nUser: {prompt}",
-                "stream": True,  #dodan streaming
-                "options": {
-                    "num_gpu": 99  #moj gpu?
-                }
+                "stream": True  #dodan streaming
             }
 
             # Pošljemo zahtevek s stream=True
@@ -148,14 +145,13 @@ if prompt := st.chat_input("Ask me anything..."):
                             # Sprotno osveževanje vmesnika z dodajanjem kurzorja
                             message_placeholder.markdown(full_response + "▌")
 
-                # Končni izpis brez kurzorja
                 message_placeholder.markdown(full_response)
             else:
                 full_response = f"Error: Ollama returned status {response.status_code}."
                 message_placeholder.markdown(full_response)
 
         except requests.exceptions.ConnectionError:
-            full_response = "Error: Cannot connect to Ollama. Check if OLLAMA_HOST=0.0.0.0."
+            full_response = "Error: Cannot connect to Ollama"
             message_placeholder.markdown(full_response)
         except Exception as e:
             full_response = f"An error occurred: {e}"
