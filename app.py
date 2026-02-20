@@ -36,32 +36,32 @@ def load_resources():
         model = joblib.load('disk_model.pkl')
         return importance, model
     except Exception as e:
-        st.error(f"Napaka pri nalaganju datotek: {e}")
+        st.error(f"Error loading files: {e}")
         return None, None
 
 
 importance_df, model_rf = load_resources()
 
-st.sidebar.title("📊 Podatki o modelu")
+st.sidebar.title("📊 Model Data")
 
-if st.sidebar.button("🗑️ Počisti zgodovino pogovora"):
+if st.sidebar.button("🗑️ Clear chat history"):
     st.session_state.messages = []
     st.rerun()
 
 if importance_df is not None:
-    st.sidebar.write("### Pomembnost značilnic (Top 10)")
+    st.sidebar.write("### Feature Importance (Top 10)")
     st.sidebar.dataframe(importance_df.head(10), hide_index=True)
 
 st.sidebar.markdown("---")
-st.sidebar.write("**Natančnost:** 90.15%")
-st.sidebar.write("**Recall (pravilno napovedane odpovedi):** 86%")
-st.sidebar.info("Model temelji na Random Forest algoritmu in je bil naučen na 8.828 uravnoteženih instancah.")
+st.sidebar.write("**Accuracy:** 90.15%")
+st.sidebar.write("**Recall (correctly predicted failures):** 86%")
+st.sidebar.info("The model is based on the Random Forest algorithm and was trained on 8,828 balanced instances.")
 
-st.title("🤖 DiskML AI Sogovornik")
+st.title("🤖 DiskML AI Advisor")
 st.markdown("""
-Ta vmesnik ti omogoča pogovor z AI modelom o logiki modela za napovedovanje odpovedi diskov.
-Vprašaš ga lahko karkoli o modelu, strojnem učenju ali o vplivih na odpoved diska nasploh.
-Zaradi lightweight llama modela, ima model v kontekstu zadnjih 20 vpraščanj uporabnika.
+This interface allows you to chat with an AI model about the logic of the disk failure prediction model.
+You can ask anything about the model, machine learning, or disk failure influences in general.
+Due to the lightweight llama model, the context includes the last 20 user questions.
 """)
 
 if "messages" not in st.session_state:
@@ -74,7 +74,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Vprašaj me karkoli..."):
+if prompt := st.chat_input("Ask me anything..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -128,26 +128,26 @@ if prompt := st.chat_input("Vprašaj me karkoli..."):
 
             history_context = ""
             for msg in recent_messages[:-1]:  # vzamemo vse razen čisto zadnjega prompta
-                role = "Uporabnik" if msg["role"] == "user" else "AI"
+                role = "User" if msg["role"] == "user" else "Assistant"
                 history_context += f"{role}: {msg['content']}\n"
 
             payload = {
                 "model": "llama3",
-                "prompt": f"{system_prompt}\n\nZgodovina pogovora:\n{history_context}\nUporabnik sprašuje: {prompt}",
+                "prompt": f"{system_prompt}\n\nChat History:\n{history_context}\nUser asks: {prompt}",
                 "stream": False
             }
 
             response = requests.post(url, json=payload, timeout=500)
 
             if response.status_code == 200:
-                full_response = response.json().get('response', 'AI ni vrnil odgovora.')
+                full_response = response.json().get('response', 'AI did not return a response.')
             else:
-                full_response = f"Napaka: Ollama je vrnila status {response.status_code}."
+                full_response = f"Error: Ollama returned status {response.status_code}."
 
         except requests.exceptions.ConnectionError:
-            full_response = "Napaka: Ne morem se povezati z Ollama storitvijo. Preveri, če container 'ollama_service' teče."
+            full_response = "Error: Cannot connect to the Ollama service. Check if container 'ollama_service' is running."
         except Exception as e:
-            full_response = f"Prišlo je do napake: {e}"
+            full_response = f"An error occurred: {e}"
 
         # Dejanski odgovor prepiše procesni stavek
         message_placeholder.markdown(full_response)
