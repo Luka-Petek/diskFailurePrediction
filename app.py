@@ -36,32 +36,31 @@ def load_resources():
         model = joblib.load('disk_model.pkl')
         return importance, model
     except Exception as e:
-        st.error(f"Napaka pri nalaganju datotek: {e}")
+        st.error(f"Error loading files: {e}")
         return None, None
 
 
 importance_df, model_rf = load_resources()
 
-st.sidebar.title("📊 Podatki o modelu")
+st.sidebar.title("📊 Model Data")
 
-if st.sidebar.button("🗑️ Počisti zgodovino pogovora"):
+if st.sidebar.button("🗑️ Clear chat history"):
     st.session_state.messages = []
     st.rerun()
 
 if importance_df is not None:
-    st.sidebar.write("### Pomembnost značilnic (Top 10)")
+    st.sidebar.write("### Feature Importance (Top 10)")
     st.sidebar.dataframe(importance_df.head(10), hide_index=True)
 
 st.sidebar.markdown("---")
-st.sidebar.write("**Natančnost:** 90.15%")
-st.sidebar.write("**Recall (pravilno napovedane odpovedi):** 86%")
-st.sidebar.info("Model temelji na Random Forest algoritmu in je bil naučen na 8.828 uravnoteženih instancah.")
+st.sidebar.write("**Accuracy:** 90.15%")
+st.sidebar.write("**Recall (correctly predicted failures):** 86%")
+st.sidebar.info("The model is primary based on the Random Forest algorithm, both for classification and regression and was trained on 8,828 balanced instances.")
 
-st.title("🤖 DiskML AI Sogovornik")
+st.title("🤖 DiskML AI Advisor")
 st.markdown("""
-Ta vmesnik ti omogoča pogovor z AI modelom o logiki modela za napovedovanje odpovedi diskov.
-Vprašaš ga lahko karkoli o modelu, strojnem učenju ali o vplivih na odpoved diska nasploh.
-Zaradi lightweight llama modela, ima model v kontekstu zadnjih 20 vpraščanj uporabnika.
+This interface allows you to chat with an AI model about the logic of the disk failure prediction model.
+You can ask anything about the model, machine learning, or disk failure influences in general.
 """)
 
 if "messages" not in st.session_state:
@@ -74,7 +73,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Vprašaj me karkoli..."):
+if prompt := st.chat_input("Ask me anything..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -113,44 +112,54 @@ if prompt := st.chat_input("Vprašaj me karkoli..."):
     with st.chat_message("assistant", avatar="🤖"):
         message_placeholder = st.empty()
 
-        # TAKOJ izpišemo naključen procesni stavek, da uporabnik vidi aktivnost
+        # Prikaz začetne animacije
         thinking_text = random.choice(placeholder_vprasanja)
         message_placeholder.markdown(f"*{thinking_text}*")
 
-        full_response = ""
-
         try:
-            url = "http://ollama:11434/api/generate"
-
-            # sliding windows, kontekst sledi samo zadnjim 25 vprasanjem..
-            MAX_HISTORY = 25
-            recent_messages = st.session_state.messages[-MAX_HISTORY:]
+            url = "http://host.docker.internal:11434/api/generate"
 
             history_context = ""
-            for msg in recent_messages[:-1]:  # vzamemo vse razen čisto zadnjega prompta
-                role = "Uporabnik" if msg["role"] == "user" else "AI"
+            for msg in st.session_state.messages[:-1]:
+                role = "User" if msg["role"] == "user" else "Assistant"
                 history_context += f"{role}: {msg['content']}\n"
 
             payload = {
-                "model": "llama3",
-                "prompt": f"{system_prompt}\n\nZgodovina pogovora:\n{history_context}\nUporabnik sprašuje: {prompt}",
-                "stream": False
+                "model": "mistral-nemo:12b",
+                "prompt": f"{system_prompt}\n\nHistory:\n{history_context}\nUser: {prompt}",
+                "stream": True,  #dodan streaming
+                "options": {
+                    "num_gpu": 99  #moj gpu?
+                }
             }
 
-            response = requests.post(url, json=payload, timeout=500)
+            # Pošljemo zahtevek s stream=True
+            response = requests.post(url, json=payload, timeout=500, stream=True)
 
             if response.status_code == 200:
-                full_response = response.json().get('response', 'AI ni vrnil odgovora.')
+                full_response = ""
+                # Procesiranje toka podatkov (chunk po chunk)
+                for line in response.iter_lines():
+                    if line:
+                        chunk = json.loads(line.decode('utf-8'))
+                        if 'response' in chunk:
+                            content = chunk.get('response', '')
+                            full_response += content
+                            # Sprotno osveževanje vmesnika z dodajanjem kurzorja
+                            message_placeholder.markdown(full_response + "▌")
+
+                # Končni izpis brez kurzorja
+                message_placeholder.markdown(full_response)
             else:
-                full_response = f"Napaka: Ollama je vrnila status {response.status_code}."
+                full_response = f"Error: Ollama returned status {response.status_code}."
+                message_placeholder.markdown(full_response)
 
         except requests.exceptions.ConnectionError:
-            full_response = "Napaka: Ne morem se povezati z Ollama storitvijo. Preveri, če container 'ollama_service' teče."
+            full_response = "Error: Cannot connect to Ollama. Check if OLLAMA_HOST=0.0.0.0."
+            message_placeholder.markdown(full_response)
         except Exception as e:
-            full_response = f"Prišlo je do napake: {e}"
-
-        # Dejanski odgovor prepiše procesni stavek
-        message_placeholder.markdown(full_response)
+            full_response = f"An error occurred: {e}"
+            message_placeholder.markdown(full_response)
 
     # dodajanje odgovorov
     st.session_state.messages.append({"role": "assistant", "content": full_response})
