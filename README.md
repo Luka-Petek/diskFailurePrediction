@@ -1,4 +1,4 @@
-# Machine Learning - Hard Drive Failure Prediction Model& AI Assistant
+# Machine Learning - Hard Drive Failure Prediction Model & AI Assistant
 
 A machine learning project that predicts hard drive failures using historical **SMART** (Self-Monitoring, Analysis, and Reporting Technology) sensor data. This system integrates Random Forest classification, unsupervised clustering, and a local AI assistant for real-time result interpretation.
 
