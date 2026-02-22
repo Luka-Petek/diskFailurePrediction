@@ -1,14 +1,13 @@
 # Machine Learning - Hard Drive Failure Prediction Model & AI Assistant
 
-A machine learning project that predicts hard drive failures using historical **SMART** (Self-Monitoring, Analysis, and Reporting Technology) sensor data. This system integrates Random Forest classification, unsupervised clustering, and a local AI assistant for real-time result interpretation.
+A machine learning project that predicts hard drive failures using historical **SMART** (Self-Monitoring, Analysis, and Reporting Technology) sensor data. This system integrates Random Forest classification, regression, unsupervised clustering, and a local AI assistant for result interpretation. 
 
-## Project Overview
-The objective is to move from reactive maintenance to a proactive strategy. By learning disk degradation patterns, the model identifies risks before critical hardware failure and data loss occur.
+By learning disk degradation patterns, the model identifies risks before critical hardware failure and data loss occur.
 
 ### Key Features:
 * **Dataset:** Backblaze open-source data (Year 2025).
 * **Scale:** Processed 32M+ records, filtered into a balanced dataset of **8,828 instances**.
-* **Methodology:** Supervised learning (Random Forest) and Unsupervised learning (K-Means).
+* **Methodology:** Supervised learning (Random Forest - regression and classification) and Unsupervised learning (K-Means).
 * **AI Integration:** Local LLM (Llama 3 via Ollama) providing natural language explanations for SMART parameters.
 
 ---
@@ -18,8 +17,8 @@ The project is deployed in an isolated **Docker** environment on **TrueNAS SCALE
 
 ### System Components:
 1.  **ML Model:** Random Forest Classifier trained on 19 statistically significant SMART attributes.
-2.  **Streamlit UI:** A web dashboard for cluster visualization (t-SNE) and AI chat interaction.
-3.  **Ollama Service:** Local inference engine running the Llama 3 model.
+2.  **Streamlit UI:** A web dashboard for AI chat interaction.
+3.  **Ollama Service:** Local inference engine running the Llama 3 model (mistral-nemo:12b on other branch, meant for laptop).
 4.  **Data Pipeline:** Automated preprocessing, median imputation, and feature scaling.
 
 ---
@@ -34,7 +33,7 @@ Categorizes drives into binary states: **Healthy** or **Failure-Prone**.
 * **Recall:** 86.00% (Critical for capturing actual failure events)
 * **F1-Score:** 0.88
 
-### 2. SMART 5 Regression Analysis
+### 2. Regression Analysis (SMART 5)
 Predicting the value of **SMART 5 (Reallocated Sectors Count)**.
 * **Predictive Forecasting:** Instead of a binary "Yes/No", the model predicts the *actual number* of reallocated sectors.
 * **Surface Degradation:** By predicting a rise in SMART 5, we can intervene before the disk's internal spare area is fully depleted.
