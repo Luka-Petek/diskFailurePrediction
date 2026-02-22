@@ -52,9 +52,16 @@ if importance_df is not None:
     st.sidebar.write("### Feature Importance (Top 10)")
     st.sidebar.dataframe(importance_df.head(10), hide_index=True)
 
-st.sidebar.markdown("---")
+st.sidebar.markdown("📈 Classification Results")
+st.sidebar.write("**Target:** Failure (Yes/No)")
 st.sidebar.write("**Accuracy:** 90.15%")
 st.sidebar.write("**Recall (correctly predicted failures):** 86%")
+
+st.sidebar.write("### 📈 Regression Results")
+st.sidebar.write("**Target:** SMART 5 (Reallocated Sectors)")
+st.sidebar.write("**MAE (Mean Absolute Error):** 0.12")
+st.sidebar.write("**R² Score:** 0.89")
+
 st.sidebar.info("The model is primary based on the Random Forest algorithm, both for classification and regression and was trained on 8,828 balanced instances.")
 
 st.title("🤖 DiskML AI Advisor")
@@ -86,7 +93,12 @@ if prompt := st.chat_input("Ask me anything..."):
     Your task is to help everyday users understand how the system evaluates disk health and what actions they can take 
     to protect their data, even if they have no prior technical knowledge.
 
-    SYSTEM SPECIFICATIONS TO PRESENT TO THE USER:
+    MODEL TRAINING & SPECIFICATIONS:
+    1. CLASSIFICATION: Trained to distinguish between 'Healthy' and 'Failure' states (90.15% Accuracy, 86% Recall).
+    2. REGRESSION: Trained to predict the specific count of SMART 5 (Reallocated Sectors) to forecast physical surface degradation (R²: 0.89).
+    3. CLUSTERING: Trained to group drives into 3 clusters: Healthy, Aging, and Critical.
+
+    SYSTEM DATA TO PRESENT TO THE USER:
     - Overall prediction accuracy: 90.15%
     - Recall (ability to detect actual failures): 86%
     - Key SMART parameters that drive the system's decisions:
@@ -95,14 +107,11 @@ if prompt := st.chat_input("Ask me anything..."):
     GUIDELINES FOR COMMUNICATING WITH THE USER:
     1. Focus solely on the user – all answers should help them interpret results and understand actions, not explain the model itself. 
     2. Use clear, friendly, and accessible language; avoid technical jargon unless necessary. 
-    3. When explaining SMART parameters or system outputs, clarify why they matter and how they affect disk reliability, using practical examples. 
-    4. If the user asks about warnings, risks, or disk issues, provide concrete, easy-to-follow preventive or corrective actions. 
-    5. Include simple explanations of:
-        - How SMART technology works
-        - Environmental factors such as temperature and power stability affecting disk health
-        - Basic maintenance tips and data protection strategies
-    6. Your explanations should be objective, authoritative, and professional, but still understandable — the user should feel informed and confident about their data safety.
-    7. For complex results, explain step-by-step using examples or analogies to ensure the everyday user can follow along.
+    3. When explaining SMART parameters or system outputs, clarify why they matter and how they affect disk reliability.
+    4. Since you have REGRESSION results for SMART 5, explain that predicting an increase in reallocated sectors indicates permanent physical damage.
+    5. If the user asks about warnings, risks, or disk issues, provide concrete, easy-to-follow preventive or corrective actions. 
+    6. Include simple explanations of SMART technology and environmental factors.
+    7. Your explanations should be objective, authoritative, and professional.
     8. Always refer to “the analysis system” or “the utilized model,” never to the author or developer of the model.
 
     Goal: Enable the user to understand, interpret, and take informed action regarding disks and SMART parameters, 
@@ -135,19 +144,18 @@ if prompt := st.chat_input("Ask me anything..."):
 
             if response.status_code == 200:
                 full_response = ""
-                # Procesiranje toka podatkov (chunk po chunk)
+                #vsak chunk posebej
                 for line in response.iter_lines():
                     if line:
                         chunk = json.loads(line.decode('utf-8'))
                         if 'response' in chunk:
                             content = chunk.get('response', '')
                             full_response += content
-                            # Sprotno osveževanje vmesnika z dodajanjem kurzorja
-                            message_placeholder.markdown(full_response + "▌")
+                            message_placeholder.markdown(full_response + " ")
 
                 message_placeholder.markdown(full_response)
             else:
-                full_response = f"Error: Ollama returned status {response.status_code}."
+                full_response = f"Error: Ollama returned status {response.status_code}s."
                 message_placeholder.markdown(full_response)
 
         except requests.exceptions.ConnectionError:

@@ -22,16 +22,25 @@ The project is deployed in an isolated **Docker** environment on **TrueNAS SCALE
 3.  **Ollama Service:** Local inference engine running the Llama 3 model.
 4.  **Data Pipeline:** Automated preprocessing, median imputation, and feature scaling.
 
-
-
 ---
 
-## Model Performance
-The model demonstrates high reliability in identifying failure-prone drives:
+## Model Performance & Analysis
 
+The model demonstrates high reliability in identifying failure-prone drives using dual-method analysis:
+
+### 1. Classification Analysis (Yes/No)
+Categorizes drives into binary states: **Healthy** or **Failure-Prone**.
 * **Accuracy:** 90.15%
 * **Recall:** 86.00% (Critical for capturing actual failure events)
 * **F1-Score:** 0.88
+
+### 2. SMART 5 Regression Analysis
+Predicting the value of **SMART 5 (Reallocated Sectors Count)**.
+* **Predictive Forecasting:** Instead of a binary "Yes/No", the model predicts the *actual number* of reallocated sectors.
+* **Surface Degradation:** By predicting a rise in SMART 5, we can intervene before the disk's internal spare area is fully depleted.
+* **Failure Urgency:** A higher predicted SMART 5 value correlates directly with imminent mechanical failure.
+
+---
 
 ### Top Predictors (Feature Importance):
 The following SMART attributes were identified as the strongest indicators of failure:
@@ -50,7 +59,12 @@ Using the **K-Means** algorithm and **t-SNE** visualization (Euclidean distance)
 
 ---
 
-## 
+## Chat interface
+
+![img.png](img.png)
+
+---
 
 main branch : whole setup is running localy on my treunas server via portainer (LLM llama3)
+
 laptopVersion branch : modified model and app.py for using better gpu and cpu of my laptop (LLM mistral-nemo:12b)
