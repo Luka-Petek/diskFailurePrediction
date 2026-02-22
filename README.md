@@ -1,4 +1,4 @@
-# Machine Learning - Hard Drive Failure Prediction & AI Assistant
+# Machine Learning - Hard Drive Failure Prediction Model& AI Assistant
 
 A machine learning project that predicts hard drive failures using historical **SMART** (Self-Monitoring, Analysis, and Reporting Technology) sensor data. This system integrates Random Forest classification, unsupervised clustering, and a local AI assistant for real-time result interpretation.
 
@@ -50,4 +50,7 @@ Using the **K-Means** algorithm and **t-SNE** visualization (Euclidean distance)
 
 ---
 
-whole setup is running localy on my treunas server via portainer
+## 
+
+main branch : whole setup is running localy on my treunas server via portainer (LLM llama3)
+laptopVersion branch : modified model and app.py for using better gpu and cpu of my laptop (LLM mistral-nemo:12b)
