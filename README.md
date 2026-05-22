@@ -12,9 +12,9 @@ By learning disk degradation patterns, the model identifies risks before critica
 
 ---
 
-* **Model Source:** [smart_scan_model.ipynb](./smart_scan_model.ipynb) — *This is the core model that predicts failures and provides the analytical results.*
-* **Balanced Data Selection:** [pridobivanje_podakotvne_mnozice](./pridobivanje_podatkovne_mnozice.ipynb) - *This selects all problematic disks from whole year 2025 (only 4414), completing the dataset with other 4414 randomly selected disks (not optimal, the more efficient selection is to be implemented)*
-* **Smart scan to json:** [smart_scan_to_json.ipynb](./smart_scan_to_json.ipynb) - *This is script that converts terminal SMART scan to a .scv format that fits the dataset structure of the model, meant to test the model on practical disk data*
+* **Model Source:** [smart_scan_model.ipynb](srcML/smart_scan_model.ipynb) — *This is the core model that predicts failures and provides the analytical results.*
+* **Balanced Data Selection:** [pridobivanje_podakotvne_mnozice](srcML/pridobivanje_podatkovne_mnozice.ipynb) - *This selects all problematic disks from whole year 2025 (only 4414), completing the dataset with other 4414 randomly selected disks (not optimal, the more efficient selection is to be implemented)*
+* **Smart scan to json:** [smart_scan_to_json.ipynb](srcML/smart_scan_to_json.ipynb) - *This is script that converts terminal SMART scan to a .scv format that fits the dataset structure of the model, meant to test the model on practical disk data*
 
 ---
 
@@ -39,7 +39,7 @@ Categorizes drives into binary states: **Healthy** or **Failure-Prone**.
 * **Recall:** 86.00% (Critical for capturing actual failure events)
 * **F1-Score:** 0.88
 
-![classification.png](graphs/classification.png)
+![classification.png](Graphs/classification.png)
 
 ### 2. Regression Analysis (SMART 5)
 Predicting the value of **SMART 5 (Reallocated Sectors Count)**.
@@ -47,7 +47,7 @@ Predicting the value of **SMART 5 (Reallocated Sectors Count)**.
 * **Surface Degradation:** By predicting a rise in SMART 5, we can intervene before the disk's internal spare area is fully depleted.
 * **Failure Urgency:** A higher predicted SMART 5 value correlates directly with imminent mechanical failure.
 
-![regression.png](graphs/regression.png)
+![regression.png](Graphs/regression_data_leakage!!.png)
 
 ---
 
@@ -66,7 +66,7 @@ Using the **K-Means** algorithm and **t-SNE** visualization (Euclidean distance)
 * **Cluster 1:** Aging drives (Increased power-on hours/usage).
 * **Cluster 2:** Critical drives (High probability of failure due to critical SMART errors).
 
-![clustering.png](graphs/clustering.png)
+![clustering.png](Graphs/clustering.png)
 
 ---
 
@@ -74,11 +74,11 @@ Using the **K-Means** algorithm and **t-SNE** visualization (Euclidean distance)
 
 To demonstrate the efficacy of our risk assessment, we present two extreme instances (hard drives) from the dataset. This visual comparison illustrates how various machine learning methods and two key attributes contribute to the final prediction.
 
-![worst_case.png](graphs/worst_case.png)
+![worst_case.png](Graphs/worst_case.png)
 
 **High-Risk Instance (61%):** We observe a high level of convergence across all modules. Each machine learning method (classification, regression, and clustering) predicts values close to 1.0. This alignment confirms that the 61% risk score is highly accurate and reliable, as it is corroborated by multiple independent models simultaneously.
 
-![best_case.png](graphs/best_case.png)
+![best_case.png](Graphs/best_case.png)
 
 **Low-Risk Instance (1%):** In contrast, we see a consistent prediction near 0.0 across all security-related modules. The only significant value is Age (0.8), proving that the model can effectively isolate natural wear and tear from actual failure signals.
 
@@ -86,7 +86,7 @@ To demonstrate the efficacy of our risk assessment, we present two extreme insta
 
 ## Chat interface
 
-![img.png](graphs/img.png)
+![img.png](Graphs/img.png)
 
 ---
 

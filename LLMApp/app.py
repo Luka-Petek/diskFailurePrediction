@@ -32,8 +32,8 @@ if trenutni_cas - st.session_state.last_placeholder_update > 10:
 @st.cache_resource
 def load_resources():
     try:
-        importance = pd.read_csv('feature_importance.csv')
-        model = joblib.load('disk_model.pkl')
+        importance = pd.read_csv('../csv/feature_importance.csv')
+        model = joblib.load('../disk_model.pkl')
         return importance, model
     except Exception as e:
         st.error(f"Error loading files: {e}")
@@ -88,10 +88,10 @@ if prompt := st.chat_input("Ask me anything..."):
     context_data = importance_df.head(15).to_string(index=False) if importance_df is not None else ""
 
     system_prompt = f"""
-    You are a highly knowledgeable advisor specializing in data storage reliability and disk failure prediction, 
+    You are a highly knowledgeable advisor specializing in DiskData storage reliability and disk failure prediction, 
     with expertise in interpreting results from systems based on classification, regression, and clustering. 
     Your task is to help everyday users understand how the system evaluates disk health and what actions they can take 
-    to protect their data, even if they have no prior technical knowledge.
+    to protect their DiskData, even if they have no prior technical knowledge.
 
     MODEL TRAINING & SPECIFICATIONS:
     1. CLASSIFICATION: Trained to distinguish between 'Healthy' and 'Failure' states (90.15% Accuracy, 86% Recall).
@@ -115,7 +115,7 @@ if prompt := st.chat_input("Ask me anything..."):
     8. Always refer to “the analysis system” or “the utilized model,” never to the author or developer of the model.
 
     Goal: Enable the user to understand, interpret, and take informed action regarding disks and SMART parameters, 
-    so they feel confident and secure using their data.
+    so they feel confident and secure using their DiskData.
     """
 
     with st.chat_message("assistant", avatar="🤖"):
