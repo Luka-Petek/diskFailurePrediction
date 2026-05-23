@@ -8,7 +8,7 @@ services:
     ports:
       - "8501:8501"
     volumes:
-      - /c/Projects/diskFailurePrediction:/src_data:ro
+      - /c/Projects/diskFailurePrediction/srcML:/src_data:ro
     command: >
       sh -c "apt-get update && apt-get install -y procps &&
              pip install streamlit pandas joblib requests openpyxl scikit-learn &&
