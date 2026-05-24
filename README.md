@@ -76,7 +76,7 @@ To demonstrate the efficacy of our risk assessment, we present two extreme insta
 
 ![worst_case.png](Graphs/worst_case.png)
 
-**High-Risk Instance (97%):** We observe a high level of convergence across all modules. Each machine learning method (classification, regression, and clustering) predicts values close to 1.0. This alignment confirms that the 61% risk score is highly accurate and reliable, as it is corroborated by multiple independent models simultaneously.
+**High-Risk Instance (97%):** We observe a high level of convergence across all modules. Each machine learning method (classification, regression, and clustering) predicts values close to 1.0. This alignment confirms that the 97% risk score is highly accurate and reliable, as it is corroborated by multiple independent models simultaneously.
 
 ![best_case.png](Graphs/best_case.png)
 
