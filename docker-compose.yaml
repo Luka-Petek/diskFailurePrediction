@@ -1,22 +1,26 @@
-version: '3.8'
-
 services:
+  # 1. STREAMLIT APP (iz mape LLMApp)
   disk-ai-chat:
+    build:
+      context: .
+      dockerfile: LLMApp/Dockerfile
     container_name: diskML
-    image: python:3.11-slim
-    working_dir: /app
     ports:
       - "8501:8501"
-    volumes:
-      - /c/Projects/diskFailurePrediction/srcML:/src_data:ro
-    command: >
-      sh -c "apt-get update && apt-get install -y procps &&
-             pip install streamlit pandas joblib requests openpyxl scikit-learn &&
-             cp /src_data/app.py /app/app.py &&
-             cp /src_data/disk_model.pkl /app/disk_model.pkl &&
-             cp /src_data/feature_importance.csv /app/feature_importance.csv &&
-             cp /src_data/znacilnice.xlsx /app/znacilnice.xlsx &&
-             streamlit run app.py --server.port=8501 --server.address=0.0.0.0"
+    networks:
+      - disk-network
 
-volumes:
-  ollama_data:
+  # 2. REACT FRONTEND (iz mape react)
+  disk-react-frontend:
+    build:
+      context: .
+      dockerfile: react/Dockerfile
+    container_name: diskFrontend
+    ports:
+      - "3000:80"
+    networks:
+      - disk-network
+
+networks:
+  disk-network:
+    driver: bridge
