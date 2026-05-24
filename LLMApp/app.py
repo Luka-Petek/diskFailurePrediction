@@ -32,8 +32,8 @@ if trenutni_cas - st.session_state.last_placeholder_update > 10:
 @st.cache_resource
 def load_resources():
     try:
-        importance = pd.read_csv('../csv/feature_importance.csv')
-        model = joblib.load('../disk_model.pkl')
+        importance = pd.read_csv('feature_importance.csv')
+        model = joblib.load('disk_model.pkl')
         return importance, model
     except Exception as e:
         st.error(f"Error loading files: {e}")
