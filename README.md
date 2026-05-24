@@ -47,7 +47,7 @@ Predicting the value of **SMART 5 (Reallocated Sectors Count)**.
 * **Surface Degradation:** By predicting a rise in SMART 5, we can intervene before the disk's internal spare area is fully depleted.
 * **Failure Urgency:** A higher predicted SMART 5 value correlates directly with imminent mechanical failure.
 
-![regression.png](Graphs/regression_data_leakage!!.png)
+![regression.png](Graphs/regression.png)
 
 ---
 
@@ -76,11 +76,15 @@ To demonstrate the efficacy of our risk assessment, we present two extreme insta
 
 ![worst_case.png](Graphs/worst_case.png)
 
-**High-Risk Instance (61%):** We observe a high level of convergence across all modules. Each machine learning method (classification, regression, and clustering) predicts values close to 1.0. This alignment confirms that the 61% risk score is highly accurate and reliable, as it is corroborated by multiple independent models simultaneously.
+**High-Risk Instance (97%):** We observe a high level of convergence across all modules. Each machine learning method (classification, regression, and clustering) predicts values close to 1.0. This alignment confirms that the 61% risk score is highly accurate and reliable, as it is corroborated by multiple independent models simultaneously.
 
 ![best_case.png](Graphs/best_case.png)
 
-**Low-Risk Instance (1%):** In contrast, we see a consistent prediction near 0.0 across all security-related modules. The only significant value is Age (0.8), proving that the model can effectively isolate natural wear and tear from actual failure signals.
+**Low-Risk Instance (5%):** In contrast, we see a consistent prediction near 0.0 across all security-related modules. The only significant value is Age (0.8), proving that the model can effectively isolate natural wear and tear from actual failure signals.
+
+**Formula for prediction calculation:** The HIR score is the weighted root-mean-square of four critical metrics ($K, R, G, N$), combining them into a single value that heavily penalizes large health deviations to predict imminent disk failure:
+
+![HIR-png](Graphs/HIR.png)
 
 ---
 
