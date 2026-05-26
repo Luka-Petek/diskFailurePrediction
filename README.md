@@ -14,7 +14,7 @@ By learning disk degradation patterns, the model identifies risks before critica
 
 * **Model Source:** [smart_scan_model.ipynb](srcML/smart_scan_model.ipynb) — *This is the core model that predicts failures and provides the analytical results.*
 * **Balanced Data Selection:** [pridobivanje_podakotvne_mnozice](srcML/pridobivanje_podatkovne_mnozice.ipynb) - *This selects all problematic disks from whole year 2025 (only 4414), completing the dataset with other 4414 randomly selected disks (not optimal, the more efficient selection is to be implemented)*
-* **Smart scan to json:** [smart_scan_to_json.ipynb](srcML/smart_scan_to_json.ipynb) - *This is script that converts terminal SMART scan to a .scv format that fits the dataset structure of the model, meant to test the model on practical disk data*
+* **Smart scan to json:** [smart_scan_to_json.ipynb](srcML/smart_scan_to_csv.ipynb) - *This is script that converts terminal SMART scan to a .scv format that fits the dataset structure of the model, meant to test the model on practical disk data*
 
 ---
 
