@@ -1,6 +1,0 @@
-streamlit
-pandas
-joblib
-requests
-openpyxl
-scikit-learn

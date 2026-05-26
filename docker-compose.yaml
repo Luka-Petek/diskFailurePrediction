@@ -1,25 +1,31 @@
 services:
-  # 1. STREAMLIT APP (iz mape LLMApp)
-  disk-ai-chat:
+  # 1. PYTHON BACKEND (iz mape backend)
+  disk-ml-backend:
     build:
       context: .
-      dockerfile: LLMApp/Dockerfile
-    container_name: diskML
+      dockerfile: backend/Dockerfile
+    container_name: diskBackend
     ports:
-      - "8501:8501"
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - PYTHONUNBUFFERED=1
     networks:
       - disk-network
 
-  # 2. REACT FRONTEND (iz mape react)
-  disk-react-frontend:
+  # 2. REACT FRONTEND (iz mape frontend)
+  disk-ml-frontend:
     build:
       context: .
-      dockerfile: react/Dockerfile
+      dockerfile: frontend/Dockerfile
     container_name: diskFrontend
     ports:
       - "3000:80"
     networks:
       - disk-network
+    depends_on:
+      - disk-ml-backend
 
 networks:
   disk-network:

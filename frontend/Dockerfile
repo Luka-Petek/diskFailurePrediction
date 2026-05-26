@@ -1,10 +1,10 @@
 FROM node:20-alpine AS build
 WORKDIR /app
-# Kopiraj package datoteke iz react mape
-COPY react/package*.json ./
+# Kopiraj package datoteke iz frontend mape
+COPY frontend/package*.json ./
 RUN npm install
-# Kopiraj ostalo kodo iz react mape
-COPY react/ .
+# Kopiraj ostalo kodo iz frontend mape
+COPY frontend/ .
 RUN npm run build
 
 FROM nginx:stable-alpine
