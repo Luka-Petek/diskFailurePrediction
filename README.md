@@ -17,7 +17,7 @@ By learning disk degradation patterns, the model identifies risks before critica
 * **Reusable Prediction Pipeline:** [disk_pipeline.py](srcML/disk_pipeline.py) — *This contains the reusable preprocessing and prediction logic used by the API.*
 * **Serialized Health Pipeline:** [disk_health_pipeline.pkl](srcML/disk_health_pipeline.pkl) — *This is the exported machine learning pipeline used for real-time inference.*
 * **Balanced Data Selection:** [pridobivanje_podatkovne_mnozice.ipynb](srcML/pridobivanje_podatkovne_mnozice.ipynb) - *This selects all problematic disks from the whole year 2025 (only 4414), completing the dataset with another 4414 randomly selected healthy disks. This selection is functional, but not optimal yet; a more efficient sampling strategy is planned.*
-* **SMART scan JSON input:** [disk_data_sda.json](disk_data_sda.json) - *Example SMART scan exported from smartctl in JSON format and used for testing real-time API prediction.*
+* **SMART scan JSON input:** [disk_data_sda.json](DiskJson/disk_data_sda.json) - *Example SMART scan exported from smartctl in JSON format and used for testing real-time API prediction.*
 
 ---
 

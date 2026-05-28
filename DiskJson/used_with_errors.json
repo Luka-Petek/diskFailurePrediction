@@ -1,0 +1,115 @@
+{
+  "json_format_version": [1, 0],
+  "smartctl": {
+    "version": [7, 4],
+    "pre_release": false,
+    "svn_revision": "5530",
+    "platform_info": "x86_64-linux-6.12.15-production+truenas",
+    "build_info": "(local build)",
+    "argv": ["smartctl", "-A", "-i", "/dev/sda", "-j"],
+    "drive_database_version": {
+      "string": "7.3/6061"
+    },
+    "exit_status": 0
+  },
+  "local_time": {
+    "time_t": 1768169535,
+    "asctime": "Sun Jan 11 23:15:00 2026 CET"
+  },
+  "device": {
+    "name": "/dev/sda",
+    "info_name": "/dev/sda [SAT]",
+    "type": "sat",
+    "protocol": "ATA"
+  },
+  "model_family": "WD Blue / Red / Green SSDs",
+  "model_name": "WDC WDS500G1R0A-68A4W0",
+  "serial_number": "252111801501",
+  "firmware_version": "411010WR",
+  "smart_support": {
+    "available": true,
+    "enabled": true
+  },
+  "ata_smart_attributes": {
+    "revision": 4,
+    "table": [
+      {
+        "id": 5,
+        "name": "Reallocated_Sector_Ct",
+        "value": 94,
+        "worst": 94,
+        "raw": {
+          "value": 24,
+          "string": "24"
+        }
+      },
+      {
+        "id": 9,
+        "name": "Power_On_Hours",
+        "value": 81,
+        "worst": 81,
+        "raw": {
+          "value": 12890,
+          "string": "12890"
+        }
+      },
+      {
+        "id": 187,
+        "name": "Reported_Uncorrect",
+        "value": 85,
+        "worst": 85,
+        "raw": {
+          "value": 15,
+          "string": "15"
+        }
+      },
+      {
+        "id": 194,
+        "name": "Temperature_Celsius",
+        "value": 58,
+        "worst": 44,
+        "raw": {
+          "value": 42,
+          "string": "42 (Min/Max 21/49)"
+        }
+      },
+      {
+        "id": 197,
+        "name": "Current_Pending_Sector",
+        "value": 100,
+        "worst": 100,
+        "raw": {
+          "value": 5,
+          "string": "5"
+        }
+      },
+      {
+        "id": 198,
+        "name": "Offline_Uncorrectable",
+        "value": 100,
+        "worst": 100,
+        "raw": {
+          "value": 2,
+          "string": "2"
+        }
+      },
+      {
+        "id": 241,
+        "name": "Host_Writes_GiB",
+        "value": 253,
+        "worst": 253,
+        "raw": {
+          "value": 50220,
+          "string": "50220"
+        }
+      }
+    ]
+  },
+  "power_on_time": {
+    "hours": 12890
+  },
+  "power_cycle_count": 521,
+  "temperature": {
+    "current": 42
+  }
+}

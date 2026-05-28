@@ -152,7 +152,20 @@ class DiskHealthPipeline:
         koncni_izracun = np.sqrt(izracun / vsota_utezi)
 
         odstotek_tveganja = round(koncni_izracun * 100, 2)
-        verdict = "Critical" if odstotek_tveganja > 75.0 else ("Warning" if odstotek_tveganja > 40.0 else "Healthy")
+
+        #tveganje ne more biti nikoli 100%, nikoli 0%
+        if odstotek_tveganja > 95.0:
+            odstotek_tveganja = 97.0
+        elif odstotek_tveganja < 5.0:
+            odstotek_tveganja = 5.0
+
+        verdict = ""
+        if odstotek_tveganja > 75.0:
+            verdict = "Critical"
+        elif odstotek_tveganja <= 75.0 and odstotek_tveganja > 40.0:
+            verdict = "Warning"
+        elif odstotek_tveganja <= 40.0:
+            verdict = "Healthy"
 
         return {
             "hir_risk_score": odstotek_tveganja,

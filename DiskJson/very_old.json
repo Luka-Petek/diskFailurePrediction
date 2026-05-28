@@ -26,7 +26,7 @@
   },
   "local_time": {
     "time_t": 1768169535,
-    "asctime": "Sun Jan 11 23:12:15 2026 CET"
+    "asctime": "Sun Jan 11 23:50:00 2026 CET"
   },
   "device": {
     "name": "/dev/sda",
@@ -36,7 +36,7 @@
   },
   "model_family": "WD Blue / Red / Green SSDs",
   "model_name": "WDC  WDS500G1R0A-68A4W0",
-  "serial_number": "252111801072",
+  "serial_number": "252111801222",
   "wwn": {
     "naa": 5,
     "oui": 6980,
@@ -113,8 +113,8 @@
       {
         "id": 9,
         "name": "Power_On_Hours",
-        "value": 100,
-        "worst": 100,
+        "value": 24,
+        "worst": 24,
         "flags": {
           "value": 50,
           "string": "-O--CK ",
@@ -126,8 +126,8 @@
           "auto_keep": true
         },
         "raw": {
-          "value": 3674,
-          "string": "3674"
+          "value": 45230,
+          "string": "45230"
         }
       },
       {
@@ -146,8 +146,8 @@
           "auto_keep": true
         },
         "raw": {
-          "value": 11,
-          "string": "11"
+          "value": 1850,
+          "string": "1850"
         }
       },
       {
@@ -326,8 +326,8 @@
           "auto_keep": true
         },
         "raw": {
-          "value": 3,
-          "string": "3"
+          "value": 210,
+          "string": "210"
         }
       },
       {
@@ -346,8 +346,8 @@
           "auto_keep": true
         },
         "raw": {
-          "value": 5,
-          "string": "5"
+          "value": 214,
+          "string": "214"
         }
       },
       {
@@ -413,8 +413,8 @@
       {
         "id": 194,
         "name": "Temperature_Celsius",
-        "value": 65,
-        "worst": 40,
+        "value": 52,
+        "worst": 32,
         "flags": {
           "value": 34,
           "string": "-O---K ",
@@ -427,7 +427,47 @@
         },
         "raw": {
           "value": 171800133667,
-          "string": "35 (Min/Max 22/40)"
+          "string": "48 (Min/Max 18/58)"
+        }
+      },
+      {
+        "id": 197,
+        "name": "Current_Pending_Sector",
+        "value": 100,
+        "worst": 100,
+        "flags": {
+          "value": 50,
+          "string": "-O--CK ",
+          "prefailure": false,
+          "updated_online": true,
+          "performance": false,
+          "error_rate": false,
+          "event_count": true,
+          "auto_keep": true
+        },
+        "raw": {
+          "value": 0,
+          "string": "0"
+        }
+      },
+      {
+        "id": 198,
+        "name": "Offline_Uncorrectable",
+        "value": 100,
+        "worst": 100,
+        "flags": {
+          "value": 50,
+          "string": "-O--CK ",
+          "prefailure": false,
+          "updated_online": true,
+          "performance": false,
+          "error_rate": false,
+          "event_count": true,
+          "auto_keep": true
+        },
+        "raw": {
+          "value": 0,
+          "string": "0"
         }
       },
       {
@@ -508,8 +548,8 @@
           "auto_keep": true
         },
         "raw": {
-          "value": 1895,
-          "string": "1895"
+          "value": 85420,
+          "string": "85420"
         }
       },
       {
@@ -528,8 +568,8 @@
           "auto_keep": true
         },
         "raw": {
-          "value": 2036,
-          "string": "2036"
+          "value": 91200,
+          "string": "91200"
         }
       },
       {
@@ -548,8 +588,8 @@
           "auto_keep": true
         },
         "raw": {
-          "value": 1467,
-          "string": "1467"
+          "value": 78451,
+          "string": "78451"
         }
       },
       {
@@ -568,8 +608,8 @@
           "auto_keep": true
         },
         "raw": {
-          "value": 101,
-          "string": "101"
+          "value": 120450,
+          "string": "120450"
         }
       },
       {
@@ -595,10 +635,10 @@
     ]
   },
   "power_on_time": {
-    "hours": 3674
+    "hours": 45230
   },
-  "power_cycle_count": 11,
+  "power_cycle_count": 1850,
   "temperature": {
-    "current": 35
+    "current": 48
   }
 }

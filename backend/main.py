@@ -9,7 +9,7 @@ SRCML_PATH = "/app/srcML"
 if SRCML_PATH not in sys.path:
     sys.path.insert(0, SRCML_PATH)
 
-from srcML.disk_pipeline import pretvori_json_v_surovi_df, DiskHealthPipeline
+from srcML.disk_pipeline import pretvori_json_v_surovi_df
 app = FastAPI(title="TrueNAS Smart Scan Analytics API")
 
 app.add_middleware(
