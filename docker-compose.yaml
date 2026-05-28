@@ -1,5 +1,4 @@
 services:
-  # 1. PYTHON BACKEND (iz mape backend)
   disk-ml-backend:
     build:
       context: .
@@ -8,13 +7,14 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./backend:/app/backend
+      - ./srcML:/app/srcML
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
     networks:
       - disk-network
 
-  # 2. REACT FRONTEND (iz mape frontend)
   disk-ml-frontend:
     build:
       context: .

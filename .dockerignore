@@ -1,4 +1,4 @@
-# --- React / Node ---
+
 **/node_modules/
 **/dist/
 **/build/
@@ -7,7 +7,6 @@
 .env.local
 .DS_Store
 
-# --- Python / ML ---
 **/__pycache__/
 *.pyc
 *.pyo
@@ -17,16 +16,14 @@ env/
 venv/
 **/.ipynb_checkpoints/
 
-# --- Podatkovne datoteke ---
-# Ignorira vse CSV, PKL, XLSX in JSON datoteke v vseh podmapah
 **/*.csv
 **/*.pkl
 **/*.xlsx
 
-!disk_model.pkl
+!srcML/disk_model.pkl
+!srcML/disk_health_pipeline.pkl
 !feature_importance.csv
 
-# --- Docker / IDE ---
 .idea/
 .vscode/
 .dockerignore

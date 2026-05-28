@@ -1,9 +1,9 @@
 FROM node:20-alpine AS build
 WORKDIR /app
-# Kopiraj package datoteke iz frontend mape
+
 COPY frontend/package*.json ./
 RUN npm install
-# Kopiraj ostalo kodo iz frontend mape
+
 COPY frontend/ .
 RUN npm run build
 

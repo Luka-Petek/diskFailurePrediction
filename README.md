@@ -1,6 +1,6 @@
 # Machine Learning - Hard Drive Failure Prediction Model & AI Assistant
 
-A machine learning project that predicts hard drive failures using historical **SMART** (Self-Monitoring, Analysis, and Reporting Technology) sensor data. This system integrates Random Forest classification, regression, unsupervised clustering, and a local AI assistant for result interpretation. 
+A machine learning project that predicts hard drive failures using historical **SMART** (Self-Monitoring, Analysis, and Reporting Technology) sensor data. This system integrates Random Forest classification, regression, unsupervised clustering, a reusable real-time prediction pipeline, and a local AI assistant for result interpretation.
 
 By learning disk degradation patterns, the model identifies risks before critical hardware failure and data loss occur.
 
@@ -8,24 +8,68 @@ By learning disk degradation patterns, the model identifies risks before critica
 * **Dataset:** Backblaze open-source data (Year 2025).
 * **Scale:** Processed 32M+ records, filtered into a balanced dataset of **8,828 instances**.
 * **Methodology:** Supervised learning (Random Forest - regression and classification) and Unsupervised learning (K-Means).
+* **Real-Time Prediction Pipeline:** A reusable pipeline that accepts live SMART JSON data and returns a disk health risk assessment through an API.
 * **AI Integration:** Local LLM (Llama 3 via Ollama) providing natural language explanations for SMART parameters.
 
 ---
 
-* **Model Source:** [smart_scan_model.ipynb](srcML/smart_scan_model.ipynb) — *This is the core model that predicts failures and provides the analytical results.*
-* **Balanced Data Selection:** [pridobivanje_podakotvne_mnozice](srcML/pridobivanje_podatkovne_mnozice.ipynb) - *This selects all problematic disks from whole year 2025 (only 4414), completing the dataset with other 4414 randomly selected disks (not optimal, the more efficient selection is to be implemented)*
-* **Smart scan to json:** [smart_scan_to_json.ipynb](srcML/smart_scan_to_csv.ipynb) - *This is script that converts terminal SMART scan to a .scv format that fits the dataset structure of the model, meant to test the model on practical disk data*
+* **Model Source:** [smart_scan_model.ipynb](srcML/smart_scan_model.ipynb) — *This is the core notebook where the model is trained, evaluated, and exported for real-time prediction.*
+* **Reusable Prediction Pipeline:** [disk_pipeline.py](srcML/disk_pipeline.py) — *This contains the reusable preprocessing and prediction logic used by the API.*
+* **Serialized Health Pipeline:** [disk_health_pipeline.pkl](srcML/disk_health_pipeline.pkl) — *This is the exported machine learning pipeline used for real-time inference.*
+* **Balanced Data Selection:** [pridobivanje_podatkovne_mnozice.ipynb](srcML/pridobivanje_podatkovne_mnozice.ipynb) - *This selects all problematic disks from the whole year 2025 (only 4414), completing the dataset with another 4414 randomly selected healthy disks. This selection is functional, but not optimal yet; a more efficient sampling strategy is planned.*
+* **SMART scan JSON input:** [disk_data_sda.json](disk_data_sda.json) - *Example SMART scan exported from smartctl in JSON format and used for testing real-time API prediction.*
 
 ---
 
-## Technical Architecture
-The project is deployed in an isolated **Docker** environment on **TrueNAS SCALE**, ensuring data privacy and system stability.
+## Current Project Structure
 
-### System Components:
-1.  **ML Model:** Random Forest Classifier trained on 19 statistically significant SMART attributes.
-2.  **Streamlit UI:** A web dashboard for AI chat interaction.
-3.  **Ollama Service:** Local inference engine running the Llama 3 model (mistral-nemo:12b on other branch, meant for laptop).
-4.  **Data Pipeline:** Automated preprocessing, median imputation, and feature scaling.
+The project is currently divided into multiple parts:
+
+### Main folders:
+* **backend:** FastAPI application that exposes the machine learning model through an API.
+* **frontend:** React/Vite dashboard application. It is meant to display disk analytics and will use the backend API for real-time prediction.
+* **srcML:** Machine learning notebooks, trained models, reusable prediction pipeline, and exported `.pkl` files.
+* **csv:** Prepared datasets and intermediate data files.
+* **Graphs:** Model evaluation graphs and visual explanation assets used in this README.
+
+---
+
+## Real-Time Prediction API
+
+The project now includes a **FastAPI backend** that allows real-time disk health prediction from SMART JSON data.
+
+The API endpoint accepts a SMART JSON file, converts it into the model-compatible structure, runs preprocessing, applies the trained pipeline, and returns a health prediction result.
+
+### Example request (currently via cli, latter will be displayed on dashboard):
+
+bash curl -X POST "[http://localhost:8000/api/analyze-smart-json](http://localhost:8000/api/analyze-smart-json)" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@disk_data_sda.json;type=application/json"
+
+### Example response:
+
+json { "hir_risk_score": 6.76, "verdict": "Healthy", "models_output": { "classification_fail": false, "predicted_smart_5_sectors": 9.6, "cluster_profile_id": 0 } }
+
+### Returned values:
+* **hir_risk_score:** Final disk risk score calculated from classification, regression, clustering, and critical SMART error signals.
+* **verdict:** Final health category: `Healthy`, `Warning`, or `Critical`.
+* **classification_fail:** Binary Random Forest classification result.
+* **predicted_smart_5_sectors:** Regression prediction for SMART 5 / Reallocated Sectors Count.
+* **cluster_profile_id:** K-Means cluster profile assigned to the disk.
+
+This API is intended to be used by the dashboard application in the `frontend` folder, where real-time disk scans can be uploaded and displayed in a more user-friendly visual form.
+
+---
+
+### Docker services:
+1. **disk-ml-backend:** FastAPI backend used for machine learning inference.
+2. **disk-ml-frontend:** React/Vite frontend dashboard.
+3. **Ollama / LLM service:** Local AI assistant setup, used for natural language interpretation of SMART results.
+
+The backend loads the serialized pipeline from: 
+
+text /app/srcML/disk_health_pipeline.pkl
+
+
+The `srcML` folder is mounted into the backend container, so the latest model pipeline and preprocessing code are available to the API.
 
 ---
 
@@ -53,15 +97,17 @@ Predicting the value of **SMART 5 (Reallocated Sectors Count)**.
 
 ### Top Predictors (Feature Importance):
 The following SMART attributes were identified as the strongest indicators of failure:
-1.  **SMART 5** (Reallocated Sectors Count)
-2.  **SMART 187** (Reported Uncorrectable Errors)
-3.  **SMART 188** (Command Timeout)
-4.  **SMART 197** (Current Pending Sector Count)
+1. **SMART 5** (Reallocated Sectors Count)
+2. **SMART 187** (Reported Uncorrectable Errors)
+3. **SMART 188** (Command Timeout)
+4. **SMART 197** (Current Pending Sector Count)
 
 ---
 
 ## Clustering Analysis
+
 Using the **K-Means** algorithm and **t-SNE** visualization (Euclidean distance), drives are categorized into 3 distinct groups:
+
 * **Cluster 0:** Healthy drives (Optimal operation).
 * **Cluster 1:** Aging drives (Increased power-on hours/usage).
 * **Cluster 2:** Critical drives (High probability of failure due to critical SMART errors).
@@ -94,6 +140,8 @@ To demonstrate the efficacy of our risk assessment, we present two extreme insta
 
 ---
 
-main branch : whole setup is running localy on my treunas server via portainer (LLM llama3)
+## Branches
 
-laptopVersion branch : modified model and app.py for using better gpu and cpu of my laptop (LLM mistral-nemo:12b)
+**main branch:** whole setup is running locally on my TrueNAS server via Portainer (LLM Llama 3).
+
+**laptopVersion branch:** modified model and app.py for using better GPU and CPU of my laptop (LLM mistral-nemo:12b).

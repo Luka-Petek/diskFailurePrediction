@@ -1,12 +1,17 @@
+import json
+import os
+import sys
+import joblib
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import pandas as pd
-import pickle
-import io
 
-app = FastAPI()
+SRCML_PATH = "/app/srcML"
+if SRCML_PATH not in sys.path:
+    sys.path.insert(0, SRCML_PATH)
 
-#CORS dovoljenja
+from srcML.disk_pipeline import pretvori_json_v_surovi_df, DiskHealthPipeline
+app = FastAPI(title="TrueNAS Smart Scan Analytics API")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,50 +20,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+PIPELINE_PATH = '/app/srcML/disk_health_pipeline.pkl'
+
 try:
-    with open("disk_model.pkl", "rb") as f:
-        model = pickle.load(f)
-except FileNotFoundError:
-    model = None
-    print("OPOZORILO: model.pkl ni najden. API bo deloval v testnem načinu.")
+    pipeline = joblib.load(PIPELINE_PATH)
+    print("ML Pipeline uspešno naložen v spomin!")
+except Exception as e:
+    print(f"Napaka pri nalaganju pkl datoteke: {e}")
+    pipeline = None
 
-#glavni api ki prejme moj model
-@app.post("/api/analyze-scan")
-async def analyze_scan(file: UploadFile = File(...)):
-    if not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="Samo .csv datoteke so dovoljene.")
 
-    contents = await file.read()
-    df = pd.read_csv(io.BytesIO(contents))
+@app.post("/api/analyze-smart-json")
+async def analyze_smart_json(file: UploadFile = File(...)):
+    if not file.filename.endswith('.json'):
+        raise HTTPException(status_code=400, detail="Naložiti morate veljavno JSON datoteko.")
 
-    # 2. Tukaj bi običajno filtrirali dataframe, da obdržiš samo featurese za model
-    # npr. features = df[['smart_5_raw', 'smart_187_raw', 'age_days']]
+    if pipeline is None:
+        raise HTTPException(status_code=500, detail="Model strojnega učenja ni na voljo na strežniku.")
 
-    if model:
-        # 3. Model Inference
-        # predictions = model.predict(features)
+    try:
+        surova_vsebina = await file.read()
+        smartctl_dict = json.loads(surova_vsebina)
 
-        # Simulacija rezultata iz modela za ta primer:
-        risk_score = 0.98
-        verdict = "Critical"
-    else:
-        # Fallback, če modela še ni
-        risk_score = 0.98
-        verdict = "Critical"
+        surovi_df = pretvori_json_v_surovi_df(smartctl_dict)
+        analiza_rezultat = pipeline.analyze(surovi_df)
 
-    # 4. Vrnemo strukturiran JSON nazaj v React
-    return {
-        "status": "success",
-        "filename": file.filename,
-        "results": {
-            "risk_score": risk_score,
-            "verdict": verdict,
-            "anomalies_detected": len(df),
-            "critical_features": {
-                "smart_5_raw": 144,
-                "smart_187_raw": 23
-            }
-        }
-    }
-
-# Zaženi s komando: uvicorn main:app --reload
+        return analiza_rezultat
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Napaka med analizo podatkov: {str(e)}")
