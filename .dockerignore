@@ -22,6 +22,9 @@ venv/
 
 !srcML/disk_model.pkl
 !srcML/disk_health_pipeline.pkl
+!srcML/tensorflow_anomaly/*.keras
+!srcML/tensorflow_anomaly/*.pkl
+!srcML/tensorflow_anomaly/*.json
 !feature_importance.csv
 
 .idea/
