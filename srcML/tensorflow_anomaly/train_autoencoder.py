@@ -50,8 +50,10 @@ FEATURE_COLUMNS = [
 
 
 OUTPUT_DIR = SRCML_ROOT / "tensorflow_anomaly"
+#struktura in utezi nevronske mreze
 MODEL_PATH = OUTPUT_DIR / "disk_autoencoder.keras"
 SCALER_PATH = OUTPUT_DIR / "tf_scaler.pkl"
+#trenshold in rezultati
 METADATA_PATH = OUTPUT_DIR / "tf_metadata.json"
 
 
@@ -286,6 +288,16 @@ def main() -> None:
     model = build_autoencoder(input_dim=X_train_scaled.shape[1])
     model.summary()
 
+    #shranjevanje log-ov za tensorbaord
+    log_dir = OUTPUT_DIR / "logs" / ("fit_" + datetime.now().strftime("%Y%m%d-%H%M%S"))
+
+    #tensorbaord prikazi
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(
+        log_dir=log_dir,
+        histogram_freq=1,
+        write_graph=True,
+    )
+
     callbacks = [
         #neki za zgodnje ustavljanje ??
         tf.keras.callbacks.EarlyStopping(
@@ -300,6 +312,7 @@ def main() -> None:
             patience=4,
             min_lr=1e-6,
         ),
+        tensorboard_callback
     ]
 
     #dejansko učenje
@@ -357,12 +370,20 @@ def main() -> None:
             ),
         }
 
+
         print("\nEvalvacija proti failure vrsticam:")
+        #sposobnost modela, da loči med zdravimi in okvarjenimi diski (1.0 je idealno)
         print(f"ROC-AUC: {evaluation['roc_auc']:.4f}")
+
+        #uspešnost iskanja redkih okvar brez povzročanja lažnih alarmov (bolj realna ocena)
         print(f"PR-AUC:  {evaluation['pr_auc']:.4f}")
+
+        #stopnja lažnih alarmov (delež zdravih diskov, ki so bili napačno označeni kot anomalija)
         print(
             f"Healthy anomaly rate: {evaluation['validation_healthy_anomaly_rate']:.4f}"
         )
+
+        #recall / Občutljivost (delež dejansko okvarjenih diskov, ki jih je model uspešno ujel)
         print(
             f"Failure anomaly rate: {evaluation['failure_eval_anomaly_rate']:.4f}"
         )
