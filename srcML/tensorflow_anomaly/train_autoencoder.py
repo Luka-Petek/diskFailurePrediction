@@ -52,6 +52,7 @@ FEATURE_COLUMNS = [
 OUTPUT_DIR = SRCML_ROOT / "tensorflow_anomaly"
 #struktura in utezi nevronske mreze
 MODEL_PATH = OUTPUT_DIR / "disk_autoencoder.keras"
+ENCODER_PATH = OUTPUT_DIR / "disk_encoder.keras"
 SCALER_PATH = OUTPUT_DIR / "tf_scaler.pkl"
 #trenshold in rezultati
 METADATA_PATH = OUTPUT_DIR / "tf_metadata.json"
@@ -170,7 +171,7 @@ def prepare_features(df_raw: pd.DataFrame) -> pd.DataFrame:
     return X.astype("float32")
 
 #arhitektura in nacrt mreze (komentarji so moja interpretacija in IZRAZITO AMATERSKI :) )
-def build_autoencoder(input_dim: int) -> tf.keras.Model:
+def build_autoencoder(input_dim: int, bottleneck_dim: int = 12) -> tf.keras.Model:
 
     #vhodni layer, vektor dolzine, npr. 19 nevronov
     inputs = tf.keras.Input(shape=(input_dim,), name="smart_features")
@@ -189,8 +190,8 @@ def build_autoencoder(input_dim: int) -> tf.keras.Model:
     x = tf.keras.layers.Dense(32, activation="relu")(x)
     x = tf.keras.layers.BatchNormalization()(x)
 
-    #bottleneck da odstranimo šum, v teh 12 nevronov so bolj "bistvene" informacije
-    bottleneck = tf.keras.layers.Dense(12, activation="relu", name="bottleneck")(x)
+    #bottleneck da odstranimo šum, pomembne informacije stisnjene v bottleneck_dim nevronov
+    bottleneck = tf.keras.layers.Dense(bottleneck_dim, activation="relu", name="bottleneck")(x)
 
     #rekonstrukcija prvotnih 12-dimenzionalnega prostora
     x = tf.keras.layers.Dense(32, activation="relu")(bottleneck)
@@ -238,15 +239,17 @@ def main() -> None:
         help="Mapa z velikimi Backblaze/SMART CSV datotekami.",
     )
     parser.add_argument("--max-files", type=int, default=None)
-    parser.add_argument("--healthy-per-file", type=int, default=500)
+    parser.add_argument("--healthy-per-file", type=int, default=750)
     parser.add_argument("--failure-per-file", type=int, default=50)
-    #kolikokrat se nevronska mreza sprehodi cez datasat (in sproti popravlja utezi)... 80 je sweet spot
-    parser.add_argument("--epochs", type=int, default=80)
-    #koliko vrstic se pogledat hkrati, keras avtomatsko zracuna MAE za vseh 1024 instanc hkrati.. 1024 sweet sport
-    parser.add_argument("--batch-size", type=int, default=1024)
+    #kolikokrat se nevronska mreza sprehodi cez datasat (in sproti popravlja utezi)
+    parser.add_argument("--epochs", type=int, default=60)
+    #koliko vrstic se pogledat hkrati — 128 je eksperimentalno najboljsi (glej DiskJson/)
+    parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--random-state", type=int, default=42)
     #meja, kjer se disk smatra za anomalijo... višji %, manjša občutljivost na anomalije
     parser.add_argument("--threshold-percentile", type=float, default=99.0)
+    #stevilo nevronov v bottleneck sloju — impl 1 uporablja 12, impl 2 bo eksperimentirala
+    parser.add_argument("--bottleneck-dim", type=int, default=12)
 
     args = parser.parse_args()
 
@@ -285,7 +288,7 @@ def main() -> None:
     X_val_scaled = scaler.transform(X_val).astype("float32")
 
     #klicemo funkcijo za gradnjo modela, dim dolocena s stevilom stolpcev matrike
-    model = build_autoencoder(input_dim=X_train_scaled.shape[1])
+    model = build_autoencoder(input_dim=X_train_scaled.shape[1], bottleneck_dim=args.bottleneck_dim)
     model.summary()
 
     #shranjevanje log-ov za tensorbaord
@@ -393,6 +396,7 @@ def main() -> None:
         "model_type": "dense_autoencoder",
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "feature_columns": FEATURE_COLUMNS,
+        "bottleneck_dim": args.bottleneck_dim,
         "threshold_percentile": args.threshold_percentile,
         "threshold": threshold,
         "validation_error_mean": mean_error,
@@ -415,6 +419,15 @@ def main() -> None:
     }
 
     model.save(MODEL_PATH)
+
+    #izvlecemo encoder submodel (input → bottleneck), ki ga impl 2 uporabi kot feature extractor
+    encoder = tf.keras.Model(
+        inputs=model.input,
+        outputs=model.get_layer("bottleneck").output,
+        name="disk_encoder",
+    )
+    encoder.save(ENCODER_PATH)
+
     joblib.dump(scaler, SCALER_PATH)
 
     with open(METADATA_PATH, "w", encoding="utf-8") as f:
@@ -422,6 +435,7 @@ def main() -> None:
 
     print("\nShranjeno:")
     print(f"Model:    {MODEL_PATH}")
+    print(f"Encoder:  {ENCODER_PATH}")
     print(f"Scaler:   {SCALER_PATH}")
     print(f"Metadata: {METADATA_PATH}")
     print(f"Threshold: {threshold:.6f}")

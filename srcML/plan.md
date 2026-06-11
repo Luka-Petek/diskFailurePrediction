@@ -169,12 +169,12 @@ srcML/tensorflow_anomaly/
 ## Execution Order
 
 ```
-[ ] Step 1  →  Modify train_autoencoder.py
+[x] Step 1  →  Modify train_autoencoder.py
                - Add --bottleneck-dim arg (default 12)
                - Fix defaults: batch=128, healthy-per-file=750
                - Save disk_encoder.keras after training
 
-[ ] Step 2  →  Create predict_autoencoder.py
+[x] Step 2  →  Create predict_autoencoder.py
                - Single-disk inference for Impl 1
                - Test against DiskJson/ files
 
