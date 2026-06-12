@@ -48,13 +48,25 @@ def predict(smartctl_json_path: Path, clf_dir: Path) -> dict:
     )
 
     threshold = metadata["threshold"]
-    anomaly = failure_prob >= threshold
+    HIGH_RISK_THRESHOLD = 0.65
+
+    #logika za trenshold
+    if failure_prob >= HIGH_RISK_THRESHOLD:
+        verdict = "FAILURE"
+        failure_predicted = True
+    elif failure_prob >= threshold:
+        verdict = "AT_RISK"
+        failure_predicted = True
+    else:
+        verdict = "HEALTHY"
+        failure_predicted = False
 
     return {
-        "failure_predicted": bool(anomaly),
+        "failure_predicted": failure_predicted,
         "failure_probability": round(failure_prob, 4),
         "threshold": round(threshold, 4),
-        "verdict": "FAILURE" if anomaly else "HEALTHY",
+        "high_risk_threshold": HIGH_RISK_THRESHOLD,
+        "verdict": verdict,
         "bottleneck_features": [round(float(v), 4) for v in bottleneck_features.flatten()],
         "model_info": {
             "bottleneck_dim": metadata["bottleneck_dim"],
