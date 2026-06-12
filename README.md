@@ -134,12 +134,6 @@ To demonstrate the efficacy of our risk assessment, we present two extreme insta
 
 ---
 
-## Chat interface
-
-![img.png](Graphs/img.png)
-
----
-
 ## Branches
 
 **main branch:** whole setup is running locally on my TrueNAS server via Portainer (LLM Llama 3).

@@ -155,13 +155,19 @@ Single-disk inference script for Implementation 2.
 
 ### Impl 2 — File Structure
 ```
-srcML/tensorflow_anomaly/
-├── bottleneck_experiment.py         ← NEW (sweep bottleneck dims, find best)
-├── train_bottleneck_classifier.py   ← NEW (Stage 2 supervised training)
-├── predict_bottleneck.py            ← NEW (single-disk inference)
-├── disk_encoder.keras               ← from Impl 1 (reused, frozen)
-├── disk_bottleneck_classifier.keras ← NEW artifact
-└── bottleneck_metadata.json         ← NEW artifact
+srcML/tensorflow_classification/     ← NEW package
+├── __init__.py
+├── bottleneck_experiment.py         ← sweep bottleneck dims, find best
+├── train_bottleneck_classifier.py   ← Stage 2 supervised training
+└── predict_bottleneck.py            ← single-disk inference
+
+srcML/tensorflow_classification/ artifacts:
+├── disk_bottleneck_classifier.keras
+└── bottleneck_metadata.json
+
+srcML/tensorflow_anomaly/ artifacts (reused from Impl 1):
+├── disk_encoder.keras               ← frozen encoder
+└── tf_scaler.pkl
 ```
 
 ---
@@ -182,15 +188,15 @@ srcML/tensorflow_anomaly/
                - Verify results match run 05 quality (ROC-AUC ~0.90)
                - Impl 1 is COMPLETE
 
-[ ] Step 4  →  Create bottleneck_experiment.py
+[x] Step 4  →  Create bottleneck_experiment.py  (tensorflow_classification/)
                - Run sweep: bottleneck_dim in [4, 6, 7, 8, 10, 12]
                - Pick best dim (expected: 6-8)
 
-[ ] Step 5  →  Create train_bottleneck_classifier.py
+[x] Step 5  →  Create train_bottleneck_classifier.py  (tensorflow_classification/)
                - Stage 2 supervised training on bottleneck features
                - Tune threshold on PR curve
 
-[ ] Step 6  →  Create predict_bottleneck.py
+[x] Step 6  →  Create predict_bottleneck.py  (tensorflow_classification/)
                - Single-disk inference for Impl 2
                - Test against DiskJson/ files
 

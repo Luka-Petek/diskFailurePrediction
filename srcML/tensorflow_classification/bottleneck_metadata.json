@@ -1,0 +1,74 @@
+{
+  "model_type": "bottleneck_classifier",
+  "created_at": "2026-06-12T21:35:26",
+  "feature_columns": [
+    "capacity_gigabytes",
+    "jeSSD",
+    "smart_1_raw",
+    "smart_3_raw",
+    "smart_4_raw",
+    "smart_5_raw",
+    "smart_7_raw",
+    "smart_9_raw",
+    "smart_12_raw",
+    "smart_187_raw",
+    "smart_188_raw",
+    "smart_191_raw",
+    "smart_192_raw",
+    "smart_193_raw",
+    "smart_197_raw",
+    "smart_198_raw",
+    "any_critical_error",
+    "total_error_count",
+    "error_per_gb"
+  ],
+  "bottleneck_dim": 8,
+  "encoder_source": "C:\\Projects\\diskFailurePrediction\\srcML\\tensorflow_classification\\disk_clf_encoder.keras",
+  "threshold": 0.2825167775154114,
+  "training": {
+    "healthy_rows": 4414,
+    "failure_rows": 4414,
+    "train_rows": 6179,
+    "val_rows": 1324,
+    "test_rows": 1325,
+    "epochs_requested": 100,
+    "epochs_finished": 68,
+    "batch_size": 128,
+    "class_weight_healthy": 1.0001618646811266,
+    "class_weight_failure": 0.9998381877022654
+  },
+  "evaluation": {
+    "roc_auc": 0.9288572040482472,
+    "pr_auc": 0.9337197395840195,
+    "failure_recall": 0.8912386706948641,
+    "failure_precision": 0.8832335329341318,
+    "failure_f1": 0.8872180451127819,
+    "classification_report": {
+      "healthy": {
+        "precision": 0.8904109589041096,
+        "recall": 0.8823529411764706,
+        "f1-score": 0.8863636363636364,
+        "support": 663.0
+      },
+      "failure": {
+        "precision": 0.8832335329341318,
+        "recall": 0.8912386706948641,
+        "f1-score": 0.8872180451127819,
+        "support": 662.0
+      },
+      "accuracy": 0.8867924528301887,
+      "macro avg": {
+        "precision": 0.8868222459191206,
+        "recall": 0.8867958059356673,
+        "f1-score": 0.8867908407382091,
+        "support": 1325.0
+      },
+      "weighted avg": {
+        "precision": 0.8868249543817509,
+        "recall": 0.8867924528301887,
+        "f1-score": 0.8867905183198133,
+        "support": 1325.0
+      }
+    }
+  }
+}

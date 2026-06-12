@@ -1,0 +1,74 @@
+{
+  "created_at": "2026-06-12T17:39:06",
+  "experiment_config": {
+    "max_files": 100,
+    "healthy_per_file": 300,
+    "failure_per_file": 50,
+    "autoencoder_epochs": 30,
+    "dims_tested": [
+      4,
+      6,
+      7,
+      8,
+      10,
+      12
+    ]
+  },
+  "results": [
+    {
+      "bottleneck_dim": 8,
+      "roc_auc": 0.9138,
+      "pr_auc": 0.5571,
+      "failure_recall": 0.7713,
+      "failure_precision": 0.4932,
+      "failure_f1": 0.6017,
+      "threshold": 0.7794
+    },
+    {
+      "bottleneck_dim": 7,
+      "roc_auc": 0.911,
+      "pr_auc": 0.5362,
+      "failure_recall": 0.7128,
+      "failure_precision": 0.4954,
+      "failure_f1": 0.5845,
+      "threshold": 0.8331
+    },
+    {
+      "bottleneck_dim": 10,
+      "roc_auc": 0.9069,
+      "pr_auc": 0.5503,
+      "failure_recall": 0.7606,
+      "failure_precision": 0.4751,
+      "failure_f1": 0.5849,
+      "threshold": 0.7317
+    },
+    {
+      "bottleneck_dim": 12,
+      "roc_auc": 0.9037,
+      "pr_auc": 0.4843,
+      "failure_recall": 0.742,
+      "failure_precision": 0.4515,
+      "failure_f1": 0.5614,
+      "threshold": 0.6964
+    },
+    {
+      "bottleneck_dim": 6,
+      "roc_auc": 0.7778,
+      "pr_auc": 0.238,
+      "failure_recall": 0.3218,
+      "failure_precision": 0.2909,
+      "failure_f1": 0.3056,
+      "threshold": 0.6906
+    },
+    {
+      "bottleneck_dim": 4,
+      "roc_auc": 0.724,
+      "pr_auc": 0.1648,
+      "failure_recall": 0.4309,
+      "failure_precision": 0.164,
+      "failure_f1": 0.2375,
+      "threshold": 0.5892
+    }
+  ],
+  "recommended_bottleneck_dim": 8
+}
