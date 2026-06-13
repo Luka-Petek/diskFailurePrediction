@@ -83,6 +83,10 @@ python srcML/tensorflow_anomaly/train_autoencoder.py --data-dir DiskData
 python srcML/tensorflow_anomaly/predict_autoencoder.py --input DiskJson/disk_data_sda.json
 ```
 
+### Architecture:
+
+![Autoencoder Architecture](Graphs/nn_autoencoder.png)
+
 ### Artifacts saved to `srcML/tensorflow_anomaly/`:
 * `disk_autoencoder.keras` — full autoencoder model
 * `disk_encoder.keras` — encoder-only model
@@ -95,8 +99,8 @@ python srcML/tensorflow_anomaly/predict_autoencoder.py --input DiskJson/disk_dat
 
 A two-stage approach recommended for higher accuracy when labeled failure data is available:
 
-1. **Stage 1 — Autoencoder as feature extractor:** A separate autoencoder (bottleneck dim = 8) compresses 19 SMART features into 8 learned representations.
-2. **Stage 2 — Supervised classifier:** A feedforward neural network is trained on these bottleneck features to directly classify disks as healthy or failure.
+1. **Stage 1 — Autoencoder as feature extractor:** A dedicated autoencoder compresses 19 SMART features down to an **8-dimensional bottleneck** — the optimal dimensionality found through experimentation that balances information retention and noise removal.
+2. **Stage 2 — Supervised classifier:** A feedforward neural network takes these **8 bottleneck features as input** and directly classifies disks as healthy or failure. Using the compressed bottleneck representation rather than raw SMART data forces the classifier to work with already-distilled, noise-free features, which is the key reason for its high performance.
 
 The classifier is trained on a **balanced 50:50 dataset** — all 4,414 known failure records from `csv/vseOdpovedi.csv`, matched with an equal number of randomly sampled healthy rows.
 
@@ -143,6 +147,12 @@ python srcML/tensorflow_classification/predict_bottleneck.py --input DiskJson/di
   }
 }
 ```
+
+### Architecture:
+
+> The classifier receives the **8-dimensional bottleneck output** from the autoencoder encoder — not raw SMART data. This dim=8 was selected as the optimal bottleneck size for maximizing classifier performance.
+
+![Classifier Architecture](Graphs/nn_classification.png)
 
 ### Artifacts saved to `srcML/tensorflow_classification/`:
 * `disk_clf_autoencoder.keras` — Impl 2 autoencoder
