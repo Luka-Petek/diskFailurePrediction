@@ -1,0 +1,77 @@
+{
+  "model_type": "dense_autoencoder_clf",
+  "created_at": "2026-06-12T19:46:21",
+  "feature_columns": [
+    "capacity_gigabytes",
+    "jeSSD",
+    "smart_1_raw",
+    "smart_3_raw",
+    "smart_4_raw",
+    "smart_5_raw",
+    "smart_7_raw",
+    "smart_9_raw",
+    "smart_12_raw",
+    "smart_187_raw",
+    "smart_188_raw",
+    "smart_191_raw",
+    "smart_192_raw",
+    "smart_193_raw",
+    "smart_197_raw",
+    "smart_198_raw",
+    "any_critical_error",
+    "total_error_count",
+    "error_per_gb"
+  ],
+  "bottleneck_dim": 8,
+  "threshold_percentile": 99.0,
+  "threshold": 0.017748545855283737,
+  "validation_error_mean": 0.0014153929660096765,
+  "validation_error_std": 0.005287721287459135,
+  "validation_error_p95": 0.0028833416290581226,
+  "validation_error_p99": 0.017748545855283737,
+  "validation_error_p999": 0.05364663898944855,
+  "normalization": {
+    "score_formula": "(error - threshold) / (p999 - threshold), clipped to 0..1",
+    "score_p999": 0.05364663898944855
+  },
+  "training": {
+    "healthy_rows": 292000,
+    "validation_rows": 73000,
+    "epochs_requested": 60,
+    "epochs_finished": 60,
+    "batch_size": 128
+  },
+  "evaluation": {
+    "roc_auc": 0.8389152727001881,
+    "pr_auc": 0.4320106400392021,
+    "validation_healthy_anomaly_rate": 0.01,
+    "failure_eval_anomaly_rate": 0.2338015405527866,
+    "classification_report": {
+      "healthy": {
+        "precision": 0.9552952995294242,
+        "recall": 0.99,
+        "f1-score": 0.9723380781960552,
+        "support": 73000.0
+      },
+      "failure": {
+        "precision": 0.5856980703745743,
+        "recall": 0.2338015405527866,
+        "f1-score": 0.33419689119170987,
+        "support": 4414.0
+      },
+      "accuracy": 0.9468829927403312,
+      "macro avg": {
+        "precision": 0.7704966849519992,
+        "recall": 0.6119007702763933,
+        "f1-score": 0.6532674846938825,
+        "support": 77414.0
+      },
+      "weighted avg": {
+        "precision": 0.9342215639068041,
+        "recall": 0.9468829927403312,
+        "f1-score": 0.9359524735323358,
+        "support": 77414.0
+      }
+    }
+  }
+}

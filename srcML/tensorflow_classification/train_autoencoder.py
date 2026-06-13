@@ -1,9 +1,7 @@
-# srcML/tensorflow_anomaly/train_autoencoder.py
+#python srcML/tensorflow_classification/train_autoencoder.py --data-dir DiskData
 
 import argparse
-import glob
 import json
-import os
 import random
 import sys
 from datetime import datetime
@@ -11,53 +9,29 @@ from pathlib import Path
 
 import joblib
 import numpy as np
-import pandas as pd
 import tensorflow as tf
 from sklearn.metrics import average_precision_score, classification_report, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-SRCML_ROOT = PROJECT_ROOT / "srcML"
+OUTPUT_DIR = Path(__file__).resolve().parent
 
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-#uporabimo procesiranje od skleanr
-from srcML.disk_pipeline import procesiraj_podatke
-#preprocessing za NN
-from srcML.nn_preprocessing.preprocessing import read_csv_robust, sample_rows_from_csv, build_dataset_from_many_csvs, prepare_features, reconstruction_errors, normalize_score
+from srcML.nn_preprocessing.preprocessing import (
+    FEATURE_COLUMNS,
+    build_dataset_from_many_csvs,
+    prepare_features,
+    reconstruction_errors,
+)
 
-FEATURE_COLUMNS = [
-    "capacity_gigabytes",
-    "jeSSD",
-    "smart_1_raw",
-    "smart_3_raw",
-    "smart_4_raw",
-    "smart_5_raw",
-    "smart_7_raw",
-    "smart_9_raw",
-    "smart_12_raw",
-    "smart_187_raw",
-    "smart_188_raw",
-    "smart_191_raw",
-    "smart_192_raw",
-    "smart_193_raw",
-    "smart_197_raw",
-    "smart_198_raw",
-    "any_critical_error",
-    "total_error_count",
-    "error_per_gb",
-]
-
-
-OUTPUT_DIR = SRCML_ROOT / "tensorflow_anomaly"
-#struktura in utezi nevronske mreze
-MODEL_PATH = OUTPUT_DIR / "disk_autoencoder.keras"
-ENCODER_PATH = OUTPUT_DIR / "disk_encoder.keras"
-SCALER_PATH = OUTPUT_DIR / "tf_scaler.pkl"
-#trenshold in rezultati
-METADATA_PATH = OUTPUT_DIR / "tf_metadata.json"
+#artefakti Impl 2 avtoenkoder — loceni od Impl 1 (tensorflow_anomaly/)
+CLF_AUTOENCODER_PATH = OUTPUT_DIR / "disk_clf_autoencoder.keras"
+CLF_ENCODER_PATH = OUTPUT_DIR / "disk_clf_encoder.keras"
+CLF_SCALER_PATH = OUTPUT_DIR / "clf_scaler.pkl"
+CLF_AE_METADATA_PATH = OUTPUT_DIR / "clf_ae_metadata.json"
 
 #arhitektura in nacrt mreze (komentarji so moja interpretacija in IZRAZITO AMATERSKI :) )
 def build_autoencoder(input_dim: int, bottleneck_dim: int = 12) -> tf.keras.Model:
@@ -102,30 +76,26 @@ def build_autoencoder(input_dim: int, bottleneck_dim: int = 12) -> tf.keras.Mode
 
     return model
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Treniranje TensorFlow autoencoderja za SMART anomaly detection."
+        description="Treniranje Impl 2 avtoenkoder (locenega od Impl 1) za SMART anomaly detection."
     )
-
     parser.add_argument(
         "--data-dir",
         type=str,
         default=str(PROJECT_ROOT / "DiskData"),
-        help="Mapa z velikimi Backblaze/SMART CSV datotekami.",
+        help="Mapa z Backblaze/SMART CSV datotekami.",
     )
     parser.add_argument("--max-files", type=int, default=None)
     parser.add_argument("--healthy-per-file", type=int, default=1000)
     parser.add_argument("--failure-per-file", type=int, default=100)
-    #kolikokrat se nevronska mreza sprehodi cez datasat (in sproti popravlja utezi)
     parser.add_argument("--epochs", type=int, default=60)
-    #koliko vrstic se pogledat hkrati — 128 je eksperimentalno najboljsi (glej DiskJson/)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--random-state", type=int, default=42)
-    #meja, kjer se disk smatra za anomalijo... višji %, manjša občutljivost na anomalije
     parser.add_argument("--threshold-percentile", type=float, default=99.0)
-    #stevilo nevronov v bottleneck sloju — impl 1 uporablja 12, impl 2 bo eksperimentirala
-    parser.add_argument("--bottleneck-dim", type=int, default=12)
-
+    #za klasifikacijo je manjsi bottleneck ponavadi boljsi (sweep bo potrdil)
+    parser.add_argument("--bottleneck-dim", type=int, default=8)
     args = parser.parse_args()
 
     np.random.seed(args.random_state)
@@ -134,7 +104,6 @@ def main() -> None:
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    #klicemo funkcijo od prej za grajenje dataseta
     print("Gradim dataset iz CSV datotek...")
     healthy_raw, failure_raw = build_dataset_from_many_csvs(
         data_dir=Path(args.data_dir),
@@ -149,7 +118,6 @@ def main() -> None:
 
     X_healthy = prepare_features(healthy_raw)
 
-    #testna / učna množica
     X_train, X_val = train_test_split(
         X_healthy,
         test_size=0.2,
@@ -157,44 +125,28 @@ def main() -> None:
         shuffle=True,
     )
 
-    #centriramo podatke glede na mediano
     scaler = MinMaxScaler()
     X_train_scaled = scaler.fit_transform(X_train).astype("float32")
     X_val_scaled = scaler.transform(X_val).astype("float32")
 
-    #klicemo funkcijo za gradnjo modela, dim dolocena s stevilom stolpcev matrike
     model = build_autoencoder(input_dim=X_train_scaled.shape[1], bottleneck_dim=args.bottleneck_dim)
     model.summary()
 
-    #shranjevanje log-ov za tensorbaord
-    log_dir = OUTPUT_DIR / "logs" / ("fit_" + datetime.now().strftime("%Y%m%d-%H%M%S"))
-
-    #tensorbaord prikazi
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(
-        log_dir=log_dir,
-        histogram_freq=1,
-        write_graph=True,
-    )
-
     callbacks = [
-        #neki za zgodnje ustavljanje ??
         tf.keras.callbacks.EarlyStopping(
             monitor="val_loss",
             patience=10,
             restore_best_weights=True,
         ),
-        #neki za nizanje stopnje ucenja?
         tf.keras.callbacks.ReduceLROnPlateau(
             monitor="val_loss",
             factor=0.5,
             patience=4,
             min_lr=1e-6,
         ),
-        tensorboard_callback
     ]
 
-    #dejansko učenje
-    print("Začenjam učenje autoencoderja...")
+    print("\nZacenjam ucenje Impl 2 avtoenkoder...")
     history = model.fit(
         X_train_scaled,
         X_train_scaled,
@@ -206,10 +158,7 @@ def main() -> None:
         verbose=1,
     )
 
-    #MAE na validac. mnozici
     val_errors = reconstruction_errors(model, X_val_scaled)
-
-    #neki percentili za prikaz napak
     threshold = float(np.percentile(val_errors, args.threshold_percentile))
     p95 = float(np.percentile(val_errors, 95))
     p99 = float(np.percentile(val_errors, 99))
@@ -218,58 +167,35 @@ def main() -> None:
     std_error = float(np.std(val_errors))
 
     evaluation = {}
-
-    #stevilo okvarjenih diskov ki jih podamo preko parametra so ZA TESTNO MNOZICO !, tukaj:
     if not failure_raw.empty:
         X_failure = prepare_features(failure_raw)
         X_failure_scaled = scaler.transform(X_failure).astype("float32")
         failure_errors = reconstruction_errors(model, X_failure_scaled)
-
-        y_true = np.concatenate(
-            [
-                np.zeros_like(val_errors, dtype=int),
-                np.ones_like(failure_errors, dtype=int),
-            ]
-        )
+        y_true = np.concatenate([
+            np.zeros_like(val_errors, dtype=int),
+            np.ones_like(failure_errors, dtype=int),
+        ])
         y_score = np.concatenate([val_errors, failure_errors])
-
         y_pred = (y_score > threshold).astype(int)
-
         evaluation = {
             "roc_auc": float(roc_auc_score(y_true, y_score)),
             "pr_auc": float(average_precision_score(y_true, y_score)),
             "validation_healthy_anomaly_rate": float(np.mean(val_errors > threshold)),
             "failure_eval_anomaly_rate": float(np.mean(failure_errors > threshold)),
             "classification_report": classification_report(
-                y_true,
-                y_pred,
+                y_true, y_pred,
                 target_names=["healthy", "failure"],
                 output_dict=True,
                 zero_division=0,
             ),
         }
-
-
-        print("\nEvalvacija proti failure vrsticam:")
-        #sposobnost modela, da loči med zdravimi in okvarjenimi diski (1.0 je idealno)
-        print(f"ROC-AUC: {evaluation['roc_auc']:.4f}")
-
-        #uspešnost iskanja redkih okvar brez povzročanja lažnih alarmov (bolj realna ocena)
+        print(f"\nROC-AUC: {evaluation['roc_auc']:.4f}")
         print(f"PR-AUC:  {evaluation['pr_auc']:.4f}")
+        print(f"Failure anomaly rate: {evaluation['failure_eval_anomaly_rate']:.4f}")
 
-        #stopnja lažnih alarmov (delež zdravih diskov, ki so bili napačno označeni kot anomalija)
-        print(
-            f"Healthy anomaly rate: {evaluation['validation_healthy_anomaly_rate']:.4f}"
-        )
-
-        #recall / Občutljivost (delež dejansko okvarjenih diskov, ki jih je model uspešno ujel)
-        print(
-            f"Failure anomaly rate: {evaluation['failure_eval_anomaly_rate']:.4f}"
-        )
-
-    #izpis diskov?
+    # !! REZULTATI TU NISO POMEMBNI, KER SO SAM MANJŠI VZOREC ZNACILNIC, KI GA BO KLASIFIKATOR UPORABIL KASNEJE
     metadata = {
-        "model_type": "dense_autoencoder",
+        "model_type": "dense_autoencoder_clf",
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "feature_columns": FEATURE_COLUMNS,
         "bottleneck_dim": args.bottleneck_dim,
@@ -294,34 +220,28 @@ def main() -> None:
         "evaluation": evaluation,
     }
 
-    model.save(MODEL_PATH)
+    model.save(CLF_AUTOENCODER_PATH)
 
-    #izvlecemo encoder submodel (input → bottleneck), ki ga impl 2 uporabi kot feature extractor
+    #izvlecemo encoder submodel — ta gre kot vhod v Stage 2 klasifikator
     encoder = tf.keras.Model(
         inputs=model.input,
         outputs=model.get_layer("bottleneck").output,
-        name="disk_encoder",
+        name="disk_clf_encoder",
     )
-    encoder.save(ENCODER_PATH)
+    encoder.save(CLF_ENCODER_PATH)
 
-    joblib.dump(scaler, SCALER_PATH)
+    joblib.dump(scaler, CLF_SCALER_PATH)
 
-    with open(METADATA_PATH, "w", encoding="utf-8") as f:
+    with open(CLF_AE_METADATA_PATH, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2, ensure_ascii=False)
 
-    print("\nShranjeno:")
-    print(f"Model:    {MODEL_PATH}")
-    print(f"Encoder:  {ENCODER_PATH}")
-    print(f"Scaler:   {SCALER_PATH}")
-    print(f"Metadata: {METADATA_PATH}")
-    print(f"Threshold: {threshold:.6f}")
+    print("\nShranjeno (Impl 2 avtoenkoder):")
+    print(f"Autoencoder: {CLF_AUTOENCODER_PATH}")
+    print(f"Encoder:     {CLF_ENCODER_PATH}")
+    print(f"Scaler:      {CLF_SCALER_PATH}")
+    print(f"Metadata:    {CLF_AE_METADATA_PATH}")
+    print(f"Bottleneck dim: {args.bottleneck_dim}")
 
 
 if __name__ == "__main__":
     main()
-
-#VARIACIJE PARAMETROV (iscem najbolse):
-
-#python srcML/tensorflow_anomaly/train_autoencoder.py --data-dir DiskData --healthy-per-file 1000 --failure-per-file 100 --epochs 60 --batch-size 512
-
-#python srcML/tensorflow_anomaly/train_autoencoder.py --data-dir DiskData --healthy-per-file 1000 --failure-per-file 100 --epochs 60 --batch-size  --> 01_nn_results.json

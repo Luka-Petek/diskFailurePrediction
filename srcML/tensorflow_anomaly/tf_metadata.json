@@ -1,6 +1,6 @@
 {
   "model_type": "dense_autoencoder",
-  "created_at": "2026-06-04T18:49:33",
+  "created_at": "2026-06-12T00:08:28",
   "feature_columns": [
     "capacity_gigabytes",
     "jeSSD",
@@ -22,6 +22,7 @@
     "total_error_count",
     "error_per_gb"
   ],
+  "bottleneck_dim": 12,
   "threshold_percentile": 99.0,
   "threshold": 0.0040753064677119255,
   "validation_error_mean": 0.0006105061038397253,
@@ -40,5 +41,37 @@
     "epochs_finished": 37,
     "batch_size": 128
   },
-  "evaluation": {}
+  "evaluation": {
+    "roc_auc": 0.901291603304554,
+    "pr_auc": 0.6004039220503946,
+    "validation_healthy_anomaly_rate": 0.01,
+    "failure_eval_anomaly_rate": 0.4472134118713185,
+    "classification_report": {
+      "healthy": {
+        "precision": 0.9673403828135457,
+        "recall": 0.99,
+        "f1-score": 0.9785390291787963,
+        "support": 73000.0
+      },
+      "failure": {
+        "precision": 0.7300295857988166,
+        "recall": 0.4472134118713185,
+        "f1-score": 0.5546501826355718,
+        "support": 4414.0
+      },
+      "accuracy": 0.9590513343839615,
+      "macro avg": {
+        "precision": 0.8486849843061812,
+        "recall": 0.7186067059356592,
+        "f1-score": 0.766594605907184,
+        "support": 77414.0
+      },
+      "weighted avg": {
+        "precision": 0.953809369585667,
+        "recall": 0.9590513343839615,
+        "f1-score": 0.9543696881210832,
+        "support": 77414.0
+      }
+    }
+  }
 }
