@@ -1,4 +1,4 @@
-# Machine Learning - Hard Drive Failure Prediction Model & AI Assistant
+# Machine Learning - Hard Drive Failure Prediction Model
 
 A machine learning project that predicts hard drive failures using historical **SMART** (Self-Monitoring, Analysis, and Reporting Technology) sensor data. The system combines two deep learning anomaly detection implementations built on TensorFlow/Keras, a classical sklearn pipeline with Random Forest classification, regression and unsupervised clustering, a reusable real-time prediction pipeline, and a local AI assistant for result interpretation.
 
