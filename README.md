@@ -291,11 +291,3 @@ To demonstrate the efficacy of our risk assessment, we present two extreme insta
 **Formula for prediction calculation:** The HIR score is the weighted root-mean-square of four critical metrics ($K, R, G, N$), combining them into a single value that heavily penalizes large health deviations to predict imminent disk failure:
 
 ![HIR-png](Graphs/HIR.png)
-
----
-
-## Branches
-
-**main branch:** whole setup is running locally on my TrueNAS server via Portainer (LLM Llama 3).
-
-**laptopVersion branch:** modified model and app.py for using better GPU and CPU of my laptop (LLM mistral-nemo:12b).
