@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 import random
 import sys
 from datetime import datetime
@@ -173,8 +174,28 @@ def main() -> None:
     classifier = build_classifier(input_dim=bottleneck_dim)
     classifier.summary()
 
+    #TensorBoard logi
+    log_dir = OUTPUT_DIR / "logs" / datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    tensorboard_cb = tf.keras.callbacks.TensorBoard(
+        log_dir=str(log_dir),
+        histogram_freq=1,
+        write_graph=False,
+        update_freq="epoch",
+    )
+
+    #rocno zapisi graf klasifikatorja (write_graph=True v callbacku ne dela z Keras)
+    writer = tf.summary.create_file_writer(str(log_dir))
+    tf.summary.trace_on(graph=True, profiler=False)
+    classifier(tf.zeros([1, bottleneck_dim]), training=False)
+    with writer.as_default():
+        #tensorboard ne dela dobro z .keras, zapises graf rocno
+        tf.summary.trace_export(name="classifier_graph", step=0)
+    writer.flush()
+
     #EarlyStopping gleda na AUC (bolj relevantno kot loss pri imbalanced podatkih)
     callbacks = [
+        tensorboard_cb,
         tf.keras.callbacks.EarlyStopping(
             monitor="val_auc",
             patience=15,
@@ -264,6 +285,8 @@ def main() -> None:
     print(f"Classifier: {CLASSIFIER_PATH}")
     print(f"Metadata:   {METADATA_PATH}")
     print(f"Threshold:  {best_threshold:.4f}")
+    print(f"\nTensorBoard logs: {log_dir}")
+    print(f"Zaženi: tensorboard --logdir \"{OUTPUT_DIR / 'logs'}\"")
 
 
 if __name__ == "__main__":
