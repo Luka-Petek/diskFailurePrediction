@@ -25,7 +25,7 @@ venv/
 !srcML/tensorflow_anomaly/*.keras
 !srcML/tensorflow_anomaly/*.pkl
 !srcML/tensorflow_anomaly/*.json
-!feature_importance.csv
+!srcML/feature_importance.csv
 
 .idea/
 .vscode/
