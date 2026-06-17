@@ -186,10 +186,10 @@ Then open `http://localhost:6006` in your browser.
 
 # sklearn Pipeline (Random Forest + Clustering)
 
-* **Model Source:** [smart_scan_model.ipynb](srcML/smart_scan_model.ipynb) — *This is the core notebook where the model is trained, evaluated, and exported for real-time prediction.*
-* **Reusable Prediction Pipeline:** [disk_pipeline.py](srcML/disk_pipeline.py) — *This contains the reusable preprocessing and prediction logic used by the API.*
+* **Model Source:** [smart_scan_model.ipynb](srcML/sklearn/smart_scan_model.ipynb) — *This is the core notebook where the model is trained, evaluated, and exported for real-time prediction.*
+* **Reusable Prediction Pipeline:** [disk_pipeline.py](srcML/sklearn/disk_pipeline.py) — *This contains the reusable preprocessing and prediction logic used by the API.*
 * **Serialized Health Pipeline:** [disk_health_pipeline.pkl](srcML/disk_health_pipeline.pkl) — *This is the exported machine learning pipeline used for real-time inference.*
-* **Balanced Data Selection:** [pridobivanje_podatkovne_mnozice.ipynb](srcML/pridobivanje_podatkovne_mnozice.ipynb) - *This selects all problematic disks from the whole year 2025 (only 4414), completing the dataset with another 4414 randomly selected healthy disks. This selection is functional, but not optimal yet; a more efficient sampling strategy is planned.*
+* **Balanced Data Selection:** [pridobivanje_podatkovne_mnozice.ipynb](srcML/sklearn/pridobivanje_podatkovne_mnozice.ipynb) - *This selects all problematic disks from the whole year 2025 (only 4414), completing the dataset with another 4414 randomly selected healthy disks. This selection is functional, but not optimal yet; a more efficient sampling strategy is planned.*
 * **SMART scan JSON input:** [disk_data_sda.json](DiskJson/disk_data_sda.json) - *Example SMART scan exported from smartctl in JSON format and used for testing real-time API prediction.*
 
 ---

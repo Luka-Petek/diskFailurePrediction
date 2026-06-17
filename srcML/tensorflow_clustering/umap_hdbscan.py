@@ -1,4 +1,4 @@
-#python srcML/tensorflow_classification/umap_hdbscan.py --data-dir DiskData
+#python srcML/tensorflow_clustering/umap_hdbscan.py --data-dir DiskData
 #Zahteva: pip install umap-learn hdbscan
 
 import argparse
@@ -120,7 +120,7 @@ def main():
     parser.add_argument("--umap-neighbors", type=int, default=30, help="UMAP n_neighbors.")
     parser.add_argument("--umap-min-dist", type=float, default=0.1, help="UMAP min_dist.")
     parser.add_argument("--hdbscan-min-cluster-size", type=int, default=50, help="HDBSCAN min_cluster_size.")
-    parser.add_argument("--clf-dir", type=str, default=str(OUTPUT_DIR), help="Mapa z Impl 2 artefakti.")
+    parser.add_argument("--clf-dir", type=str, default=str(PROJECT_ROOT / "srcML" / "tensorflow_classification"), help="Mapa z Impl 2 artefakti (encoder + scaler).")
     parser.add_argument("--random-state", type=int, default=42)
     args = parser.parse_args()
 
@@ -206,18 +206,18 @@ def main():
         "cluster_risk": cluster_metadata,
     }
 
-    meta_path = clf_dir / "hdbscan_metadata.json"
+    meta_path = OUTPUT_DIR / "hdbscan_metadata.json"
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(full_metadata, f, indent=2, ensure_ascii=False)
     print(f"\nMetadata shranjena: {meta_path}")
 
     #Shranimo HDBSCAN model za inference (approximate_predict na novih točkah)
-    hdbscan_path = clf_dir / "clf_hdbscan.pkl"
+    hdbscan_path = OUTPUT_DIR / "clf_hdbscan.pkl"
     joblib.dump(clusterer, hdbscan_path)
     print(f"HDBSCAN model shranjen: {hdbscan_path}")
 
     #Shranimo UMAP reducer za re-vizualizacijo (ni potreben za inference)
-    umap_path = clf_dir / "clf_umap_reducer.pkl"
+    umap_path = OUTPUT_DIR / "clf_umap_reducer.pkl"
     joblib.dump(reducer, umap_path)
     print(f"UMAP reducer shranjen: {umap_path}")
 

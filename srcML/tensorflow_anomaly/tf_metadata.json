@@ -1,6 +1,6 @@
 {
   "model_type": "dense_autoencoder",
-  "created_at": "2026-06-12T00:08:28",
+  "created_at": "2026-06-17T16:01:24",
   "feature_columns": [
     "capacity_gigabytes",
     "jeSSD",

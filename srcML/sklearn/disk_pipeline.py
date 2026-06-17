@@ -88,6 +88,7 @@ def procesiraj_podatke(df_raw):
 
     return df
 
+
 #spet podvajanje iz "smart_scan_model"...
 class DiskHealthPipeline:
     def __init__(self, classifier, regressor=None, kmeans=None, scaler=None, expected_columns=None, feature_importance_dict=None):

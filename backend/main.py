@@ -17,9 +17,9 @@ if SRCML_PATH not in sys.path:
 APP_ROOT = Path("/app")
 AE_DIR = APP_ROOT / "srcML" / "tensorflow_anomaly"
 CLF_DIR = APP_ROOT / "srcML" / "tensorflow_classification"
-SKLEARN_PIPELINE_PATH = APP_ROOT / "srcML" / "disk_health_pipeline.pkl"
+SKLEARN_PIPELINE_PATH = APP_ROOT / "srcML" / "sklearn" / "disk_health_pipeline.pkl"
 
-from srcML.disk_pipeline import pretvori_json_v_surovi_df
+from srcML.sklearn.disk_pipeline import pretvori_json_v_surovi_df
 from srcML.nn_preprocessing.preprocessing import prepare_features
 
 

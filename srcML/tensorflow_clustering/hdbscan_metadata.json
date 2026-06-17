@@ -15,7 +15,7 @@
   "cluster_risk": {
     "-1": {
       "risk_label": "OUTLIER",
-      "risk_score": 1.0,
+      "risk_score": 0.6686,
       "failure_rate": 0.6686,
       "total_samples": 1207,
       "failure_samples": 807,
@@ -23,7 +23,7 @@
     },
     "0": {
       "risk_label": "ELEVATED_RISK",
-      "risk_score": 0.5,
+      "risk_score": 0.133,
       "failure_rate": 0.133,
       "total_samples": 188,
       "failure_samples": 25,
@@ -31,7 +31,7 @@
     },
     "1": {
       "risk_label": "ELEVATED_RISK",
-      "risk_score": 0.5,
+      "risk_score": 0.4949,
       "failure_rate": 0.4949,
       "total_samples": 99,
       "failure_samples": 49,
@@ -39,7 +39,7 @@
     },
     "2": {
       "risk_label": "ELEVATED_RISK",
-      "risk_score": 0.5,
+      "risk_score": 0.1113,
       "failure_rate": 0.1113,
       "total_samples": 476,
       "failure_samples": 53,
@@ -47,7 +47,7 @@
     },
     "3": {
       "risk_label": "HIGH_RISK",
-      "risk_score": 1.0,
+      "risk_score": 0.994,
       "failure_rate": 0.994,
       "total_samples": 167,
       "failure_samples": 166,
@@ -55,7 +55,7 @@
     },
     "4": {
       "risk_label": "ELEVATED_RISK",
-      "risk_score": 0.5,
+      "risk_score": 0.1125,
       "failure_rate": 0.1125,
       "total_samples": 569,
       "failure_samples": 64,
@@ -63,7 +63,7 @@
     },
     "5": {
       "risk_label": "ELEVATED_RISK",
-      "risk_score": 0.5,
+      "risk_score": 0.1009,
       "failure_rate": 0.1009,
       "total_samples": 228,
       "failure_samples": 23,
@@ -71,7 +71,7 @@
     },
     "6": {
       "risk_label": "ELEVATED_RISK",
-      "risk_score": 0.5,
+      "risk_score": 0.1519,
       "failure_rate": 0.1519,
       "total_samples": 928,
       "failure_samples": 141,
@@ -79,7 +79,7 @@
     },
     "7": {
       "risk_label": "LOW_RISK",
-      "risk_score": 0.0,
+      "risk_score": 0.0777,
       "failure_rate": 0.0777,
       "total_samples": 296,
       "failure_samples": 23,
@@ -87,7 +87,7 @@
     },
     "8": {
       "risk_label": "LOW_RISK",
-      "risk_score": 0.0,
+      "risk_score": 0.0804,
       "failure_rate": 0.0804,
       "total_samples": 958,
       "failure_samples": 77,
@@ -95,7 +95,7 @@
     },
     "9": {
       "risk_label": "HIGH_RISK",
-      "risk_score": 1.0,
+      "risk_score": 0.8351,
       "failure_rate": 0.8351,
       "total_samples": 485,
       "failure_samples": 405,
@@ -103,7 +103,7 @@
     },
     "10": {
       "risk_label": "HIGH_RISK",
-      "risk_score": 1.0,
+      "risk_score": 0.9548,
       "failure_rate": 0.9548,
       "total_samples": 1372,
       "failure_samples": 1310,
@@ -111,7 +111,7 @@
     },
     "11": {
       "risk_label": "ELEVATED_RISK",
-      "risk_score": 0.5,
+      "risk_score": 0.1817,
       "failure_rate": 0.1817,
       "total_samples": 567,
       "failure_samples": 103,
@@ -119,7 +119,7 @@
     },
     "12": {
       "risk_label": "HIGH_RISK",
-      "risk_score": 1.0,
+      "risk_score": 0.7524,
       "failure_rate": 0.7524,
       "total_samples": 105,
       "failure_samples": 79,
@@ -127,7 +127,7 @@
     },
     "13": {
       "risk_label": "HIGH_RISK",
-      "risk_score": 1.0,
+      "risk_score": 0.86,
       "failure_rate": 0.86,
       "total_samples": 100,
       "failure_samples": 86,
@@ -135,7 +135,7 @@
     },
     "14": {
       "risk_label": "HIGH_RISK",
-      "risk_score": 1.0,
+      "risk_score": 0.868,
       "failure_rate": 0.868,
       "total_samples": 341,
       "failure_samples": 296,
@@ -143,7 +143,7 @@
     },
     "15": {
       "risk_label": "HIGH_RISK",
-      "risk_score": 1.0,
+      "risk_score": 0.9792,
       "failure_rate": 0.9792,
       "total_samples": 337,
       "failure_samples": 330,
@@ -151,7 +151,7 @@
     },
     "16": {
       "risk_label": "HIGH_RISK",
-      "risk_score": 1.0,
+      "risk_score": 0.9252,
       "failure_rate": 0.9252,
       "total_samples": 214,
       "failure_samples": 198,
@@ -159,7 +159,7 @@
     },
     "17": {
       "risk_label": "HIGH_RISK",
-      "risk_score": 1.0,
+      "risk_score": 0.9372,
       "failure_rate": 0.9372,
       "total_samples": 191,
       "failure_samples": 179,

@@ -1,9 +1,7 @@
 # srcML/tensorflow_anomaly/train_autoencoder.py
 
 import argparse
-import glob
 import json
-import os
 import random
 import sys
 from datetime import datetime
@@ -11,7 +9,6 @@ from pathlib import Path
 
 import joblib
 import numpy as np
-import pandas as pd
 import tensorflow as tf
 from sklearn.metrics import average_precision_score, classification_report, roc_auc_score
 from sklearn.model_selection import train_test_split
@@ -24,9 +21,9 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 #uporabimo procesiranje od skleanr
-from srcML.disk_pipeline import procesiraj_podatke
+from srcML.sklearn.disk_pipeline import procesiraj_podatke
 #preprocessing za NN
-from srcML.nn_preprocessing.preprocessing import read_csv_robust, sample_rows_from_csv, build_dataset_from_many_csvs, prepare_features, reconstruction_errors, normalize_score
+from srcML.nn_preprocessing.preprocessing import build_dataset_from_many_csvs, prepare_features, reconstruction_errors
 
 FEATURE_COLUMNS = [
     "capacity_gigabytes",
