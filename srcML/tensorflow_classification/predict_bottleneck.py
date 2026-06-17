@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 import joblib
-import numpy as np
 import tensorflow as tf
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -15,7 +14,7 @@ OUTPUT_DIR = Path(__file__).resolve().parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from srcML.disk_pipeline import pretvori_json_v_surovi_df
+from srcML.sklearn.disk_pipeline import pretvori_json_v_surovi_df
 from srcML.nn_preprocessing.preprocessing import prepare_features
 
 

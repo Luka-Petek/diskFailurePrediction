@@ -27,6 +27,21 @@ services:
     depends_on:
       - disk-ml-backend
 
+  tensorboard:
+    image: tensorflow/tensorflow:latest
+    container_name: diskTensorboard
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./srcML:/app/srcML:ro
+    command: >
+      tensorboard
+      --logdir_spec=anomaly:/app/srcML/tensorflow_anomaly/logs,classification:/app/srcML/tensorflow_classification/logs,clustering:/app/srcML/tensorflow_clustering/logs
+      --host 0.0.0.0
+      --port 6006
+    networks:
+      - disk-network
+
 networks:
   disk-network:
     driver: bridge

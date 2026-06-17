@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 
-from srcML.disk_pipeline import procesiraj_podatke
+from srcML.sklearn.disk_pipeline import procesiraj_podatke
 
 FEATURE_COLUMNS = [
     "capacity_gigabytes",

@@ -15,8 +15,8 @@ OUTPUT_DIR = Path(__file__).resolve().parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from srcML.disk_pipeline import pretvori_json_v_surovi_df
-from srcML.tensorflow_anomaly.train_autoencoder import FEATURE_COLUMNS, prepare_features
+from srcML.sklearn.disk_pipeline import pretvori_json_v_surovi_df
+from srcML.tensorflow_anomaly.train_autoencoder import prepare_features
 
 
 def load_artifacts(model_dir: Path) -> tuple:

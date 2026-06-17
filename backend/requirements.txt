@@ -7,3 +7,7 @@ numpy
 python-multipart
 joblib
 scikit-learn==1.7.2
+tensorflow
+matplotlib
+umap-learn
+hdbscan

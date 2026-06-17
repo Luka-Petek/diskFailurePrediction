@@ -1,32 +1,58 @@
+# ── Veliki podatkovni direktoriji ─────────────────────────────────────────────
+DiskData/
+csv/
+Graphs/
+DiskJson/
+sample.csv
+**/*.csv
+**/*.xlsx
 
-**/node_modules/
-**/dist/
-**/build/
-**/.vite/
-.env
-.env.local
-.DS_Store
-
+# ── Python artefakti ──────────────────────────────────────────────────────────
+.venv/
+env/
+venv/
 **/__pycache__/
 *.pyc
 *.pyo
 *.pyd
-.venv/
-env/
-venv/
 **/.ipynb_checkpoints/
+**/*.ipynb
 
-**/*.csv
+# ── Training logi (ne rabimo v produkciji) ────────────────────────────────────
+**/logs/
+
+# ── Frontend build artefakti ──────────────────────────────────────────────────
+**/node_modules/
+**/dist/
+**/build/
+**/.vite/
+
+# ── IDE + env ─────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+.git/
+.env
+.env.local
+.DS_Store
+
+# ── Model datoteke — globalno izključene, nato selektivno vključene ───────────
 **/*.pkl
-**/*.xlsx
+**/*.keras
 
-!srcML/disk_model.pkl
-!srcML/disk_health_pipeline.pkl
+# Sklearn modeli (po refactoringu v srcML/sklearn/)
+!srcML/sklearn/disk_health_pipeline.pkl
+!srcML/sklearn/disk_model.pkl
+
+# Anomaly detection modeli
 !srcML/tensorflow_anomaly/*.keras
 !srcML/tensorflow_anomaly/*.pkl
 !srcML/tensorflow_anomaly/*.json
-!feature_importance.csv
 
-.idea/
-.vscode/
-.dockerignore
+# Classification modeli
+!srcML/tensorflow_classification/*.keras
+!srcML/tensorflow_classification/*.pkl
+!srcML/tensorflow_classification/*.json
+
+# Clustering modeli
+!srcML/tensorflow_clustering/*.pkl
+!srcML/tensorflow_clustering/*.json
