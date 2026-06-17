@@ -6,11 +6,14 @@ import json
 import sys
 from pathlib import Path
 
+import datetime
+
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from tensorboard.plugins import projector
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 OUTPUT_DIR = Path(__file__).resolve().parent
@@ -108,6 +111,42 @@ def plot_umap_hdbscan(
     plt.savefig(save_path, dpi=150)
     plt.close()
     print(f"UMAP/HDBSCAN plot shranjen: {save_path}")
+
+
+def log_tensorboard_projector(
+    bottleneck: np.ndarray,
+    hdbscan_labels: np.ndarray,
+    labels_true: np.ndarray,
+    cluster_metadata: dict,
+) -> None:
+    run_id = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = OUTPUT_DIR / "logs" / f"clustering_{run_id}"
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    #Shranimo embeddings kot TF checkpoint
+    embedding_var = tf.Variable(bottleneck.astype("float32"), name="bottleneck_embeddings")
+    checkpoint = tf.train.Checkpoint(embedding=embedding_var)
+    checkpoint.save(str(log_dir / "embedding.ckpt"))
+
+    #Metadata TSV: cluster_id, risk_label, failure
+    meta_path = log_dir / "metadata.tsv"
+    with open(meta_path, "w", encoding="utf-8") as f:
+        f.write("cluster_id\trisk_label\tfailure\n")
+        for i in range(len(bottleneck)):
+            cid = str(int(hdbscan_labels[i]))
+            risk = cluster_metadata.get(cid, {}).get("risk_label", "UNKNOWN")
+            failure = int(labels_true[i])
+            f.write(f"{cid}\t{risk}\t{failure}\n")
+
+    #Projector config
+    config = projector.ProjectorConfig()
+    emb_config = config.embeddings.add()
+    emb_config.tensor_name = "embedding/.ATTRIBUTES/VARIABLE_VALUE"
+    emb_config.metadata_path = "metadata.tsv"
+    projector.visualize_embeddings(str(log_dir), config)
+
+    print(f"TensorBoard Projector logi shranjeni: {log_dir}")
+    print(f"  Zaženi z: tensorboard --logdir {log_dir}")
 
 
 def main():
@@ -222,6 +261,8 @@ def main():
     print(f"UMAP reducer shranjen: {umap_path}")
 
     plot_umap_hdbscan(umap_coords, hdbscan_labels, labels_true, graphs_dir)
+
+    log_tensorboard_projector(bottleneck, hdbscan_labels, labels_true, cluster_metadata)
 
     print("\nDone.")
 

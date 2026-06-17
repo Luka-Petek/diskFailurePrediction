@@ -2,7 +2,7 @@
 #
 #  HIR (Health Index Rating) — kombinirana formula vseh 4 modelov:
 #    Impl 0  — Sklearn Random Forest        (utez 0.30)
-#    Impl 2  — TF Bottleneck Classifier     (utez 0.40)  ← najboljsi signal
+#    Impl 2  — TF Bottleneck Classifier     (utez 0.40)  ← najboljsi rezultati
 #    Impl 1  — TF Anomaly Detection AE      (utez 0.20)
 #    Impl C  — TF Clustering HDBSCAN        (utez 0.10)
 
@@ -42,7 +42,6 @@ W_CLUSTER  = 0.10   # HDBSCAN cluster failure_rate
 def _load_sklearn_pipeline(sklearn_dir: Path):
     return joblib.load(sklearn_dir / "disk_health_pipeline.pkl")
 
-
 def _load_tf_clf_artifacts(clf_dir: Path) -> tuple:
     encoder    = tf.keras.models.load_model(clf_dir / "disk_clf_encoder.keras")
     classifier = tf.keras.models.load_model(clf_dir / "disk_bottleneck_classifier.keras")
@@ -51,7 +50,6 @@ def _load_tf_clf_artifacts(clf_dir: Path) -> tuple:
         metadata = json.load(f)
     return encoder, classifier, scaler, metadata
 
-
 def _load_anomaly_artifacts(anomaly_dir: Path) -> tuple:
     model  = tf.keras.models.load_model(anomaly_dir / "disk_autoencoder.keras")
     scaler = joblib.load(anomaly_dir / "tf_scaler.pkl")
@@ -59,18 +57,15 @@ def _load_anomaly_artifacts(anomaly_dir: Path) -> tuple:
         metadata = json.load(f)
     return model, scaler, metadata
 
-
 def _load_clustering_artifacts(clustering_dir: Path) -> tuple:
     clusterer = joblib.load(clustering_dir / "clf_hdbscan.pkl")
     with open(clustering_dir / "hdbscan_metadata.json", encoding="utf-8") as f:
         cluster_meta = json.load(f)
     return clusterer, cluster_meta
 
-
 def _score_sklearn(pipeline, raw_df: "pd.DataFrame") -> float:
     result = pipeline.analyze(raw_df)
     return float(result["failure_probability"])
-
 
 def _score_tf_clf(encoder, classifier, scaler, raw_df: "pd.DataFrame") -> float:
     X = prepare_features(raw_df)
@@ -78,7 +73,6 @@ def _score_tf_clf(encoder, classifier, scaler, raw_df: "pd.DataFrame") -> float:
     bottleneck = encoder.predict(X_scaled, batch_size=1, verbose=0)
     prob       = float(classifier.predict(bottleneck, batch_size=1, verbose=0).flatten()[0])
     return prob
-
 
 def _score_anomaly(ae_model, scaler, metadata, raw_df: "pd.DataFrame") -> float:
     X = prepare_features(raw_df)
@@ -92,7 +86,6 @@ def _score_anomaly(ae_model, scaler, metadata, raw_df: "pd.DataFrame") -> float:
     if p999 <= threshold:
         return 0.0
     return float(np.clip((error - threshold) / (p999 - threshold), 0.0, 1.0))
-
 
 def _score_clustering(
     clusterer, cluster_meta,
