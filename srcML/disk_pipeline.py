@@ -130,15 +130,8 @@ class DiskHealthPipeline:
         K = float(self.classifier.predict(X_input)[0])
         failure_prob = float(self.classifier.predict_proba(X_input)[0][1])
 
-        #HIR FORMULA (K = RF classifier, N = any_critical_error)
-        N = float(X_input.iloc[0]['any_critical_error'])
-
-        w_k, w_n = 1.5, 1.2
-        vsota_utezi = w_k + w_n
-        izracun = (w_k * (K ** 2)) + (w_n * (N ** 2))
-        koncni_izracun = np.sqrt(izracun / vsota_utezi)
-
-        odstotek_tveganja = round(koncni_izracun * 100, 2)
+        #HIR FORMULA - failure_probability ze vsebuje vse featere (any_critical_error, starost, ...)
+        odstotek_tveganja = round(failure_prob * 100, 2)
 
         #tveganje ne more biti nikoli 100%, nikoli 0%
         if odstotek_tveganja > 95.0:
