@@ -1,0 +1,169 @@
+{
+  "n_clusters": 18,
+  "n_outliers": 1207,
+  "outlier_ratio": 0.1367,
+  "bottleneck_dim": 8,
+  "umap_params": {
+    "n_neighbors": 30,
+    "min_dist": 0.1,
+    "metric": "euclidean"
+  },
+  "hdbscan_params": {
+    "min_cluster_size": 50,
+    "metric": "euclidean"
+  },
+  "cluster_risk": {
+    "-1": {
+      "risk_label": "OUTLIER",
+      "risk_score": 1.0,
+      "failure_rate": 0.6686,
+      "total_samples": 1207,
+      "failure_samples": 807,
+      "is_outlier": true
+    },
+    "0": {
+      "risk_label": "ELEVATED_RISK",
+      "risk_score": 0.5,
+      "failure_rate": 0.133,
+      "total_samples": 188,
+      "failure_samples": 25,
+      "is_outlier": false
+    },
+    "1": {
+      "risk_label": "ELEVATED_RISK",
+      "risk_score": 0.5,
+      "failure_rate": 0.4949,
+      "total_samples": 99,
+      "failure_samples": 49,
+      "is_outlier": false
+    },
+    "2": {
+      "risk_label": "ELEVATED_RISK",
+      "risk_score": 0.5,
+      "failure_rate": 0.1113,
+      "total_samples": 476,
+      "failure_samples": 53,
+      "is_outlier": false
+    },
+    "3": {
+      "risk_label": "HIGH_RISK",
+      "risk_score": 1.0,
+      "failure_rate": 0.994,
+      "total_samples": 167,
+      "failure_samples": 166,
+      "is_outlier": false
+    },
+    "4": {
+      "risk_label": "ELEVATED_RISK",
+      "risk_score": 0.5,
+      "failure_rate": 0.1125,
+      "total_samples": 569,
+      "failure_samples": 64,
+      "is_outlier": false
+    },
+    "5": {
+      "risk_label": "ELEVATED_RISK",
+      "risk_score": 0.5,
+      "failure_rate": 0.1009,
+      "total_samples": 228,
+      "failure_samples": 23,
+      "is_outlier": false
+    },
+    "6": {
+      "risk_label": "ELEVATED_RISK",
+      "risk_score": 0.5,
+      "failure_rate": 0.1519,
+      "total_samples": 928,
+      "failure_samples": 141,
+      "is_outlier": false
+    },
+    "7": {
+      "risk_label": "LOW_RISK",
+      "risk_score": 0.0,
+      "failure_rate": 0.0777,
+      "total_samples": 296,
+      "failure_samples": 23,
+      "is_outlier": false
+    },
+    "8": {
+      "risk_label": "LOW_RISK",
+      "risk_score": 0.0,
+      "failure_rate": 0.0804,
+      "total_samples": 958,
+      "failure_samples": 77,
+      "is_outlier": false
+    },
+    "9": {
+      "risk_label": "HIGH_RISK",
+      "risk_score": 1.0,
+      "failure_rate": 0.8351,
+      "total_samples": 485,
+      "failure_samples": 405,
+      "is_outlier": false
+    },
+    "10": {
+      "risk_label": "HIGH_RISK",
+      "risk_score": 1.0,
+      "failure_rate": 0.9548,
+      "total_samples": 1372,
+      "failure_samples": 1310,
+      "is_outlier": false
+    },
+    "11": {
+      "risk_label": "ELEVATED_RISK",
+      "risk_score": 0.5,
+      "failure_rate": 0.1817,
+      "total_samples": 567,
+      "failure_samples": 103,
+      "is_outlier": false
+    },
+    "12": {
+      "risk_label": "HIGH_RISK",
+      "risk_score": 1.0,
+      "failure_rate": 0.7524,
+      "total_samples": 105,
+      "failure_samples": 79,
+      "is_outlier": false
+    },
+    "13": {
+      "risk_label": "HIGH_RISK",
+      "risk_score": 1.0,
+      "failure_rate": 0.86,
+      "total_samples": 100,
+      "failure_samples": 86,
+      "is_outlier": false
+    },
+    "14": {
+      "risk_label": "HIGH_RISK",
+      "risk_score": 1.0,
+      "failure_rate": 0.868,
+      "total_samples": 341,
+      "failure_samples": 296,
+      "is_outlier": false
+    },
+    "15": {
+      "risk_label": "HIGH_RISK",
+      "risk_score": 1.0,
+      "failure_rate": 0.9792,
+      "total_samples": 337,
+      "failure_samples": 330,
+      "is_outlier": false
+    },
+    "16": {
+      "risk_label": "HIGH_RISK",
+      "risk_score": 1.0,
+      "failure_rate": 0.9252,
+      "total_samples": 214,
+      "failure_samples": 198,
+      "is_outlier": false
+    },
+    "17": {
+      "risk_label": "HIGH_RISK",
+      "risk_score": 1.0,
+      "failure_rate": 0.9372,
+      "total_samples": 191,
+      "failure_samples": 179,
+      "is_outlier": false
+    }
+  }
+}

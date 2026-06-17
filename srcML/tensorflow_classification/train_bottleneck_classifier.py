@@ -267,8 +267,8 @@ def main() -> None:
             "class_weight_failure": class_weight_dict[1],
         },
         "evaluation": {
-            "roc_auc": roc_auc,
-            "pr_auc": pr_auc,
+            "roc_auc": roc_auc, # sensitivity (recall za pozitiven razred) vs specificity (recall za negatoven razred)
+            "pr_auc": pr_auc,   # sensitivity (recall) vs precision
             "failure_recall": clf_report["failure"]["recall"],
             "failure_precision": clf_report["failure"]["precision"],
             "failure_f1": clf_report["failure"]["f1-score"],

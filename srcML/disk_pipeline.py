@@ -90,7 +90,7 @@ def procesiraj_podatke(df_raw):
 
 #spet podvajanje iz "smart_scan_model"...
 class DiskHealthPipeline:
-    def __init__(self, classifier, regressor, kmeans, scaler, expected_columns, feature_importance_dict):
+    def __init__(self, classifier, regressor=None, kmeans=None, scaler=None, expected_columns=None, feature_importance_dict=None):
         self.classifier = classifier
         self.regressor = regressor
         self.kmeans = kmeans
@@ -126,29 +126,16 @@ class DiskHealthPipeline:
                 if 'model' in df_processed.columns and df_processed['model'].iloc[0] == proizvajalec:
                     X_input.at[0, col] = 1
 
-        #Standardizacija & K-Means
-        X_clean_scaler = X_input[list(self.scaler.feature_names_in_)]
-        X_scaled = self.scaler.transform(X_clean_scaler)
-        cluster_id = self.kmeans.predict(X_scaled)[0]
-
-        #Stolpci za Regresijo
-        cols_to_drop_reg = ['smart_5_raw', 'model', 'failure', 'total_error_count', 'error_per_gb',
-                            'any_critical_error']
-        reg_cols = [c for c in self.expected_columns if c not in cols_to_drop_reg and not c.startswith('model_')]
-        X_input_reg = X_input[reg_cols]
-
-        #Napovedovanje obeh modelov (Inference)
+        #Napovedovanje klasifikatorja (Inference)
         K = float(self.classifier.predict(X_input)[0])
-        smart5_napoved = self.regressor.predict(X_input_reg)[0]
+        failure_prob = float(self.classifier.predict_proba(X_input)[0][1])
 
-        #HIR FORMULA
-        R = min(max(smart5_napoved, 0.0) / 50.0, 1.0)
-        G = 1.0 if cluster_id == 1 else (0.5 if cluster_id == 2 else 0.0)
+        #HIR FORMULA (K = RF classifier, N = any_critical_error)
         N = float(X_input.iloc[0]['any_critical_error'])
 
-        w_k, w_n, w_g, w_r = 1.5, 1.2, 0.8, 0.5
-        vsota_utezi = w_k + w_r + w_g + w_n
-        izracun = (w_k * (K ** 2)) + (w_r * (R ** 2)) + (w_g * (G ** 2)) + (w_n * (N ** 2))
+        w_k, w_n = 1.5, 1.2
+        vsota_utezi = w_k + w_n
+        izracun = (w_k * (K ** 2)) + (w_n * (N ** 2))
         koncni_izracun = np.sqrt(izracun / vsota_utezi)
 
         odstotek_tveganja = round(koncni_izracun * 100, 2)
@@ -169,10 +156,9 @@ class DiskHealthPipeline:
 
         return {
             "hir_risk_score": odstotek_tveganja,
+            "failure_probability": round(failure_prob, 4),
             "verdict": verdict,
             "models_output": {
                 "classification_fail": bool(K == 1.0),
-                "predicted_smart_5_sectors": round(smart5_napoved, 1),
-                "cluster_profile_id": int(cluster_id)
             }
         }
