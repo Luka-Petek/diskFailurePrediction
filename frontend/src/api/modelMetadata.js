@@ -172,7 +172,6 @@ export const GRAPH_LABELS = {
   'nn_autoencoder.png': 'Autoencoder — Training & Reconstruction Error',
   'classification.png': 'Random Forest — Classification Results',
   'regression.png': 'Random Forest — HIR Regression Results',
-  'clustering.png': 'Clustering — UMAP + HDBSCAN Visualization',
   'umap_hdbscan.png': 'UMAP Projection with HDBSCAN Clusters',
   'bottleneck_kmeans_clusters.png': 'Bottleneck Space — K-means Clusters',
   'kmeans_elbow.png': 'K-means Elbow Plot',

@@ -45,8 +45,8 @@ const LogsWidget = ({ history, loading }) => {
             <div>
               <strong>{scan.filename}</strong>
               <br />
-              <span style={{ fontSize: '11px', opacity: 0.7 }}>
-                <Clock size={10} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px' }} />
+              <span style={{ fontSize: '13px', opacity: 0.7 }}>
+                <Clock size={12} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px' }} />
                 {formatTime(scan.timestamp)} · {verdict}
               </span>
             </div>

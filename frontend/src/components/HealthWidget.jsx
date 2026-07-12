@@ -6,7 +6,7 @@ const MODEL_META = {
   tf_classification: { label: 'Bottleneck Clf', scoreKey: 'failure_probability' },
   tf_anomaly: { label: 'Anomaly AE', scoreKey: 'anomaly_score' },
   clustering: { label: 'HDBSCAN', scoreKey: 'cluster_score' },
-  sklearn: { label: 'Random Forest', scoreKey: 'failure_probability' },
+  sklearn: { label: 'Random Forest', scoreKey: 'hir_risk_score', scoreDivisor: 100 },
 };
 
 const scoreToColor = (score) => {
@@ -56,13 +56,13 @@ const HealthWidget = ({ result, loading, driveInfo }) => {
     <div className="card widget-health">
       <div className="card-title">
         Model Consensus
-        <span style={{ fontSize: '11px', fontWeight: '400', color: 'var(--text-muted)' }}>
+        <span style={{ fontSize: '13px', fontWeight: '400', color: 'var(--text-muted)' }}>
           {consensus.models_predicting_failure}/{consensus.models_total} flag failure
         </span>
       </div>
       {driveInfo && (
         <div className="drive-identity">
-          <HardDrive size={12} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle', opacity: 0.6 }} />
+          <HardDrive size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'middle', opacity: 0.6 }} />
           <strong>{driveInfo.model}</strong>
           {' · '}
           {formatBytes(driveInfo.capacity)}
@@ -83,7 +83,8 @@ const HealthWidget = ({ result, loading, driveInfo }) => {
               </div>
             );
           }
-          const score = data[meta.scoreKey] ?? 0;
+          const rawScore = data[meta.scoreKey] ?? 0;
+          const score = meta.scoreDivisor ? rawScore / meta.scoreDivisor : rawScore;
           const pct = Math.round(score * 100);
           const color = scoreToColor(score);
           return (

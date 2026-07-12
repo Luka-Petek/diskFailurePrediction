@@ -316,6 +316,12 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
     #Normaliziramo na aktivne uteži
     disk_health_score = round(weighted_sum / active_weight, 4)
 
+    #tveganje ne more biti nikoli 100%, nikoli 0%
+    if disk_health_score > 0.97:
+        disk_health_score = 0.97
+    elif disk_health_score < 0.05:
+        disk_health_score = 0.05
+
     if disk_health_score >= 0.70:
         combined_verdict = "FAILURE"
     elif disk_health_score >= 0.40:

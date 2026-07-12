@@ -52,7 +52,7 @@ const Navbar = ({ onAnalyze, loading, activeView, onViewChange }) => {
 
   return (
     <nav className="navbar" style={{ position: 'relative' }}>
-      <img src={logoWordmark} alt="DiskGuard" className="logo" style={{ height: 26, display: 'block' }} />
+      <img src={logoWordmark} alt="DiskGuard" className="logo" style={{ height: 38, display: 'block' }} />
       <div className="nav-links">
         <span
           className={activeView === 'dashboard' ? 'active' : ''}

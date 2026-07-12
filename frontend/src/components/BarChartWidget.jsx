@@ -39,7 +39,7 @@ const BarChartWidget = ({ smartData, loading }) => {
     <div className="card widget-bar">
       <div className="card-title">
         SMART Attributes
-        <span style={{ fontSize: '11px', fontWeight: '400', color: 'var(--text-muted)' }}>
+        <span style={{ fontSize: '13px', fontWeight: '400', color: 'var(--text-muted)' }}>
           {sorted.length} attributes
         </span>
       </div>

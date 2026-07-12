@@ -63,7 +63,7 @@ const StatusWidget = ({ result, loading, driveInfo }) => {
       <div className="card-title">
         Verdict
         <span className={`status-pill ${pill.cls}`}>
-          <Icon size={11} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
+          <Icon size={13} style={{ display: 'inline', marginRight: '4px', verticalAlign: 'middle' }} />
           {pill.label}
         </span>
       </div>

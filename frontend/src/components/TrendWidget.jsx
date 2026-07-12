@@ -21,7 +21,7 @@ const verdictToPill = (verdict) => {
   const v = verdict.toUpperCase();
   if (v === 'FAILURE' || v === 'ANOMALY_DETECTED' || v === 'CRITICAL') return { cls: 'critical', label: v.replace(/_/g, ' ') };
   if (v === 'AT_RISK' || v === 'WARNING' || v === 'ELEVATED_RISK' || v === 'HIGH_RISK') return { cls: 'warning', label: v.replace(/_/g, ' ') };
-  if (v === 'HEALTHY' || v === 'LOW_RISK') return { cls: 'healthy', label: v.replace(/_/g, ' ') };
+  if (v === 'HEALTHY' || v === 'LOW_RISK' || v === 'OK') return { cls: 'healthy', label: v.replace(/_/g, ' ') };
   return { cls: 'neutral', label: v };
 };
 
@@ -47,6 +47,7 @@ function ModelCard({ modelKey, modelData, scanData }) {
     modelKey === 'tf_classification' ? scanData.failure_probability
     : modelKey === 'tf_anomaly' ? scanData.anomaly_score
     : modelKey === 'clustering' ? scanData.cluster_score
+    : modelKey === 'sklearn' ? (scanData.hir_risk_score != null ? scanData.hir_risk_score / 100 : scanData.failure_probability)
     : scanData.failure_probability
   ) : null;
   const verdict = scanData?.verdict || (modelKey === 'clustering' ? null : null);
@@ -165,7 +166,7 @@ function ModelCard({ modelKey, modelData, scanData }) {
               <div className="mp-extra-row">
                 <span>HIR Score</span>
                 <strong className="tabular-nums">
-                  {scanData.hir_risk_score != null ? `${Math.round(scanData.hir_risk_score * 100)}%` : '—'}
+                  {scanData.hir_risk_score != null ? `${Math.round(scanData.hir_risk_score)}%` : '—'}
                 </strong>
               </div>
               <div className="mp-extra-row">
@@ -180,7 +181,7 @@ function ModelCard({ modelKey, modelData, scanData }) {
       )}
 
       <div className="mp-card-footer">
-        <Info size={10} />
+        <Info size={13} />
         <span>{meta.description}</span>
       </div>
     </div>
@@ -197,11 +198,11 @@ const TrendWidget = ({ result, loading }) => {
         <div className="mp-grid">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="mp-card">
-              <Skeleton width="80%" height="14px" />
-              <Skeleton width="60%" height="10px" />
-              <div style={{ marginTop: 'var(--space-3)' }}>
+              <Skeleton width="80%" height="18px" />
+              <Skeleton width="60%" height="12px" />
+              <div style={{ marginTop: 'var(--space-4)' }}>
                 {[...Array(5)].map((_, j) => (
-                  <Skeleton key={j} width="100%" height="12px" />
+                  <Skeleton key={j} width="100%" height="14px" />
                 ))}
               </div>
             </div>

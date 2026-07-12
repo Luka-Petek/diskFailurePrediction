@@ -51,12 +51,14 @@ const Dashboard = () => {
           <>
             <StatusWidget result={result} loading={loading} driveInfo={driveInfo} />
             <HealthWidget result={result} loading={loading} driveInfo={driveInfo} />
-            <ShapWidget result={result} smartData={smartData} loading={loading} />
             <BarChartWidget smartData={smartData} loading={loading} />
             <LogsWidget history={history} loading={loading} />
           </>
         ) : (
-          <TrendWidget result={result} loading={loading} />
+          <>
+            <TrendWidget result={result} loading={loading} />
+            <ShapWidget result={result} smartData={smartData} loading={loading} />
+          </>
         )}
       </div>
     </div>

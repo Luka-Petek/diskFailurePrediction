@@ -71,9 +71,9 @@ const ShapWidget = ({ result, smartData, loading }) => {
         <div className="feature-bars">
           {[...Array(TOP_N)].map((_, i) => (
             <div key={i} className="feature-bar-row">
-              <Skeleton width="100px" height="12px" />
-              <Skeleton width="100%" height="8px" />
-              <Skeleton width="40px" height="12px" />
+              <Skeleton width="140px" height="14px" />
+              <Skeleton width="100%" height="10px" />
+              <Skeleton width="50px" height="14px" />
             </div>
           ))}
         </div>
@@ -85,7 +85,7 @@ const ShapWidget = ({ result, smartData, loading }) => {
     <div className="card widget-shap">
       <div className="card-title">
         Feature Importance
-        <span style={{ fontSize: '11px', fontWeight: '400', color: 'var(--text-muted)' }}>
+        <span style={{ fontSize: '13px', fontWeight: '400', color: 'var(--text-muted)' }}>
           Random Forest
         </span>
       </div>
@@ -144,7 +144,7 @@ const ShapWidget = ({ result, smartData, loading }) => {
             <span className="rf-verdict-label">HIR Risk Score</span>
             <span className="tabular-nums">
               {sklearnScore.hir_risk_score != null
-                ? `${Math.round(sklearnScore.hir_risk_score * 100)}%`
+                ? `${Math.round(sklearnScore.hir_risk_score)}%`
                 : '—'}
             </span>
           </div>
@@ -156,6 +156,10 @@ const ShapWidget = ({ result, smartData, loading }) => {
           Upload a scan to see this drive's values for each feature
         </div>
       )}
+
+      <div style={{ marginTop: 'var(--space-3)', paddingTop: 'var(--space-3)', borderTop: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-muted)', opacity: 0.7, lineHeight: 1.4 }}>
+        Percentages reflect the Random Forest's global feature importance from training — not specific to the analyzed disk.
+      </div>
     </div>
   );
 };
