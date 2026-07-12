@@ -1,4 +1,26 @@
-# DiskGuard — Hard Drive Failure Prediction &amp; Health Index Rating
+<div align="center">
+
+<br/>
+
+<img src="frontend/src/assets/logo-wordmark.svg" alt="DiskGuard" width="320" />
+
+**Hard drive failure prediction & Health Index Rating — 4 ML models fused into one real-time verdict.**
+
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](frontend/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)](backend/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-Keras-FF6F00?logo=tensorflow&logoColor=white)](srcML/tensorflow_classification/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-RandomForest-F7931E?logo=scikitlearn&logoColor=white)](srcML/sklearn/)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)](docker-compose.yaml)
+
+</div>
+
+## Authors
+
+**Luka Petek**
+
+---
+
+## About the Project
 
 A machine learning system that predicts hard drive failures from real-time **SMART** sensor data. Four independent models — spanning supervised deep learning, unsupervised anomaly detection, and density-based clustering — are fused into a single interpretable score: the **Health Index Rating (HIR)**.
 
@@ -191,11 +213,21 @@ python srcML/hir_final.py --input disk_data.json
 
 ## API & Frontend
 
-The **FastAPI backend** exposes a `/api/analyze-smart-json` endpoint that accepts a raw `smartctl -j` JSON file and returns the full HIR result. The **React/Vite frontend** provides a dashboard for uploading scans and visualising results.
+The **FastAPI backend** exposes `/api/predict/combined`, which runs all four models and returns the fused HIR verdict — this is the endpoint the **React/Vite dashboard** calls when you upload a scan. A legacy `/api/analyze-smart-json` alias (sklearn-only) is kept for backward compatibility.
 
 ```bash
-curl -X POST http://localhost:8000/api/analyze-smart-json \
+curl -X POST http://localhost:8000/api/predict/combined \
   -F "file=@disk_data.json;type=application/json"
+```
+
+```json
+{
+  "disk_health_score": 33.43,
+  "verdict": "HEALTHY",
+  "confidence": "high",
+  "model_scores": { "tf_classification": {...}, "tf_anomaly": {...}, "clustering": {...}, "sklearn": {...} },
+  "consensus": { "models_predicting_failure": 0, "models_total": 4 }
+}
 ```
 
 ---

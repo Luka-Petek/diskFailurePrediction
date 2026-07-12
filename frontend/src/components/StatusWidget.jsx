@@ -13,6 +13,51 @@ const scoreToStatusColor = (score) => {
   return 'var(--status-healthy)';
 };
 
+//final % circle:
+const RING_SIZE = 160;
+const RING_STROKE = 12;
+const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+const VerdictRing = ({ pct, color }) => {
+  const offset = RING_CIRCUMFERENCE - (pct / 100) * RING_CIRCUMFERENCE;
+  return (
+    <svg width={RING_SIZE} height={RING_SIZE} className="verdict-ring">
+      <defs>
+        <filter id="ringGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="4" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <circle
+        cx={RING_SIZE / 2}
+        cy={RING_SIZE / 2}
+        r={RING_RADIUS}
+        fill="none"
+        stroke="#2a2d38"
+        strokeWidth={RING_STROKE}
+      />
+      <circle
+        cx={RING_SIZE / 2}
+        cy={RING_SIZE / 2}
+        r={RING_RADIUS}
+        fill="none"
+        stroke={color}
+        strokeWidth={RING_STROKE}
+        strokeLinecap="round"
+        strokeDasharray={RING_CIRCUMFERENCE}
+        strokeDashoffset={offset}
+        transform={`rotate(-90 ${RING_SIZE / 2} ${RING_SIZE / 2})`}
+        filter="url(#ringGlow)"
+        className="verdict-ring-progress"
+      />
+    </svg>
+  );
+};
+
 const StatusWidget = ({ result, loading, driveInfo }) => {
   if (loading) {
     return (
@@ -34,7 +79,8 @@ const StatusWidget = ({ result, loading, driveInfo }) => {
       <div className="card widget-status">
         <div className="card-title">Verdict</div>
         <div className="donut-container">
-          <div className="donut" style={{ background: 'conic-gradient(var(--status-neutral) 0%, #2a2d38 0)' }}>
+          <div className="verdict-ring-wrap">
+            <VerdictRing pct={0} color="var(--status-neutral)" />
             <div className="donut-text">
               <h2>—</h2>
               <span>No data</span>
@@ -68,11 +114,8 @@ const StatusWidget = ({ result, loading, driveInfo }) => {
         </span>
       </div>
       <div className="donut-container">
-        <div
-          className="donut"
-          style={{ background: `conic-gradient(${color} ${pct}%, #2a2d38 0)` }}
-          aria-live="polite"
-        >
+        <div className="verdict-ring-wrap">
+          <VerdictRing pct={pct} color={color} />
           <div className="donut-text">
             <h2>{pct}%</h2>
             <span>Risk</span>

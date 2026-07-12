@@ -163,14 +163,9 @@
 .widget-status { grid-column: span 4; }
 .donut-container { display: flex; align-items: center; gap: var(--space-8); margin-top: var(--space-3); }
 
-.donut {
-    width: 140px; height: 140px;
-    border-radius: 50%;
-    display: flex; justify-content: center; align-items: center;
-    position: relative;
-}
-
-.donut::before { content: ""; position: absolute; width: 106px; height: 106px; background: var(--bg-card); border-radius: 50%; }
+.verdict-ring-wrap { position: relative; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+.verdict-ring { display: block; }
+.verdict-ring-progress { transition: stroke-dashoffset 0.8s ease-in-out, stroke 0.3s ease; }
 
 .donut-text { position: absolute; text-align: center; z-index: 2; }
 .donut-text h2 { font-size: 36px; font-weight: 800; margin: 0; font-variant-numeric: tabular-nums; }
