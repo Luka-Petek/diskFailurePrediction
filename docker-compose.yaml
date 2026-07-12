@@ -1,9 +1,9 @@
 services:
-  disk-ml-backend:
+  diskguard-backend:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    container_name: diskBackend
+    container_name: diskguard-backend
     ports:
       - "8000:8000"
     volumes:
@@ -13,35 +13,37 @@ services:
       - PYTHONUNBUFFERED=1
       - PYTHONPATH=/app
     networks:
-      - disk-network
+      - diskguard-network
 
-  disk-ml-frontend:
+  diskguard-frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    container_name: diskFrontend
+    container_name: diskguard-frontend
     ports:
       - "3000:80"
     networks:
-      - disk-network
+      - diskguard-network
     depends_on:
-      - disk-ml-backend
+      - diskguard-backend
 
   tensorboard:
     image: tensorflow/tensorflow:latest
-    container_name: diskTensorboard
+    container_name: diskguard-tensorboard
     ports:
       - "6006:6006"
     volumes:
       - ./srcML:/app/srcML:ro
+    entrypoint: ["/bin/bash", "-c"]
     command: >
-      tensorboard
+      pip install --quiet tensorboard &&
+      python -m tensorboard
       --logdir_spec=anomaly:/app/srcML/tensorflow_anomaly/logs,classification:/app/srcML/tensorflow_classification/logs,clustering:/app/srcML/tensorflow_clustering/logs
       --host 0.0.0.0
       --port 6006
     networks:
-      - disk-network
+      - diskguard-network
 
 networks:
-  disk-network:
+  diskguard-network:
     driver: bridge
