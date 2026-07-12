@@ -2,7 +2,6 @@
 DiskData/
 csv/
 Graphs/
-DiskJson/
 sample.csv
 **/*.csv
 **/*.xlsx

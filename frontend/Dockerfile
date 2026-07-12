@@ -5,6 +5,7 @@ COPY frontend/package*.json ./
 RUN npm install
 
 COPY frontend/ .
+COPY DiskJson/ ./DiskJson/
 RUN npm run build
 
 FROM nginx:stable-alpine

@@ -34,8 +34,10 @@ services:
       - "6006:6006"
     volumes:
       - ./srcML:/app/srcML:ro
+    entrypoint: ["/bin/bash", "-c"]
     command: >
-      tensorboard
+      pip install --quiet tensorboard &&
+      python -m tensorboard
       --logdir_spec=anomaly:/app/srcML/tensorflow_anomaly/logs,classification:/app/srcML/tensorflow_classification/logs,clustering:/app/srcML/tensorflow_clustering/logs
       --host 0.0.0.0
       --port 6006

@@ -1,8 +1,15 @@
+import { TrendingUp } from 'lucide-react';
+
 const TrendWidget = () => (
-  <div className="card widget-trend">
-    <div className="card-title">Anomaly Detection Over Time <span className="info-icon">ℹ</span></div>
-    <div className="chart-placeholder">
-      <div className="chart-tooltip">Errors: 452,120</div>
+  <div className="card widget-trend widget-stub">
+    <div className="stub-content">
+      <div className="stub-icon">
+        <TrendingUp size={32} />
+      </div>
+      <div className="stub-title">Coming soon</div>
+      <div className="stub-desc">
+        Anomaly trend over time — requires multiple scans to build a history.
+      </div>
     </div>
   </div>
 );
