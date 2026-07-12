@@ -221,9 +221,9 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
     smartctl_dict = _parse_upload(raw)
     state = request.app.state
 
-    W_clf, W_anom, W_clust, W_skl = 0.50, 0.10, 0.20, 0.20
+    W_clf, W_anom, W_clust, W_skl = 0.40, 0.20, 0.10, 0.30
     model_scores = {}
-    weighted_sum = 0.0
+    weighted_sum_sq = 0.0
     active_weight = 0.0
     models_predicting_failure = 0
     models_total = 0
@@ -232,7 +232,7 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
     try:
         clf_result, bottleneck = _infer_classification(state, smartctl_dict)
         s_clf = clf_result["failure_probability"]
-        weighted_sum += W_clf * s_clf
+        weighted_sum_sq += W_clf * s_clf ** 2
         active_weight += W_clf
         models_total += 1
         if clf_result["failure_predicted"]:
@@ -253,7 +253,7 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
     try:
         ae_result = _infer_anomaly(state, smartctl_dict)
         s_anom = ae_result["anomaly_score"]
-        weighted_sum += W_anom * s_anom
+        weighted_sum_sq += W_anom * s_anom ** 2
         active_weight += W_anom
         models_total += 1
         if ae_result["anomaly"]:
@@ -274,7 +274,7 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
         try:
             clust_result = _infer_clustering(state, bottleneck)
             s_clust = clust_result["cluster_score"]
-            weighted_sum += W_clust * s_clust
+            weighted_sum_sq += W_clust * s_clust ** 2
             active_weight += W_clust
             models_total += 1
             if s_clust >= 0.5:
@@ -295,7 +295,7 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
     try:
         skl_result = _infer_sklearn(state, smartctl_dict)
         s_skl = skl_result.get("failure_probability", 0.0)
-        weighted_sum += W_skl * s_skl
+        weighted_sum_sq += W_skl * s_skl ** 2
         active_weight += W_skl
         models_total += 1
         if skl_result.get("models_output", {}).get("classification_fail", False):
@@ -313,19 +313,14 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
     if active_weight == 0.0:
         raise HTTPException(status_code=503, detail="Nobeden model ni na voljo.")
 
-    #Normaliziramo na aktivne uteži
-    disk_health_score = round(weighted_sum / active_weight, 4)
+    #RMS formula: sqrt( Σ(wi · si²) / Σw )
+    rms_score = float(np.sqrt(weighted_sum_sq / active_weight))
+    disk_health_score = round(float(np.clip(rms_score * 100, 3.0, 97.0)), 2)
 
-    #tveganje ne more biti nikoli 100%, nikoli 0%
-    if disk_health_score > 0.97:
-        disk_health_score = 0.97
-    elif disk_health_score < 0.05:
-        disk_health_score = 0.05
-
-    if disk_health_score >= 0.70:
-        combined_verdict = "FAILURE"
-    elif disk_health_score >= 0.40:
-        combined_verdict = "AT_RISK"
+    if disk_health_score >= 75.0:
+        combined_verdict = "CRITICAL"
+    elif disk_health_score >= 40.0:
+        combined_verdict = "WARNING"
     else:
         combined_verdict = "HEALTHY"
 

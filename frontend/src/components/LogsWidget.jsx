@@ -2,8 +2,8 @@ import { Clock } from 'lucide-react';
 import Skeleton from './Skeleton';
 
 const scoreToColor = (score) => {
-  if (score >= 0.70) return 'var(--status-critical)';
-  if (score >= 0.40) return 'var(--status-warning)';
+  if (score >= 75) return 'var(--status-critical)';
+  if (score >= 40) return 'var(--status-warning)';
   return 'var(--status-healthy)';
 };
 
@@ -38,7 +38,7 @@ const LogsWidget = ({ history, loading }) => {
       <div className="card-title">Recent Scans</div>
       {history.map((scan) => {
         const score = scan.result?.disk_health_score ?? 0;
-        const pct = Math.round(score * 100);
+        const pct = Math.round(score);
         const verdict = scan.result?.verdict || '—';
         return (
           <div key={scan.id} className="scan-item">

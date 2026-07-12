@@ -3,13 +3,13 @@ import Skeleton from './Skeleton';
 
 const verdictToPill = {
   HEALTHY: { cls: 'healthy', label: 'HEALTHY', Icon: ShieldCheck },
-  AT_RISK: { cls: 'warning', label: 'AT RISK', Icon: AlertCircle },
-  FAILURE: { cls: 'critical', label: 'FAILURE', Icon: XCircle },
+  WARNING: { cls: 'warning', label: 'WARNING', Icon: AlertCircle },
+  CRITICAL: { cls: 'critical', label: 'CRITICAL', Icon: XCircle },
 };
 
 const scoreToStatusColor = (score) => {
-  if (score >= 0.70) return 'var(--status-critical)';
-  if (score >= 0.40) return 'var(--status-warning)';
+  if (score >= 75) return 'var(--status-critical)';
+  if (score >= 40) return 'var(--status-warning)';
   return 'var(--status-healthy)';
 };
 
@@ -52,7 +52,7 @@ const StatusWidget = ({ result, loading, driveInfo }) => {
   }
 
   const score = result.disk_health_score;
-  const pct = Math.round(score * 100);
+  const pct = Math.round(score);
   const verdict = result.verdict || 'HEALTHY';
   const pill = verdictToPill[verdict] || verdictToPill.HEALTHY;
   const { Icon } = pill;
