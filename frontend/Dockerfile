@@ -6,6 +6,8 @@ RUN npm install
 
 COPY frontend/ .
 COPY DiskJson/ ./DiskJson/
+COPY Graphs/ ./Graphs/
+COPY srcML/ ./srcML/
 RUN npm run build
 
 FROM nginx:stable-alpine

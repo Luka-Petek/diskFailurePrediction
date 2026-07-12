@@ -29,8 +29,11 @@ const BarChartWidget = ({ smartData, loading }) => {
   // Show all attributes, sorted by id
   const sorted = [...attrs].sort((a, b) => a.id - b.id);
 
-  // Find max raw value for bar scaling (use normalized value 0-100 if available, else raw)
-  const maxValue = Math.max(...sorted.map((a) => a.value || 0), 100);
+  // Use log10 scale for bar widths — raw values span many orders of magnitude
+  const maxLog = Math.max(...sorted.map((a) => {
+    const v = a.raw?.value ?? 0;
+    return v > 0 ? Math.log10(v + 1) : 0;
+  }), 1);
 
   return (
     <div className="card widget-bar">
@@ -44,8 +47,9 @@ const BarChartWidget = ({ smartData, loading }) => {
         {sorted.map((attr) => {
           const isFlagged = FLAGGED_IDS.includes(attr.id);
           const rawValue = attr.raw?.value ?? 0;
-          const normalized = attr.value ?? 0;
-          const barPct = Math.min((normalized / maxValue) * 100, 100);
+          const barPct = rawValue > 0
+            ? Math.min((Math.log10(rawValue + 1) / maxLog) * 100, 100)
+            : 0;
           const flagClass = isFlagged
             ? rawValue > 0
               ? 'flagged-critical'

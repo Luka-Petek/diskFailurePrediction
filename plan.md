@@ -391,14 +391,7 @@ nothing is added or removed from the grid, only what renders inside each slot ch
   slots (Hero, Model Consensus + drive info, SMART attributes panel, Recent Scans); fix
   `Navbar` bug and add its Upload Scan control; stub Trend/SHAP widgets with "Coming soon"
   instead of fake data. No grid/composition changes.
-- **Phase 2 (later):**
-  - Performance graphs — start cheap by embedding the already-generated
-    `Graphs/*.png` (ROC curves, autoencoder architecture, UMAP+HDBSCAN plot), then
-    consider live-computed charts via `recharts`.
-  - Explainability — a small new backend endpoint exposing per-feature contributions
-    (raw material already exists: `srcML/sklearn/feature_importance.csv`,
-    `srcML/sklearn/X_test_shap.csv`), rendered as a SHAP-style bar chart in place of
-    the current `ShapWidget` stub.
+- **Phase 2 — Full ML Pipeline Visibility:** see §10 below for the full spec.
 - **Phase 3 (optional):** persistent scan history. Today the backend is fully
   stateless — every `/api/predict/*` call is a one-shot inference with no storage.
   "Recent scans" would need either a lightweight DB/JSON log on the backend or an
@@ -432,3 +425,363 @@ nothing is added or removed from the grid, only what renders inside each slot ch
 - [ ] Every numeric value uses `font-variant-numeric: tabular-nums`.
 - [ ] Status colors (`--status-healthy|warning|critical`) are used **only** for
       health/verdict semantics — not reused decoratively anywhere else on the page.
+
+---
+
+## 10. Phase 2 — Full ML Pipeline Visibility
+
+**Goal:** When a user uploads a `smartctl -j` JSON scan, they should see the complete
+breakdown of how all 4 ML models contribute to the final HIR verdict — not just a
+single number. Every model's individual score, intermediate data (reconstruction error,
+bottleneck features, cluster assignment), reliability metrics, and feature-level
+explanations should be visible. The user should understand *why* the system says what
+it says.
+
+### 10.1 The 4 Models Forming the HIR
+
+The system fuses 4 independent ML models into a single Health Index Rating (HIR):
+
+| Impl | Model | Type | Weight (backend) | Key metric | What it does |
+|---|---|---|---|---|---|
+| **Impl 0** | Sklearn Random Forest | Supervised | 0.20 | `failure_probability` | 19 SMART features + manufacturer → fail/healthy classification + HIR risk score |
+| **Impl 2** | TF Bottleneck Classifier | Supervised (2-stage) | 0.50 | `failure_probability` | AE encoder (19→8 dim) → supervised classifier on bottleneck features. **Best performer: ROC-AUC 0.929, recall 89.1%** |
+| **Impl 1** | TF Anomaly Autoencoder | Unsupervised | 0.10 | `anomaly_score` | Trained on 292k healthy rows only. Reconstruction error → normalized 0-1 anomaly score. Threshold at p99. |
+| **Impl C** | UMAP + HDBSCAN | Unsupervised | 0.20 | `cluster_score` | Clusters on 8-dim bottleneck → assigns disk to a cluster with empirical failure rate. 18 clusters, 13.7% outliers. |
+
+**Data flow for a single prediction:**
+```
+smartctl -j JSON
+    │
+    ├──→ pretvori_json_v_surovi_df()  →  raw DataFrame (19 SMART raw values + model + capacity)
+    │                                    │
+    │                                    ├──→ procesiraj_podatke()  →  feature engineering
+    │                                    │    (any_critical_error, total_error_count, error_per_gb, jeSSD, ...)
+    │                                    │
+    │                                    ├──→ prepare_features()  →  19-column normalized feature vector
+    │                                    │    │
+    │                                    │    ├──→ [Impl 1] AE scaler → autoencoder → reconstruction error → anomaly_score
+    │                                    │    │
+    │                                    │    ├──→ [Impl 2] clf scaler → encoder → 8-dim bottleneck → classifier → failure_probability
+    │                                    │    │                                                         │
+    │                                    │    │                                                         └──→ [Impl C] HDBSCAN approximate_predict → cluster_id → cluster_score
+    │                                    │    │
+    │                                    │    └──→ [Impl 0] sklearn pipeline.analyze() → failure_probability + hir_risk_score
+    │                                    │
+    └──→ weighted average of 4 scores → disk_health_score → verdict (HEALTHY/AT_RISK/FAILURE)
+```
+
+### 10.2 What the Backend Currently Returns vs What It Computes
+
+**Already returned by `/api/predict/combined`:**
+```json
+{
+  "disk_health_score": 0.5,
+  "verdict": "AT_RISK",
+  "confidence": "medium",
+  "model_scores": {
+    "tf_classification": { "failure_probability": 0.45, "verdict": "AT_RISK", "weight": 0.5 },
+    "tf_anomaly": { "anomaly_score": 0.15, "verdict": "HEALTHY", "weight": 0.1 },
+    "clustering": { "cluster_score": 0.6, "cluster_label": "HIGH_RISK", "weight": 0.2 },
+    "sklearn": { "failure_probability": 0.55, "hir_risk_score": 0.6, "verdict": "AT_RISK", "weight": 0.2 }
+  },
+  "consensus": { "models_predicting_failure": 3, "models_total": 4 }
+}
+```
+
+**Computed but NOT returned (lost data):**
+
+| Model | Field | Where in code | Why it matters |
+|---|---|---|---|
+| Anomaly AE | `reconstruction_error` | `_infer_anomaly()` L112 | Shows how far the disk deviates from "normal" — the raw signal before normalization |
+| Anomaly AE | `threshold` | `_infer_anomaly()` L114 | The p99 cutoff — user can see if the disk is just barely over or way over |
+| Bottleneck Clf | `bottleneck_features` (8-dim array) | `_infer_classification()` L159 | The compressed representation of this disk — shows where it sits in the model's learned space |
+| Bottleneck Clf | `threshold`, `high_risk_threshold` | `_infer_classification()` L140-141 | The decision boundaries — user sees how close the disk is to the AT_RISK / FAILURE line |
+| Clustering | `cluster_id` | `_infer_clustering()` L167 | Which of the 18 clusters this disk was assigned to |
+| Clustering | `cluster_strength` | `_infer_clustering()` L168 | HDBSCAN confidence in the cluster assignment |
+| Clustering | `cluster_failure_rate` | `_infer_clustering()` L175 | The empirical failure rate of this cluster (from training data) |
+| Clustering | `is_outlier` | `_infer_clustering()` L172 | Whether HDBSCAN couldn't assign the disk to any cluster (66.9% failure rate for outliers!) |
+| Sklearn RF | `models_output.classification_fail` | `disk_pipeline.py` L156 | The raw RF vote (fail/healthy) before probability |
+
+### 10.3 Backend Enhancement Plan
+
+**Goal:** Enrich the `/api/predict/combined` response to include all intermediate data.
+
+Changes to `backend/main.py`:
+
+1. **`_infer_anomaly()`** — already returns `reconstruction_error` and `threshold` in its
+   dict, but `_infer_combined()` only extracts `anomaly_score` and `verdict`. Pass through
+   the full dict.
+
+2. **`_infer_classification()`** — already returns `bottleneck_features`, `threshold`, and
+   `high_risk_threshold`. Pass these through to `model_scores.tf_classification`.
+
+3. **`_infer_clustering()`** — already returns `cluster_id`, `is_outlier`, `cluster_strength`,
+   `cluster_failure_rate`. Pass these through to `model_scores.clustering`.
+
+4. **`_infer_sklearn()`** — already returns `models_output.classification_fail`. Pass through.
+
+5. **Add a new `GET /api/models/metadata` endpoint** that returns all static model
+   metadata (from the `*_metadata.json` files + feature importance) as a single JSON
+   payload. This lets the frontend fetch it once on page load without bundling large
+   JSON files at build time. Alternatively, keep using `import.meta.glob` for the
+   metadata and skip this endpoint — **decision: use `import.meta.glob` for static
+   metadata (simpler, no backend change needed), but enhance the combined response
+   with the missing dynamic fields.**
+
+**Enhanced response shape:**
+```json
+{
+  "disk_health_score": 0.5,
+  "verdict": "AT_RISK",
+  "confidence": "medium",
+  "model_scores": {
+    "tf_classification": {
+      "failure_probability": 0.45,
+      "verdict": "AT_RISK",
+      "weight": 0.5,
+      "threshold": 0.2825,
+      "high_risk_threshold": 0.65,
+      "bottleneck_features": [0.12, -0.34, 0.56, 0.78, -0.23, 0.45, 0.67, -0.89]
+    },
+    "tf_anomaly": {
+      "anomaly_score": 0.15,
+      "verdict": "HEALTHY",
+      "weight": 0.1,
+      "reconstruction_error": 0.00321,
+      "threshold": 0.00408,
+      "is_anomaly": false
+    },
+    "clustering": {
+      "cluster_score": 0.6,
+      "cluster_label": "HIGH_RISK",
+      "weight": 0.2,
+      "cluster_id": 3,
+      "is_outlier": false,
+      "cluster_strength": 0.85,
+      "cluster_failure_rate": 0.994,
+      "cluster_total_samples": 167,
+      "cluster_failure_samples": 166
+    },
+    "sklearn": {
+      "failure_probability": 0.55,
+      "hir_risk_score": 0.6,
+      "verdict": "AT_RISK",
+      "weight": 0.2,
+      "classification_fail": true
+    }
+  },
+  "consensus": {
+    "models_predicting_failure": 3,
+    "models_total": 4
+  }
+}
+```
+
+### 10.4 Static Model Metadata (bundled at build time)
+
+All metadata is already in the repo. The frontend will bundle it via `import.meta.glob`:
+
+| Source file | Data | Frontend use |
+|---|---|---|
+| `srcML/tensorflow_classification/bottleneck_metadata.json` | ROC-AUC 0.929, PR-AUC 0.934, failure recall 89.1%, F1 88.7%, bottleneck dim 8, threshold 0.283, training rows 6179/1324/1325, epochs 68/100 | Model Performance Panel — shows classifier reliability |
+| `srcML/tensorflow_anomaly/tf_metadata.json` | ROC-AUC 0.901, PR-AUC 0.600, failure recall 44.7%, F1 55.5%, threshold 0.00408, p999 0.0322, training 292k healthy rows, epochs 37/60 | Model Performance Panel — shows AE reliability |
+| `srcML/tensorflow_clustering/hdbscan_metadata.json` | 18 clusters, 1207 outliers (13.67%), per-cluster risk_label/risk_score/failure_rate/total_samples/failure_samples, UMAP params, HDBSCAN params | Model Performance Panel + Cluster Detail view |
+| `srcML/tensorflow_classification/clf_ae_metadata.json` | Stage 1 AE metadata: ROC-AUC 0.839, threshold 0.0177, training 292k healthy, epochs 60/60 | Model Performance Panel — shows the encoder's standalone quality |
+| `DiskJson/bottleneck_sweep_results.json` | 6 bottleneck dims tested (4,6,7,8,10,12), per-dim ROC-AUC/PR-AUC/recall/precision/F1, recommended dim=8 | Optional: show why dim=8 was chosen |
+| `srcML/sklearn/feature_importance.csv` (gitignored — hardcode in JS) | Top features: error_per_gb (16.8%), any_critical_error (14.8%), total_error_count (10.3%), smart_9 (7.3%), smart_197 (7.1%), smart_5 (5.6%) | Explainability Panel — which SMART attributes drive predictions |
+| `Graphs/*.png` (9 images) | Training curves, ROC, UMAP+HDBSCAN, confusion matrices, HIR formula | Graph Gallery |
+
+**Note on `feature_importance.csv`:** Both `.gitignore` and `.dockerignore` exclude
+`*.csv`. The file has only 20 rows — hardcode the data as a JS constant in
+`src/api/modelMetadata.js` to avoid build issues.
+
+### 10.5 Frontend Component Specs
+
+#### 10.5.1 Explainability Panel (replaces `.widget-shap` stub, `span 4, row span 2`)
+
+**Goal:** Show which SMART features drive the prediction + this drive's actual values.
+
+**Sections (top to bottom in the tall card):**
+
+1. **Feature Importance bars** (always visible, static data):
+   - Top 10 features, horizontal bars sorted by importance descending
+   - Bar color: `--status-critical` for SMART 5/187/188/197/198, `--status-warning` for
+     SMART 9 (age), `--accent-blue` for others
+   - Each bar: feature label (left), importance % (right, `tabular-nums`)
+
+2. **This Drive's Values** (shown only after a scan):
+   - For each top-10 feature, show this drive's actual raw value
+   - Map feature names to SMART IDs: `smart_5_raw` → attr id=5, etc.
+   - Non-zero critical features (SMART 5/187/197/198) → row highlighted with
+     `--status-critical-bg` + warning icon
+   - Engineered features (`error_per_gb`, `any_critical_error`, `total_error_count`)
+     computed client-side from the SMART attributes
+
+3. **RF Verdict detail** (shown only after a scan):
+   - `classification_fail: true/false` — the raw RF vote
+   - `hir_risk_score` — the RF's own HIR score (0-100, clamped 5-97)
+
+**Data flow:** Static from `modelMetadata.js`, dynamic from `result.model_scores.sklearn`
++ client-side parsed `smartctl JSON`.
+
+#### 10.5.2 Model Performance Panel (replaces `.widget-trend` stub, `span 8`)
+
+**Goal:** 4-column model comparison showing reliability metrics + this scan's results.
+
+**Layout: 4 mini-cards side by side, each with:**
+
+**Card header:** Model name + role badge + weight badge
+
+**Card body — static reliability metrics (from metadata):**
+- ROC-AUC (with progress bar 0-1)
+- PR-AUC
+- Failure Recall (with progress bar)
+- Failure Precision
+- Failure F1
+- Training info (rows, epochs converged/requested)
+
+**Card body — this scan's results (from API response, highlighted section):**
+- This scan's score (large, colored by status)
+- This scan's verdict (pill badge)
+- Model-specific extra data:
+  - **RF:** HIR risk score, classification_fail vote
+  - **Bottleneck Clf:** failure probability vs threshold (visual gauge showing how close
+    to the AT_RISK / FAILURE boundary), 8-dim bottleneck features as a mini sparkline/bar
+  - **Anomaly AE:** reconstruction error vs threshold (visual gauge showing if over/under
+    the p99 cutoff), is_anomaly flag
+  - **HDBSCAN:** cluster_id, cluster_label, cluster_failure_rate, is_outlier flag,
+    cluster_strength (confidence in assignment)
+
+**Card footer:** Tooltip icon with plain-language explanation of the model's role
+
+**Data flow:** Static from `modelMetadata.js`, dynamic from enhanced
+`/api/predict/combined` response.
+
+#### 10.5.3 Model Consensus Enhancement (existing `.widget-health`)
+
+**Goal:** Add reliability indicators + richer per-model data.
+
+**Changes to `HealthWidget.jsx`:**
+- Below each mini-donut, add a tiny reliability bar (3px, `--radius-pill`) colored by ROC-AUC:
+  - ≥0.90 → `--status-healthy`, ≥0.80 → `--status-warning`, <0.80 → `--status-critical`,
+    N/A → `--status-neutral`
+- Below the donuts, add a compact "consensus breakdown" line:
+  `3/4 models flag failure · weights: Clf 0.50 · HDBSCAN 0.20 · RF 0.20 · AE 0.10`
+
+**Data flow:** Static from `modelMetadata.js`, dynamic from existing `result` props.
+
+#### 10.5.4 Graph Gallery (optional, below main grid or modal)
+
+**Goal:** Show all 9 pre-generated training graphs.
+
+- Triggered from a "View Training Graphs" button in the Model Performance Panel
+- Modal overlay or collapsible section below the main grid
+- Responsive grid of thumbnails with lightbox/zoom on click
+- Graphs bundled via `import.meta.glob('../../Graphs/*.png', { query: '?url', eager: true })`
+
+**Graph label mapping:**
+
+| Filename | Label |
+|---|---|
+| `nn_classification.png` | Bottleneck Classifier — Training Curves |
+| `nn_autoencoder.png` | Autoencoder — Training & Reconstruction Error |
+| `classification.png` | Random Forest — Classification Results |
+| `regression.png` | Random Forest — HIR Regression Results |
+| `clustering.png` | Clustering — UMAP + HDBSCAN Visualization |
+| `umap_hdbscan.png` | UMAP Projection with HDBSCAN Clusters |
+| `bottleneck_kmeans_clusters.png` | Bottleneck Space — K-means Clusters |
+| `kmeans_elbow.png` | K-means Elbow Plot |
+| `hir_formula.png` | HIR Formula Diagram |
+
+### 10.6 Implementation Steps
+
+**Step 1 — Backend: Enhance `/api/predict/combined` response**
+- In `backend/main.py`, pass through the missing fields from each `_infer_*()` function
+  into `model_scores` (see §10.3 for the exact enhanced shape)
+- No new endpoints needed — just enrich the existing response
+- Verify with `curl -X POST http://localhost:8000/api/predict/combined -F "file=@DiskJson/used_with_errors.json"`
+
+**Step 2 — Frontend: Create `src/api/modelMetadata.js`**
+- Hardcode `FEATURE_IMPORTANCE` array (20 rows, since CSV is gitignored)
+- Use `import.meta.glob` for the 4 metadata JSON files + `bottleneck_sweep_results.json`
+- Export a structured `MODEL_METADATA` object with all static metrics
+- Export `featureLabel()` and `featureToSmartId()` helper functions
+- Export `GRAPH_LABELS` mapping for the graph gallery
+
+**Step 3 — Frontend: Rework `ShapWidget.jsx` → Explainability Panel**
+- Keep `.widget-shap` class for grid compatibility
+- Feature importance bars (static) + this drive's values (dynamic)
+- Empty state: "Upload a scan to see feature-level contributions"
+- Loading state: skeleton bars
+
+**Step 4 — Frontend: Rework `TrendWidget.jsx` → Model Performance Panel**
+- Keep `.widget-trend` class for grid compatibility
+- 4-column mini-card grid with static metrics + dynamic per-scan data
+- Visual gauges for threshold comparisons (AE reconstruction error, Clf failure prob)
+- Bottleneck features sparkline
+- Cluster detail with outlier warning
+- "View Training Graphs" button
+
+**Step 5 — Frontend: Enhance `HealthWidget.jsx`**
+- Add reliability bars under each mini-donut
+- Add consensus breakdown line
+
+**Step 6 — Frontend: Create `GraphGallery.jsx`**
+- Modal or collapsible section
+- Bundle `Graphs/*.png` via `import.meta.glob`
+- Lightbox/zoom on click
+
+**Step 7 — Frontend: Wire `Dashboard.jsx`**
+- Pass `result` (enhanced) + `smartData` to the new Explainability Panel
+- Pass `result` to the Model Performance Panel
+- Pass `result` + static metadata to enhanced HealthWidget
+- Add GraphGallery trigger
+
+**Step 8 — CSS: Add all new styles to `index.css`**
+- Feature importance bars, model comparison grid, reliability indicators
+- Threshold gauges, bottleneck sparkline, cluster detail
+- Graph gallery modal/thumbnails
+- All using §3.5 design tokens
+
+**Step 9 — Docker: Update build context**
+- Update `.dockerignore` to allow `Graphs/` (currently excluded)
+- Update `frontend/Dockerfile` to `COPY Graphs/ ./Graphs/` before build
+- Verify `srcML/tensorflow_*/*.json` files are accessible to `import.meta.glob`
+  (they're currently in the build context since `.dockerignore` only excludes `*.pkl`
+  and `*.keras` globally with selective re-includes — the JSON files should pass through)
+
+**Step 10 — Verify end-to-end**
+- `docker compose up --build`
+- Upload each sample JSON from `DiskJson/`
+- Verify all 4 model scores + intermediate data appear
+- Verify feature importance + drive values appear
+- Verify graph gallery works
+- Verify `tabular-nums` on all numeric values
+
+### 10.7 Libraries
+
+- **No new npm dependencies.** Feature importance bars, threshold gauges, and
+  bottleneck sparklines all use plain CSS divs (same pattern as the Phase 1 SMART
+  attributes panel). `recharts` can be added later if interactive charts are needed.
+
+### 10.8 Definition of Done (Phase 2)
+
+- [ ] Backend `/api/predict/combined` returns all intermediate data: `reconstruction_error`,
+      `threshold`, `bottleneck_features`, `cluster_id`, `cluster_strength`,
+      `cluster_failure_rate`, `is_outlier`, `classification_fail`.
+- [ ] `ShapWidget` slot (`.widget-shap`) shows feature importance bars from RF, sorted
+      descending, with critical SMART attributes highlighted.
+- [ ] After a scan, the explainability panel shows this drive's actual values for each
+      important feature, with non-zero critical features flagged.
+- [ ] `TrendWidget` slot (`.widget-trend`) shows a 4-column model comparison with
+      ROC-AUC, PR-AUC, recall, precision, F1, training info, plus this scan's per-model
+      scores/verdicts/intermediate data.
+- [ ] Model Performance Panel shows model-specific extras: AE reconstruction error vs
+      threshold gauge, Clf failure prob vs threshold gauge, bottleneck features sparkline,
+      HDBSCAN cluster detail with outlier warning.
+- [ ] Model Consensus (`.widget-health`) shows reliability bars under each mini-donut
+      + consensus breakdown line.
+- [ ] (Optional) Graph gallery shows all 9 `Graphs/*.png` with human-readable labels.
+- [ ] All new CSS uses §3.5 design tokens.
+- [ ] Every numeric value uses `font-variant-numeric: tabular-nums`.
+- [ ] `docker compose up` works end-to-end with all new static assets + enriched API.

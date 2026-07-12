@@ -1,4 +1,4 @@
-# Hard Drive Failure Prediction — Multi-Model Health Index Rating
+# DiskGuard — Hard Drive Failure Prediction &amp; Health Index Rating
 
 A machine learning system that predicts hard drive failures from real-time **SMART** sensor data. Four independent models — spanning supervised deep learning, unsupervised anomaly detection, and density-based clustering — are fused into a single interpretable score: the **Health Index Rating (HIR)**.
 

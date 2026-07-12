@@ -1,5 +1,6 @@
 import { HardDrive } from 'lucide-react';
 import Skeleton from './Skeleton';
+import { MODEL_METADATA, reliabilityColor } from '../api/modelMetadata';
 
 const MODEL_META = {
   tf_classification: { label: 'Bottleneck Clf', scoreKey: 'failure_probability' },
@@ -95,9 +96,22 @@ const HealthWidget = ({ result, loading, driveInfo }) => {
               </div>
               <span className="subsystem-label">{meta.label}</span>
               <span className="weight">w{data.weight?.toFixed(2) ?? '—'}</span>
+              <div
+                className="reliability-bar"
+                style={{ background: reliabilityColor(MODEL_METADATA[key]?.rocAuc) }}
+                title={MODEL_METADATA[key]?.rocAuc ? `ROC-AUC: ${MODEL_METADATA[key].rocAuc.toFixed(3)}` : 'No ROC-AUC'}
+              />
             </div>
           );
         })}
+      </div>
+      <div className="consensus-breakdown">
+        {consensus.models_predicting_failure}/{consensus.models_total} models flag failure
+        {' · '}
+        weights: Clf {MODEL_METADATA.tf_classification.weight.toFixed(2)}
+        {' · '}HDBSCAN {MODEL_METADATA.clustering.weight.toFixed(2)}
+        {' · '}RF {MODEL_METADATA.sklearn.weight.toFixed(2)}
+        {' · '}AE {MODEL_METADATA.tf_anomaly.weight.toFixed(2)}
       </div>
     </div>
   );

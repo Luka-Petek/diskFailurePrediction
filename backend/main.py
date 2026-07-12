@@ -80,7 +80,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="TrueNAS Smart Scan Analytics API", lifespan=lifespan)
+app = FastAPI(title="DiskGuard API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -241,6 +241,9 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
             "failure_probability": clf_result["failure_probability"],
             "verdict": clf_result["verdict"],
             "weight": W_clf,
+            "threshold": clf_result["threshold"],
+            "high_risk_threshold": clf_result["high_risk_threshold"],
+            "bottleneck_features": clf_result["bottleneck_features"],
         }
     except HTTPException:
         clf_result = None
@@ -259,6 +262,9 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
             "anomaly_score": ae_result["anomaly_score"],
             "verdict": ae_result["verdict"],
             "weight": W_anom,
+            "reconstruction_error": ae_result["reconstruction_error"],
+            "threshold": ae_result["threshold"],
+            "is_anomaly": ae_result["anomaly"],
         }
     except HTTPException:
         pass
@@ -277,6 +283,10 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
                 "cluster_score": clust_result["cluster_score"],
                 "cluster_label": clust_result["cluster_label"],
                 "weight": W_clust,
+                "cluster_id": clust_result["cluster_id"],
+                "is_outlier": clust_result["is_outlier"],
+                "cluster_strength": clust_result["cluster_strength"],
+                "cluster_failure_rate": clust_result["cluster_failure_rate"],
             }
         except HTTPException:
             pass
@@ -295,6 +305,7 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
             "hir_risk_score": skl_result.get("hir_risk_score"),
             "verdict": skl_result.get("verdict"),
             "weight": W_skl,
+            "classification_fail": skl_result.get("models_output", {}).get("classification_fail", False),
         }
     except HTTPException:
         pass

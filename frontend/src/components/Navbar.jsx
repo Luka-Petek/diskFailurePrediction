@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { Upload, FileUp } from 'lucide-react';
 import { loadSampleAsFile, SAMPLE_FILES } from '../api/client';
+import logoWordmark from '../assets/logo-wordmark.svg';
 
-const Navbar = ({ onAnalyze, loading }) => {
+const Navbar = ({ onAnalyze, loading, activeView, onViewChange }) => {
   const [open, setOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedSample, setSelectedSample] = useState('');
@@ -51,10 +52,16 @@ const Navbar = ({ onAnalyze, loading }) => {
 
   return (
     <nav className="navbar" style={{ position: 'relative' }}>
-      <div className="logo">DISK_ANALYTICS</div>
+      <img src={logoWordmark} alt="DiskGuard" className="logo" style={{ height: 26, display: 'block' }} />
       <div className="nav-links">
-        <span className="active">Dashboard</span>
-        <span>Analytics</span>
+        <span
+          className={activeView === 'dashboard' ? 'active' : ''}
+          onClick={() => onViewChange?.('dashboard')}
+        >Dashboard</span>
+        <span
+          className={activeView === 'models' ? 'active' : ''}
+          onClick={() => onViewChange?.('models')}
+        >Model Performance</span>
         <span>Settings</span>
       </div>
       <div style={{ position: 'relative' }} ref={popoverRef}>

@@ -13,6 +13,7 @@ const Dashboard = () => {
   const { loading, error, result, history, analyze, dismissError } = useDiskAnalysis();
   const [smartData, setSmartData] = useState(null);
   const [driveInfo, setDriveInfo] = useState(null);
+  const [activeView, setActiveView] = useState('dashboard');
 
   const handleAnalyze = useCallback(async (file) => {
     // Parse the JSON file client-side for SMART attributes and drive info
@@ -36,7 +37,7 @@ const Dashboard = () => {
   return (
     <div className="app-body">
       <div className="dashboard-container">
-        <Navbar onAnalyze={handleAnalyze} loading={loading} />
+        <Navbar onAnalyze={handleAnalyze} loading={loading} activeView={activeView} onViewChange={setActiveView} />
         {error && (
           <div className="error-banner">
             <AlertCircle size={18} />
@@ -46,12 +47,17 @@ const Dashboard = () => {
             </button>
           </div>
         )}
-        <StatusWidget result={result} loading={loading} driveInfo={driveInfo} />
-        <HealthWidget result={result} loading={loading} driveInfo={driveInfo} />
-        <ShapWidget />
-        <TrendWidget />
-        <BarChartWidget smartData={smartData} loading={loading} />
-        <LogsWidget history={history} loading={loading} />
+        {activeView === 'dashboard' ? (
+          <>
+            <StatusWidget result={result} loading={loading} driveInfo={driveInfo} />
+            <HealthWidget result={result} loading={loading} driveInfo={driveInfo} />
+            <ShapWidget result={result} smartData={smartData} loading={loading} />
+            <BarChartWidget smartData={smartData} loading={loading} />
+            <LogsWidget history={history} loading={loading} />
+          </>
+        ) : (
+          <TrendWidget result={result} loading={loading} />
+        )}
       </div>
     </div>
   );

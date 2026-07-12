@@ -1,7 +1,6 @@
 # ── Veliki podatkovni direktoriji ─────────────────────────────────────────────
 DiskData/
 csv/
-Graphs/
 sample.csv
 **/*.csv
 **/*.xlsx
