@@ -14,6 +14,11 @@ SRCML_PATH = "/app/srcML"
 if SRCML_PATH not in sys.path:
     sys.path.insert(0, SRCML_PATH)
 
+#pkl datoteke so bile shranjene ko je bil disk_pipeline.py v rootu — dodamo srcML/sklearn v path
+SKLEARN_PATH = "/app/srcML/sklearn"
+if SKLEARN_PATH not in sys.path:
+    sys.path.insert(0, SKLEARN_PATH)
+
 APP_ROOT = Path("/app")
 AE_DIR = APP_ROOT / "srcML" / "tensorflow_anomaly"
 CLF_DIR = APP_ROOT / "srcML" / "tensorflow_classification"
