@@ -34,6 +34,8 @@ Built on the [Backblaze 2025](https://www.backblaze.com/cloud-storage/resources/
 - 🔒 **Fully offline** — no cloud, no telemetry, no data leaves the machine
 - 🌐 **Full-stack** — FastAPI backend + React dashboard + TensorBoard, all in one `docker compose up`
 
+*The model evaluates the current health condition of the drive and outputs a current risk percentage — it assesses present state, not future failure prediction.*
+
 ---
 
 ## Model Performance Summary
