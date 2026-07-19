@@ -26,13 +26,14 @@ A machine learning system that predicts hard drive failures from real-time **SMA
 
 Built on the [Backblaze 2025](https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data) open dataset: **32M+ records**, **365 daily CSV files**, **4,414 confirmed failure events**.
 
+> **For a detailed ML engineering breakdown** — preprocessing logic, model architectures, training configs, and HIR fusion math — see [`srcML/README.md`](srcML/README.md).
+
 - **89.1% failure recall** — catches 9 out of 10 failing disks before they die
 - **4 ML techniques, one final score** — RF, deep AE, bottleneck classifier and HDBSCAN each vote independently; results fused into a single HIR verdict
 - **32M+ real-world sensor records** — trained on a full year of Backblaze production fleet data, not synthetic benchmarks
-- **Lightweight inference** — runs on CPU, no GPU required; suitable for embedded systems, NAS devices, and edge deployments
+- **Lightweight inference** — suitable for embedded systems, NAS devices, and edge deployments
 - **Instant real-time prediction** — plug in any `smartctl -j` JSON output, get a risk score and verdict in seconds
 - **Fully offline** — no cloud, no telemetry, no data leaves the machine
-- **Full-stack** — FastAPI backend + React dashboard + TensorBoard, all in one `docker compose up`
 
 *The model evaluates the current health condition of the drive and outputs a current risk percentage — it assesses present state, not future failure prediction.*
 
@@ -185,6 +186,8 @@ All four models are fused into a single score using a **weighted root-mean-squar
 | R | TF Bottleneck Classifier probability | **0.40** |
 | A | Anomaly AE normalized score | 0.20 |
 | C | HDBSCAN cluster failure rate | 0.10 |
+
+### Dashboard
 
 Score clamped to **[3, 97]** · Verdicts: **HEALTHY** < 40 · **WARNING** 40–75 · **CRITICAL** > 75
 
