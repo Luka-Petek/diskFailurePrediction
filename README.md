@@ -188,6 +188,8 @@ All four models are fused into a single score using a **weighted root-mean-squar
 
 Score clamped to **[3, 97]** · Verdicts: **HEALTHY** < 40 · **WARNING** 40–75 · **CRITICAL** > 75
 
+![Dashboard](Graphs/dashbaord.png)
+
 ### Run on any disk:
 ```bash
 # Export SMART data
