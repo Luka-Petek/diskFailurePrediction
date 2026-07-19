@@ -17,6 +17,7 @@ if SRCML_PATH not in sys.path:
 APP_ROOT = Path("/app")
 AE_DIR = APP_ROOT / "srcML" / "tensorflow_anomaly"
 CLF_DIR = APP_ROOT / "srcML" / "tensorflow_classification"
+CLUSTER_DIR = APP_ROOT / "srcML" / "tensorflow_clustering"
 SKLEARN_PIPELINE_PATH = APP_ROOT / "srcML" / "sklearn" / "disk_health_pipeline.pkl"
 
 from srcML.sklearn.disk_pipeline import pretvori_json_v_surovi_df
@@ -61,8 +62,8 @@ async def lifespan(app: FastAPI):
 
     #--- HDBSCAN clustering na bottleneck ---
     try:
-        app.state.hdbscan = joblib.load(CLF_DIR / "clf_hdbscan.pkl")
-        with open(CLF_DIR / "hdbscan_metadata.json", encoding="utf-8") as f:
+        app.state.hdbscan = joblib.load(CLUSTER_DIR / "clf_hdbscan.pkl")
+        with open(CLUSTER_DIR / "hdbscan_metadata.json", encoding="utf-8") as f:
             app.state.hdbscan_metadata = json.load(f)
         print("HDBSCAN model naložen.")
     except Exception as e:
