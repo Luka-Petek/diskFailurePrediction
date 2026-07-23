@@ -41,12 +41,12 @@ Built on the [Backblaze 2025](https://www.backblaze.com/cloud-storage/resources/
 
 ## Model Performance Summary
 
-| Implementation | Method | ROC-AUC | Failure Recall | HIR Weight |
+| Model | Method | ROC-AUC | Failure Recall | HIR Weight |
 |---|---|---|---|---|
-| **Impl 0** — Sklearn RF | Random Forest (19 SMART features) | — | 86.0 % | 0.30 |
-| **Impl 1** — Anomaly AE | Unsupervised Autoencoder (12-dim bottleneck) | 0.901 | 44.7 % | 0.20 |
-| **Impl 2** — Bottleneck Clf | AE encoder → 8-dim → Supervised Classifier | **0.929** | **89.1 %** | **0.40** |
-| **Impl C** — HDBSCAN | UMAP + density clustering (18 clusters) | — | — | 0.10 |
+| **Model 0** — Sklearn RF | Random Forest (19 SMART features) | — | 86.0 % | 0.30 |
+| **Model 1** — Anomaly AE | Unsupervised Autoencoder (12-dim bottleneck) | 0.901 | 44.7 % | 0.20 |
+| **Model 2** — Bottleneck Clf | AE encoder → 8-dim → Supervised Classifier | **0.929** | **89.1 %** | **0.40** |
+| **Model 3** — HDBSCAN | UMAP + density clustering (18 clusters) | — | — | 0.10 |
 
 > Impl 2 carries the highest weight — it achieves the best balance of precision and recall while being trained on a perfectly balanced dataset (4,414 failures : 4,414 healthy).
 
