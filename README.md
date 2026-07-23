@@ -97,7 +97,15 @@ diskFailurePrediction/
 
 ---
 
-## Implementation 0 — Random Forest (Sklearn)
+### Dashboard
+
+Score clamped to **[3, 97]** · Verdicts: **HEALTHY** < 40 · **WARNING** 40–75 · **CRITICAL** > 75
+
+![Dashboard](Graphs/dashbaord.png)
+
+---
+
+## Model 0 — Random Forest (Sklearn)
 
 A classical supervised pipeline trained in [`smart_scan_model.ipynb`](srcML/sklearn/smart_scan_model.ipynb) on 19 SMART attributes plus manufacturer encoding. Serves as a strong and interpretable baseline.
 
@@ -111,10 +119,9 @@ A classical supervised pipeline trained in [`smart_scan_model.ipynb`](srcML/skle
 
 ![classification.png](Graphs/classification.png)
 
-
 ---
 
-## Implementation 1 — Autoencoder Anomaly Detection (Unsupervised)
+## Model 1 — Autoencoder Anomaly Detection (Unsupervised)
 
 The autoencoder is trained **exclusively on 292,000 healthy disk rows**. It learns to reconstruct normal SMART patterns. When a degraded disk is passed through the network, reconstruction error spikes above the learned 99th-percentile threshold — flagging it as an anomaly without ever having seen a failure during training.
 
@@ -134,7 +141,7 @@ python srcML/tensorflow_anomaly/predict_autoencoder.py --input DiskJson/disk_dat
 
 ---
 
-## Implementation 2 — Bottleneck Classifier (Supervised, 2-stage)
+## Model 2 — Bottleneck Classifier (Supervised, 2-stage)
 
 The strongest individual signal in the ensemble. A two-stage pipeline where a dedicated autoencoder first compresses the 19 SMART features into an **8-dimensional bottleneck** (optimal dimensionality determined empirically), and a supervised feedforward classifier then acts on those distilled, noise-reduced features.
 
@@ -160,7 +167,7 @@ python srcML/tensorflow_classification/predict_bottleneck.py --input DiskJson/di
 
 ---
 
-## Implementation C — UMAP + HDBSCAN Clustering (Unsupervised)
+## Model 3 — UMAP + HDBSCAN Clustering (Unsupervised)
 
 Density-based clustering directly on the **8-dim bottleneck representation** from Impl 2's encoder. UMAP reduces the space for visualization; HDBSCAN clusters in the full 8-dim space without requiring a pre-specified cluster count.
 
@@ -186,12 +193,6 @@ All four models are fused into a single score using a **weighted root-mean-squar
 | R | TF Bottleneck Classifier probability | **0.40** |
 | A | Anomaly AE normalized score | 0.20 |
 | C | HDBSCAN cluster failure rate | 0.10 |
-
-### Dashboard
-
-Score clamped to **[3, 97]** · Verdicts: **HEALTHY** < 40 · **WARNING** 40–75 · **CRITICAL** > 75
-
-![Dashboard](Graphs/dashbaord.png)
 
 ### Run on any disk:
 ```bash
