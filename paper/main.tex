@@ -1,15 +1,16 @@
 % !TeX spellcheck = en_GB
 % !TeX encoding = UTF-8
-% !TeX root = paper_full.tex
+% !TeX root = main.tex
 % !TeX TS-program = pdflatex
 % !BIB TS-program = biber
-%%
-%% SiKDD 2026 / IS2026 — FULL PAPER draft.
-%% Based on the official IS2026 template (sample-is-2026.tex).
-%% Do not modify margins/typefaces/spacing.
-\documentclass[sigconf,natbib=false, language=english]{acmart}
 
-\usepackage[datamodel=acmdatamodel, style=acmnumeric, backend=biber]{biblatex}
+%% for SiKDD 2026 / IS2026
+%% Based on the official IS2026 template (sample-is-2026.tex).
+
+\documentclass[sigconf,natbib=false,language=english]{acmart}
+\usepackage{csquotes}
+
+\usepackage[datamodel=acmdatamodel,style=acmnumeric,backend=biber]{biblatex}
 \addbibresource{references.bib}
 
 \usepackage{graphicx}
@@ -23,13 +24,13 @@
 \acmDOI{}
 \acmConference[Information Society 2026]{Information Society 2026: 29th international multiconference}{5--9 October 2026}{Ljubljana, Slovenia}
 \acmISBN{}
-\settopmatter{printccs=false, printacmref=false}
+\settopmatter{printccs=false,printacmref=false}
 
 \geometry{a4paper}
 
 \begin{document}
 
-\title[Fusing Supervised and Unsupervised Learning for Hard Drive Failure Prediction]{Fusing Supervised and Unsupervised Learning for Interpretable Hard Drive Failure Prediction on SMART Data}
+\title[Combining Supervised and Unsupervised Learning for Disk Failure Assessment]{Fusing Supervised and Unsupervised Learning for Interpretable Disk Failure Assessment on SMART Data}
 
 \author{Luka Petek}
 \affiliation{%
@@ -37,7 +38,7 @@
   \city{Maribor}
   \country{Slovenia}
 }
-\email{luka.petek1@student.um.si} %
+\email{luka.petek1@student.um.si}
 
 \author{Vili Podgorelec}
 \affiliation{%
@@ -50,17 +51,17 @@
 \renewcommand{\shortauthors}{Petek and Podgorelec}
 
 \begin{abstract}
-Hard disk drives remain among the most frequently replaced components in storage systems, and their unplanned failure causes data loss, downtime, and increased operational cost. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates, and most machine-learning approaches to the problem commit to a single learning paradigm -- typically supervised classification, unsupervised anomaly detection, or clustering -- evaluated in isolation. We present a system that instead fuses four independent models trained on the same SMART feature set -- a random forest classifier, an unsupervised autoencoder anomaly detector, a two-stage autoencoder-bottleneck classifier, and a UMAP+HDBSCAN density-based clustering model -- into a single interpretable Health Index Rating (HIR) via a weighted root-mean-square combination. Trained and evaluated on a full year of the Backblaze 2025 dataset (32M+ daily SMART records, 4,414 confirmed failures), the strongest individual component reaches 0.929 ROC-AUC and 89.1\% failure recall, while the componentized HIR score preserves per-model interpretability and remains robust when any single signal is weak or noisy. We discuss the resulting system's deployment as a lightweight, fully offline inference pipeline suitable for data-center fleet monitoring and edge/NAS devices, and outline the trade-offs of ensemble fusion versus single-model deployment.
+Disks -- both hard disk drives (HDDs) and solid-state drives (SSDs) -- remain among the most frequently replaced components in storage systems, and their unplanned failure causes data loss, downtime, and increased operational cost. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates, and most machine-learning approaches to the problem commit to a single learning paradigm -- typically supervised classification, unsupervised anomaly detection, or clustering -- evaluated in isolation. We present a system that instead fuses four independent models trained on the same SMART feature set -- a random forest classifier, an unsupervised autoencoder anomaly detector, a two-stage autoencoder-bottleneck classifier, and a UMAP+HDBSCAN density-based clustering model -- into a single interpretable Health Index Rating (HIR) via a weighted root-mean-square combination. Trained and evaluated on a full year of the Backblaze 2025 dataset (32M+ daily SMART records, 4,414 confirmed failures), the strongest individual component reaches 0.929 ROC-AUC and 89.1\% failure recall, while the componentized HIR score preserves per-model interpretability and remains robust when any single signal is weak or noisy. We discuss the resulting system's deployment as a lightweight, fully offline inference pipeline suitable for data-center fleet monitoring and edge/NAS devices, and outline the trade-offs of ensemble fusion versus single-model deployment.
 \end{abstract}
 
-\keywords{hard drive failure prediction, SMART data, ensemble learning, autoencoder, anomaly detection, HDBSCAN clustering, interpretable machine learning, edge AI}
+\keywords{disk failure prediction, SMART data, ensemble learning, autoencoder, anomaly detection, HDBSCAN clustering, interpretable machine learning, edge AI}
 
 \maketitle
 
 \section{Introduction}
 \label{sec:introduction}
 
-Hard disk drives (HDDs) are one of the most commonly replaced hardware components in data centers, and their failure is a leading cause of server-level failure, data loss, service unavailability, and increased operational cost~\cite{lu2020smarter}. To provide early warning, drive manufacturers embed Self-Monitoring, Analysis, and Reporting Technology (SMART) into virtually every modern drive. However, the threshold-based failure flags built into SMART firmware are deliberately conservative -- manufacturers report failure detection rates of only 3--10\% at an acceptable false-alarm rate of roughly 0.1\% per year~\cite{murray2005}, leaving a large share of failures undetected until they are catastrophic.
+Disks, including both hard disk drives (HDDs) and solid-state drives (SSDs), are among the most commonly replaced hardware components in data centers, and their failure is a leading cause of server-level failure, data loss, service unavailability, and increased operational cost~\cite{lu2020smarter}. To provide early warning, drive manufacturers embed Self-Monitoring, Analysis, and Reporting Technology (SMART) into virtually every modern drive. However, the threshold-based failure flags built into SMART firmware are deliberately conservative -- manufacturers report failure detection rates of only 3--10\% at an acceptable false-alarm rate of roughly 0.1\% per year~\cite{murray2005}, leaving a large share of failures undetected until they are catastrophic.
 
 Machine learning applied to raw SMART attribute values, rather than the manufacturer's own threshold flags, has been shown to substantially improve detection rates~\cite{murray2005,lu2020smarter}. However, the majority of published approaches commit to a single learning paradigm: a supervised classifier trained on labeled failure/healthy examples, an unsupervised anomaly detector trained only on healthy behaviour, or a clustering-based approach that groups drives by operating regime. Each paradigm has a distinct blind spot -- supervised classifiers are only as good as the (rare, imbalanced) failure examples they were trained on; unsupervised anomaly detectors cannot exploit known failure examples when they exist; clustering approaches provide risk context but no direct failure probability.
 
@@ -76,7 +77,7 @@ The remainder of this paper is organized as follows. Section~\ref{sec:related} r
 \section{Related Work}
 \label{sec:related}
 
-Early work by Murray et al.~\cite{murray2005} cast hard drive failure prediction as a multiple-instance learning problem and compared SVMs, unsupervised clustering, and non-parametric statistical tests against the manufacturer SMART threshold baseline. Their finding that the built-in SMART flag detects only 3--10\% of failures at acceptable false-alarm rates has motivated most subsequent ML-based work.
+Early work by Murray et al.~\cite{murray2005} cast disk failure prediction as a multiple-instance learning problem and compared SVMs, unsupervised clustering, and non-parametric statistical tests against the manufacturer SMART threshold baseline. Their finding that the built-in SMART flag detects only 3--10\% of failures at acceptable false-alarm rates has motivated most subsequent ML-based work.
 
 Lu et al.~\cite{lu2020smarter} performed one of the largest disk failure prediction studies to date, covering 380{,}000 drives across 64 data-center sites. They demonstrated that combining SMART attributes with disk performance metrics and physical location information achieves 0.95 F-measure, showing that additional data sources beyond SMART alone can improve prediction quality. Their work, however, relies on infrastructure-level data (performance counters, rack location) that is typically unavailable to end users and edge deployments.
 
@@ -90,7 +91,7 @@ A common thread across this literature is that each study commits to a single le
 \subsection{Dataset}
 \label{sec:dataset}
 
-We use the Backblaze 2025 hard drive SMART dataset~\cite{backblaze2025}, which contains daily SMART snapshots from Backblaze's production storage fleet over a full calendar year. The dataset comprises over 32 million daily records across 365 CSV files, with 4{,}414 confirmed drive failure events marked by a boolean \texttt{failure} flag. Each record contains raw and normalized values for up to ~80 SMART attributes, along with drive metadata (model, serial number, capacity, manufacturer). For context, Backblaze's 2025 annual report shows an overall annualized failure rate of 1.36\% across 344{,}196 drives~\cite{backblaze2025stats}.
+We use the Backblaze 2025 disk SMART dataset~\cite{backblaze2025}, which contains daily SMART snapshots from Backblaze's production storage fleet over a full calendar year. The dataset comprises over 32 million daily records across 365 CSV files, with 4{,}414 confirmed drive failure events marked by a boolean \texttt{failure} flag. Each record contains raw and normalized values for up to ~80 SMART attributes, along with drive metadata (model, serial number, capacity, manufacturer). For context, Backblaze's 2025 annual report shows an overall annualized failure rate of 1.36\% across 344{,}196 drives~\cite{backblaze2025stats}.
 
 The dataset is extremely imbalanced: the failure-to-healthy ratio is approximately 1:7{,}300. We address this differently depending on the model paradigm (Section~\ref{sec:models}).
 
@@ -186,13 +187,9 @@ Finally, the ensemble adds system complexity compared to deploying a single mode
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-We presented a multi-paradigm ensemble for hard drive failure prediction that fuses supervised classification, unsupervised anomaly detection, and density-based clustering into a single interpretable Health Index Rating. Trained on 32M+ SMART records from the Backblaze 2025 dataset, the system achieves up to 89.1\% failure recall and 0.929 ROC-AUC for its strongest component, while the HIR fusion provides a robust, componentized score suitable for deployment in data-center and edge environments.
+We presented a multi-paradigm ensemble for disk failure prediction that fuses supervised classification, unsupervised anomaly detection, and density-based clustering into a single interpretable Health Index Rating. Trained on 32M+ SMART records from the Backblaze 2025 dataset, the system achieves up to 89.1\% failure recall and 0.929 ROC-AUC for its strongest component, while the HIR fusion provides a robust, componentized score suitable for deployment in data-center and edge environments.
 
 Future work includes: (1) extending the system to predict a time-to-failure horizon using temporal models over SMART time series; (2) incorporating additional data sources such as drive location and environmental metrics, as shown beneficial by Lu et al.~\cite{lu2020smarter}; (3) learning the fusion weights via optimization rather than manual tuning; and (4) evaluating cross-vendor generalization with datasets from other storage operators.
-
-%\begin{acks}
-%% TODO: add if there is funding/support to acknowledge; omit section entirely if none.
-%\end{acks}
 
 \printbibliography
 

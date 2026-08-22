@@ -1,8 +1,9 @@
 % References for "Fusing Supervised and Unsupervised Learning for Interpretable
-% Hard Drive Failure Prediction on SMART Data" (SiKDD 2026 submission draft).
+% Hard Drive Failure Prediction on SMART Data" (SiKDD 2026 submission).
 %
-% STATUS: draft placeholders found via web search — VERIFY every field (venue,
-% pages, volume, year) against the original source before submission.
+% All entries verified against original sources (publishers, DOIs, arXiv).
+
+% ── Domain literature: SMART-based disk failure prediction ──
 
 @article{murray2005,
   author  = {Murray, Joseph F. and Hughes, Gordon F. and Kreutz-Delgado, Kenneth},
@@ -11,41 +12,145 @@
   volume  = {6},
   number  = {5},
   pages   = {783--816},
-  year    = {2005}
+  year    = {2005},
+  url     = {https://www.jmlr.org/papers/v6/murray05a.html}
 }
 
 @inproceedings{lu2020smarter,
   author    = {Lu, Sidi and Luo, Bing and Patel, Tirthak and Yao, Yongtao and Tiwari, Devesh and Shi, Weisong},
   title     = {Making Disk Failure Predictions SMARTer!},
   booktitle = {Proceedings of the 18th USENIX Conference on File and Storage Technologies (FAST)},
-  year      = {2020}
+  pages     = {359--372},
+  year      = {2020},
+  publisher = {USENIX Association},
+  url       = {https://www.usenix.org/conference/fast20/presentation/lu}
 }
 
 @article{xu2018layerwise,
   author  = {Xu, Chuanmao and Wang, Guangyan and Liu, Xie and Guo, Deke and Liu, Tian-Yi},
   title   = {Layerwise Perturbation-Based Adversarial Training for Hard Drive Health Degree Prediction},
   journal = {arXiv preprint arXiv:1809.04188},
-  year    = {2018}
+  year    = {2018},
+  url     = {https://arxiv.org/abs/1809.04188}
 }
 
-@article{costawarelstm2023,
+@article{ahmed2024costaware,
+  author  = {Ahmed, Jishan and Green II, Robert C.},
   title   = {Cost Aware LSTM Model for Predicting Hard Disk Drive Failures Based on Extremely Imbalanced S.M.A.R.T. Sensors Data},
   journal = {Engineering Applications of Artificial Intelligence},
-  year    = {2023},
-  note    = {ScienceDirect — verify authors/volume/pages before citing}
+  volume  = {127},
+  number  = {Part B},
+  pages   = {107339},
+  year    = {2024},
+  doi     = {10.1016/j.engappai.2023.107339},
+  url     = {https://www.sciencedirect.com/science/article/abs/pii/S0952197623015233}
 }
 
-@article{proactivetdsc2023,
+@article{zhou2024proactive,
+  author  = {Zhou, Hao and Niu, Zhiheng and Wang, Gang and Liu, Xiaoguang and Liu, Dongshi and Kang, Bingnan and Hu, Zheng and Zhang, Yong},
   title   = {Proactive Drive Failure Prediction for Cloud Storage System Through Semi-Supervised Learning},
   journal = {IEEE Transactions on Dependable and Secure Computing},
-  year    = {2023},
-  note    = {Verify authors/volume/pages before citing}
+  volume  = {21},
+  number  = {4},
+  pages   = {1528--1543},
+  year    = {2024},
+  doi     = {10.1109/TDSC.2023.3286093},
+  url     = {https://ieeexplore.ieee.org/document/10151948}
 }
+
+% ── Dataset ──
 
 @misc{backblaze2025,
   author       = {{Backblaze Inc.}},
-  title        = {Hard Drive Test Data},
+  title        = {Hard Drive Test Data — Open Dataset},
   year         = {2025},
   howpublished = {\url{https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data}},
-  note         = {Open dataset: daily SMART snapshots from production storage fleet}
+  note         = {Daily SMART snapshots from Backblaze's production storage fleet}
+}
+
+@misc{backblaze2025stats,
+  author       = {Klein, Andy and Doyle, Stephanie and Johnson, David},
+  title        = {Backblaze Drive Stats for 2025},
+  year         = {2026},
+  howpublished = {\url{https://www.backblaze.com/blog/backblaze-drive-stats-for-2025/}},
+  note         = {Annualized failure rates and lifetime statistics for 344{,}196 drives}
+}
+
+% ── Algorithms ──
+
+@article{breiman2001random,
+  author  = {Breiman, Leo},
+  title   = {Random Forests},
+  journal = {Machine Learning},
+  volume  = {45},
+  number  = {1},
+  pages   = {5--32},
+  year    = {2001},
+  doi     = {10.1023/A:1010933404324},
+  url     = {https://link.springer.com/article/10.1023/A:1010933404324}
+}
+
+@inproceedings{campello2013hdbscan,
+  author    = {Campello, Ricardo J. G. B. and Moulavi, Davoud and Sander, J{\"o}rg},
+  title     = {Density-Based Clustering Based on Hierarchical Density Estimates},
+  booktitle = {Advances in Knowledge Discovery and Data Mining (PAKDD 2013)},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {7819},
+  pages     = {160--172},
+  year      = {2013},
+  publisher = {Springer},
+  doi       = {10.1007/978-3-642-37456-2_14},
+  url       = {https://link.springer.com/chapter/10.1007/978-3-642-37456-2_14}
+}
+
+% ── Software libraries ──
+
+@article{pedregosa2011scikit,
+  author  = {Pedregosa, Fabian and Varoquaux, Ga{\"e}l and Gramfort, Alexandre and Michel, Vincent and Thirion, Bertrand and Grisel, Olivier and Blondel, Mathieu and Prettenhofer, Peter and Weiss, Ron and Dubourg, Vincent and Vanderplas, Jake and Passos, Alexandre and Cournapeau, David and Brucher, Matthieu and Perrot, Matthieu and Duchesnay, {\'E}douard},
+  title   = {Scikit-learn: Machine Learning in {Python}},
+  journal = {Journal of Machine Learning Research},
+  volume  = {12},
+  pages   = {2825--2830},
+  year    = {2011},
+  url     = {https://www.jmlr.org/papers/v12/pedregosa11a.html}
+}
+
+@misc{tensorflow2015,
+  author       = {Abadi, Mart\'{i}n and Agarwal, Ashish and Barham, Paul and Brevdo, Eugene and Chen, Zhifeng and Citro, Craig and Corrado, Greg S. and Davis, Andy and Dean, Jeffrey and Devin, Matthieu and Ghemawat, Sanjay and Goodfellow, Ian and Harp, Andrew and Irving, Geoffrey and Isard, Michael and Jia, Yangqing and Jozefowicz, Rafal and Kaiser, Lukasz and Kudlur, Manjunath and Levenberg, Josh and Man{\'e}, Dandelion and Monga, Rajat and Moore, Sherry and Murray, Derek and Olah, Chris and Schuster, Mike and Shlens, Jonathon and Steiner, Benoit and Sutskever, Ilya and Talwar, Kunal and Tucker, Paul and Vanhoucke, Vincent and Vasudevan, Vijay and Vi{\'e}gas, Fernanda and Vinyals, Oriol and Warden, Pete and Wattenberg, Martin and Wicke, Martin and Yu, Yuan and Zheng, Xiaoqiang},
+  title        = {{TensorFlow}: Large-Scale Machine Learning on Heterogeneous Systems},
+  year         = {2015},
+  howpublished = {\url{https://www.tensorflow.org/}},
+  note         = {Software available from tensorflow.org}
+}
+
+@article{mcinnes2018umap,
+  author  = {McInnes, Leland and Healy, John and Saul, Nathaniel and Grossberger, Lukas},
+  title   = {{UMAP}: Uniform Manifold Approximation and Projection},
+  journal = {The Journal of Open Source Software},
+  volume  = {3},
+  number  = {29},
+  pages   = {861},
+  year    = {2018},
+  doi     = {10.21105/joss.00861},
+  url     = {https://joss.theoj.org/papers/10.21105/joss.00861}
+}
+
+@article{mcinnes2017hdbscan,
+  author  = {McInnes, Leland and Healy, John and Astels, Steve},
+  title   = {hdbscan: Hierarchical density based clustering},
+  journal = {The Journal of Open Source Software},
+  volume  = {2},
+  number  = {11},
+  pages   = {205},
+  year    = {2017},
+  doi     = {10.21105/joss.00205},
+  url     = {https://joss.theoj.org/papers/10.21105/joss.00205}
+}
+
+@misc{smartmontools,
+  author       = {{smartmontools developers}},
+  title        = {smartmontools: Control and Monitor Storage Systems Using {SMART}},
+  year         = {2025},
+  howpublished = {\url{https://www.smartmontools.org/}},
+  note         = {Open-source utility (\texttt{smartctl}, \texttt{smartd}) for ATA/SATA, SCSI/SAS, and NVMe disks}
 }
