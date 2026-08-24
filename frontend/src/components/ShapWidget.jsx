@@ -141,10 +141,10 @@ const ShapWidget = ({ result, smartData, loading }) => {
             </span>
           </div>
           <div className="rf-verdict-row">
-            <span className="rf-verdict-label">HIR Risk Score</span>
+            <span className="rf-verdict-label">AHI Risk Score</span>
             <span className="tabular-nums">
-              {sklearnScore.hir_risk_score != null
-                ? `${Math.round(sklearnScore.hir_risk_score)}%`
+              {sklearnScore.ahi_risk_score != null
+                ? `${Math.round(sklearnScore.ahi_risk_score)}%`
                 : '—'}
             </span>
           </div>

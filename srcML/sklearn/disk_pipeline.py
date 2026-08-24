@@ -131,7 +131,7 @@ class DiskHealthPipeline:
         K = float(self.classifier.predict(X_input)[0])
         failure_prob = float(self.classifier.predict_proba(X_input)[0][1])
 
-        #HIR FORMULA - failure_probability ze vsebuje vse featere (any_critical_error, starost, ...)
+        #AHI FORMULA - failure_probability ze vsebuje vse featere (any_critical_error, starost, ...)
         odstotek_tveganja = round(failure_prob * 100, 2)
 
         #tveganje ne more biti nikoli 100%, nikoli 0%
@@ -149,7 +149,7 @@ class DiskHealthPipeline:
             verdict = "Healthy"
 
         return {
-            "hir_risk_score": odstotek_tveganja,
+            "ahi_risk_score": odstotek_tveganja,
             "failure_probability": round(failure_prob, 4),
             "verdict": verdict,
             "models_output": {

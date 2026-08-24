@@ -48,7 +48,7 @@
 \renewcommand{\shortauthors}{Petek and Podgorelec}
 
 \begin{abstract}
-Hard disk drives remain among the most frequently replaced components in storage systems, and their unplanned failure causes data loss, downtime, and increased operational cost. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates, and most machine-learning approaches to the problem commit to a single learning paradigm -- typically supervised classification, unsupervised anomaly detection, or clustering -- evaluated in isolation. We present a system that instead fuses four independent models trained on the same SMART feature set -- a random forest classifier, an unsupervised autoencoder anomaly detector, a two-stage autoencoder-bottleneck classifier, and a UMAP+HDBSCAN density-based clustering model -- into a single interpretable Health Index Rating (HIR) via a weighted root-mean-square combination. Trained and evaluated on a full year of the Backblaze 2025 dataset (32M+ daily SMART records, 4,414 confirmed failures), the strongest individual component reaches 0.929 ROC-AUC and 89.1\% failure recall, while the componentized HIR score preserves per-model interpretability and remains robust when any single signal is weak or noisy. We discuss the resulting system's deployment as a lightweight, fully offline inference pipeline suitable for data-center fleet monitoring and edge/NAS devices, and outline the trade-offs of ensemble fusion versus single-model deployment.
+Hard disk drives remain among the most frequently replaced components in storage systems, and their unplanned failure causes data loss, downtime, and increased operational cost. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates, and most machine-learning approaches to the problem commit to a single learning paradigm -- typically supervised classification, unsupervised anomaly detection, or clustering -- evaluated in isolation. We present a system that instead fuses four independent models trained on the same SMART feature set -- a random forest classifier, an unsupervised autoencoder anomaly detector, a two-stage autoencoder-bottleneck classifier, and a UMAP+HDBSCAN density-based clustering model -- into a single interpretable Aggregated Health Index (AHI) via a weighted root-mean-square combination. Trained and evaluated on a full year of the Backblaze 2025 dataset (32M+ daily SMART records, 4,414 confirmed failures), the strongest individual component reaches 0.929 ROC-AUC and 89.1\% failure recall, while the componentized AHI score preserves per-model interpretability and remains robust when any single signal is weak or noisy. We discuss the resulting system's deployment as a lightweight, fully offline inference pipeline suitable for data-center fleet monitoring and edge/NAS devices, and outline the trade-offs of ensemble fusion versus single-model deployment.
 \end{abstract}
 
 \keywords{hard drive failure prediction, SMART data, ensemble learning, autoencoder, anomaly detection, HDBSCAN clustering, interpretable machine learning, edge AI}
@@ -65,11 +65,11 @@ Machine learning applied to raw SMART attribute values, rather than the manufact
 \textbf{Contributions.} In this paper we:
 \begin{itemize}
     \item combine four independently trained models spanning all three paradigms -- supervised classification, unsupervised anomaly detection, and density-based clustering -- into a single deployable pipeline trained on a full year of the Backblaze 2025 SMART dataset;
-    \item propose a weighted root-mean-square fusion, the Health Index Rating (HIR), that preserves the interpretability of each component while being more robust than any single model on its own;
+    \item propose a weighted root-mean-square fusion, the Aggregated Health Index (AHI), that preserves the interpretability of each component while being more robust than any single model on its own;
     \item report end-to-end evaluation results (up to 0.929 ROC-AUC, 89.1\% failure recall for the strongest component) and discuss the practical trade-offs of deploying such an ensemble as a lightweight, fully offline system suitable for both data-center fleet monitoring and edge/NAS devices.
 \end{itemize}
 
-The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work on SMART-based failure prediction. Section~\ref{sec:method} describes the dataset, preprocessing, the four component models, and the HIR fusion formula. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:discussion} discusses deployment use cases, trade-offs, and limitations, and Section~\ref{sec:conclusion} concludes.
+The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work on SMART-based failure prediction. Section~\ref{sec:method} describes the dataset, preprocessing, the four component models, and the AHI fusion formula. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:discussion} discusses deployment use cases, trade-offs, and limitations, and Section~\ref{sec:conclusion} concludes.
 
 \section{Related Work}
 \label{sec:related}
@@ -83,12 +83,12 @@ The remainder of this paper is organized as follows. Section~\ref{sec:related} r
 \label{sec:method}
 % TODO (next pass): Backblaze 2025 dataset description, preprocessing/balancing,
 % brief subsections for each of the 4 models (RF, AE anomaly, bottleneck AE+classifier,
-% UMAP+HDBSCAN), then the HIR weighted-RMS fusion formula and weight rationale.
+% UMAP+HDBSCAN), then the AHI weighted-RMS fusion formula and weight rationale.
 % Source: README.md and srcML/hir_final.py in the diskFailurePrediction repo (read-only reference).
 
 \section{Results}
 \label{sec:results}
-% TODO (next pass): performance table (ROC-AUC / Recall / F1 / HIR weight per model),
+% TODO (next pass): performance table (ROC-AUC / Recall / F1 / AHI weight per model),
 % 1 key figure, 2-3 sentence interpretation of why fusion helps.
 
 \section{Discussion}

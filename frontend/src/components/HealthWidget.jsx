@@ -6,7 +6,7 @@ const MODEL_META = {
   tf_classification: { label: 'Bottleneck Clf', scoreKey: 'failure_probability' },
   tf_anomaly: { label: 'Anomaly AE', scoreKey: 'anomaly_score' },
   clustering: { label: 'HDBSCAN', scoreKey: 'cluster_score' },
-  sklearn: { label: 'Random Forest', scoreKey: 'hir_risk_score', scoreDivisor: 100 },
+  sklearn: { label: 'Random Forest', scoreKey: 'ahi_risk_score', scoreDivisor: 100 },
 };
 
 const scoreToColor = (score) => {

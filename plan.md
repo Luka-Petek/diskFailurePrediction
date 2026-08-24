@@ -64,4 +64,4 @@ Keyword matching kept as fallback for Backblaze CSVs (which may not have `rotati
 After fix, re-run the dashboard with `DiskJson/disk_data_sda.json`:
 - `jeSSD` should be 1
 - `smart_3_raw`, `smart_4_raw`, `smart_193_raw` should be 0 (not HDD medians)
-- HIR should drop from ~36% to single digits / low teens
+- AHI should drop from ~36% to single digits / low teens

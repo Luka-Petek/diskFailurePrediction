@@ -1,6 +1,6 @@
 # srcML — ML Pipeline Engineering Notes
 
-Detailed description of the ML process across all 4 implementations, the shared preprocessing, and the HIR fusion. Written for engineering review — every claim here is traceable to code in this directory.
+Detailed description of the ML process across all 4 implementations, the shared preprocessing, and the AHI fusion. Written for engineering review — every claim here is traceable to code in this directory.
 
 ---
 
@@ -26,7 +26,7 @@ Backblaze daily CSVs (32M+ rows, 365 files)
     │      │      │          │
     └──────┴──┬───┴──────────┘
               ▼
-         HIR RMS fusion
+         AHI RMS fusion
               │
               ▼
         Score [3–97]
@@ -188,9 +188,9 @@ For each cluster:
 
 ---
 
-## HIR Fusion - Formula
+## AHI Fusion - Formula
 
-![HIR Formula](../Graphs/hir_formula.png)
+![AHI Formula](../Graphs/hir_formula.png)
 
 Since weights sum to 1.0, the denominator (Σw) is omitted.
 
@@ -223,17 +223,17 @@ RMS amplifies large individual signals. A disk scoring 0.9 on one model and 0.1 
 
 **File**: `backend/main.py`
 
-FastAPI app with `lifespan` context that loads all artifacts on startup. Same HIR computation as `hir_final.py`.
+FastAPI app with `lifespan` context that loads all artifacts on startup. Same AHI computation as `hir_final.py`.
 
 ### Endpoints
 - `POST /api/predict/anomaly` — Impl 1 AE only
 - `POST /api/predict/classification` — Impl 2 classifier only
 - `POST /api/predict/clustering` — Impl C HDBSCAN only (runs classifier first for bottleneck)
 - `POST /api/predict/sklearn` — Impl 0 RF only
-- `POST /api/predict/combined` — all 4 models, HIR fusion, returns per-model breakdown + consensus
+- `POST /api/predict/combined` — all 4 models, AHI fusion, returns per-model breakdown + consensus
 
 ### Graceful degradation
-Each model loads in its own try/except. If an artifact is missing, that model is set to `None` and skipped during combined inference. The HIR formula renormalizes weights over active models only (`active_weight` tracks sum of weights of models that succeeded).
+Each model loads in its own try/except. If an artifact is missing, that model is set to `None` and skipped during combined inference. The AHI formula renormalizes weights over active models only (`active_weight` tracks sum of weights of models that succeeded).
 
 ---
 

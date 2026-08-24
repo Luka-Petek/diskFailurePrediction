@@ -1,6 +1,6 @@
 #  python srcML/hir_final.py --input DiskJson/disk_data_sda.json
 #
-#  HIR (Health Index Rating) — kombinirana formula vseh 4 modelov:
+#  AHI (Aggregated Health Index) — kombinirana formula vseh 4 modelov:
 #    Impl 0  — Sklearn Random Forest        (utez 0.30)
 #    Impl 2  — TF Bottleneck Classifier     (utez 0.40)  ← najboljsi rezultati
 #    Impl 1  — TF Anomaly Detection AE      (utez 0.20)
@@ -129,17 +129,17 @@ def _compute_hir(
         + W_CLUSTER * cluster_score ** 2
     )
 
-    hir = float(np.clip(rms_score * 100, 3.0, 97.0))
+    ahi = float(np.clip(rms_score * 100, 3.0, 97.0))
 
-    if hir >= 75.0:
+    if ahi >= 75.0:
         verdict = "CRITICAL"
-    elif hir >= 40.0:
+    elif ahi >= 40.0:
         verdict = "WARNING"
     else:
         verdict = "HEALTHY"
 
     return {
-        "hir_score":  round(hir, 2),
+        "ahi_score":  round(ahi, 2),
         "verdict":    verdict,
         "components": {
             "sklearn_failure_prob":  round(sklearn_prob,   4),
@@ -205,7 +205,7 @@ def predict_hir(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="HIR — kombinirana napoved zdravja diska (4 modeli)."
+        description="AHI — kombinirana napoved zdravja diska (4 modeli)."
     )
     parser.add_argument(
         "--input", type=str, required=True,

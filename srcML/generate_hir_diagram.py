@@ -1,4 +1,4 @@
-"""Generates Graphs/hir_formula.png — v stilu originalnega HIR.png"""
+"""Generates Graphs/hir_formula.png — v stilu originalnega AHI.png"""
 
 from pathlib import Path
 import matplotlib
@@ -15,7 +15,7 @@ ax.set_ylim(0, 1)
 ax.axis("off")
 
 formula = (
-    r"$HIR = \sqrt{\dfrac{"
+    r"$AHI = \sqrt{\dfrac{"
     r"w_k \cdot K^2 \;+\; w_r \cdot R^2 \;+\; w_a \cdot A^2 \;+\; w_c \cdot C^2"
     r"}{\sum w}} \;\times\; 100$"
 )

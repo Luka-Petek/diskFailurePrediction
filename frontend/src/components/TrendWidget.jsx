@@ -47,7 +47,7 @@ function ModelCard({ modelKey, modelData, scanData }) {
     modelKey === 'tf_classification' ? scanData.failure_probability
     : modelKey === 'tf_anomaly' ? scanData.anomaly_score
     : modelKey === 'clustering' ? scanData.cluster_score
-    : modelKey === 'sklearn' ? (scanData.hir_risk_score != null ? scanData.hir_risk_score / 100 : scanData.failure_probability)
+    : modelKey === 'sklearn' ? (scanData.ahi_risk_score != null ? scanData.ahi_risk_score / 100 : scanData.failure_probability)
     : scanData.failure_probability
   ) : null;
   const verdict = scanData?.verdict || (modelKey === 'clustering' ? null : null);
@@ -164,9 +164,9 @@ function ModelCard({ modelKey, modelData, scanData }) {
           {modelKey === 'sklearn' && (
             <div className="mp-extra">
               <div className="mp-extra-row">
-                <span>HIR Score</span>
+                <span>AHI Score</span>
                 <strong className="tabular-nums">
-                  {scanData.hir_risk_score != null ? `${Math.round(scanData.hir_risk_score)}%` : '—'}
+                  {scanData.ahi_risk_score != null ? `${Math.round(scanData.ahi_risk_score)}%` : '—'}
                 </strong>
               </div>
               <div className="mp-extra-row">
