@@ -52,7 +52,56 @@
 
 \begin{abstract}
 
-Hard disk drives remain among the most frequently replaced components in storage systems, and their unexpected failure causes data loss, downtime and increased operational cost. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates. Classical methods (SVM or Naive Bayes) perform reasonably on SMART data, but most of them rely on a single model and do not combine different learning strategies. Our combination of all 4 independent models - random forest classifier, an unsupervised autoencoder anomaly detector, a UMAP clustering model and another classifier, made on the bottleneck from autoencoder. Each model captures different kind of failure signal, and each one has its own interpretational value. At the end, all 4 predictions are combined into single aggregated health index (AHI).
+Hard disk drives remain among the most frequently replaced components in storage systems, and their unexpected failure causes data loss, downtime and increased operational cost. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates. Classical methods (SVM or Naive Bayes) perform reasonably on SMART data, but most of them rely on a single model and do not combine different learning strategies. Our combination of all 4 independent models - random forest classifier, an unsupervised autoencoder anomaly detector, a UMAP clustering model and another classifier, made on the bottleneck from autoencoder. Each model captures different kind of failure signal, and each one has its own interpretational value. At the end, all 4 predictions are combined into single aggregated health index (AHI). Since each model provides its own perspective on disk health, the final AHI can be decomposed and explained through the individual contributions of each model.
+\end{abstract}
+
+\keywords{hard drive failure assessment, SMART data, hybrid model, autoencoder, anomaly detection, HDBSCAN clustering, interpretable machine learning, edge AI}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:introduction}
+
+Hard disk drives are among the most frequently replaced components in storage systems, and their unexpected failure is a leading cause of data loss, service unavailability, and increased operational cost~\cite{lu2020smarter}. To provide early warning, drive manufacturers embed Self-Monitoring, Analysis, and Reporting Technology (SMART) into virtually every modern drive. However, the threshold-based failure flags built into SMART firmware are deliberately conservative: manufacturers report failure detection rates of only 3--10\% at an acceptable false-alarm rate of roughly 0.1\% per year~\cite{murray2005}, leaving the majority of failures undetected until it is too late.
+
+Each paradigm has a distinct blind spot.
+No single model covers all failure modes:
+gradual degradation may go unnoticed by a supervised classifier trained on binary labels,
+while explicit failure signals may be missed by an unsupervised detector that never saw them.
+Most existing approaches rely on a single model type
+-- Naive Bayes, SVM, or random forest --
+evaluated in isolation.
+This is where a hybrid approach that combines multiple paradigms
+into a single, interpretable output, is standing out.
+
+We use the Backblaze 2025 hard drive SMART dataset~\cite{backblaze2025}, which contains over 32 million daily SMART records across a full calendar year, with 4{,}414 confirmed drive failure events. The dataset is overwhelmingly composed of HDDs ($>$95\%), reflecting Backblaze's production storage fleet~\cite{backblaze2025stats}. The failure-to-healthy ratio is approximately 1:7{,}300, making class imbalance a central challenge.
+
+\textbf{Contributions.} In this paper we:
+\begin{itemize}
+    \item combine four independently trained models -- a random forest classifier, an unsupervised autoencoder anomaly detector, an autoencoder-bottleneck classifier, and a UMAP density-based clustering model -- into a single aggregated health index (AHI), trained on a full year of the Backblaze 2025 SMART dataset;
+    \item propose a weighted root-mean-square aggregation, the Aggregated Health Index (AHI), that preserves the interpretability of each component while being more robust than any single model on its own;
+    \item report end-to-end evaluation results (up to 0.929 ROC-AUC and 89.1\% failure recall for the strongest component) and discuss the practical trade-offs of deploying such a hybrid system as a lightweight, fully offline pipeline suitable for both data-center fleet monitoring and edge/NAS devices.
+\end{itemize}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work on SMART-based failure prediction. Section~\ref{sec:method} describes the dataset, preprocessing, the four component models, and the AHI aggregation formula. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:discussion} discusses deployment use cases, trade-offs, and limitations, and Section~\ref{sec:conclusion} concludes.
+
+\section{Related Work}
+\label{sec:related}
+
+Machine learning applied to raw SMART attribute values, rather than the manufacturer's own threshold flags, has been shown to improve detection rates~\cite{murray2005,lu2020smarter}. Yet the ML-based disk failure prediction remains fragmented. Supervised classifiers, such as the random forests and SVMs used by Murray et al.~\cite{murray2005}, achieve high precision when enough labeled failures are available but struggle with the extreme class imbalance typical of SMART datasets (often exceeding 10{,}000:1~\cite{ahmed2024costaware}). Unsupervised anomaly detectors, such as autoencoders trained on healthy drives only, do not require failure labels but cannot exploit known failure patterns when they exist~\cite{zhou2024proactive}. Clustering approaches group drives by operating regime and provide population-level risk context, but do not output a direct failure probability. Semi-supervised methods, such as the reconstruction-based approach of Zhou et al.~\cite{zhou2024proactive} and the health-degree prediction of Xu et al.~\cite{xu2018layerwise}, attempt to bridge this gap but still rely on a single learning strategy.
+
+\section{Data and Methodology}
+\label{sec:method}
+
+\section{Results}
+\label{sec:results}
+
+\section{Discussion}
+\label{sec:discussion}
+
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+\printbibliography
 
 \end{document}
-

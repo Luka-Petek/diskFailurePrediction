@@ -1,0 +1,109 @@
+================================================================================
+MEETING NOTES — prof. Vili Podgorelec
+Paper: SiKDD 2026 / IS2026 — Disk Failure Assessment
+Date: August 2026
+================================================================================
+
+AGREED TERMINOLOGY & EXPRESSION ADJUSTMENTS
+--------------------------------------------------------------------------------
+
+1. "HYBRID MODEL" instead of "FUSION"
+   - Use "hybrid model" throughout the paper instead of "fusion" / "fusing".
+   - In text: "hybrid model combines..." instead of "fuses..."
+   - Section name: "AHI Aggregation" instead of "AHI Fusion"
+   - "aggregation" instead of "fusion" for the AHI formula description
+
+2. "FAILURE ASSESSMENT" in the title
+   - Keep "Failure Assessment" (not "Failure Prediction") in the title.
+   - Done in main.tex, paper.tex, paper_full.tex.
+
+3. "AGGREGATED HEALTH INDEX" (AHI)
+   - Always capitalize: "Aggregated Health Index (AHI)"
+   - Use "aggregation" language for the AHI formula, not "fusion".
+
+4. "combined supervised and unsupervised"
+   - Emphasize the combination of supervised AND unsupervised paradigms
+     as a key characteristic of the hybrid model.
+
+5. "advantages of multi-paradigm"
+   - Section in Discussion: "Advantages of the Multi-Paradigm Approach"
+   - Highlight robustness, interpretability, graceful degradation.
+
+6. "utilization with aggregated HIR function"
+   - The AHI (Aggregated Health Index) function is the core utilization
+     output — make sure deployment use cases reference it clearly.
+
+
+STRUCTURE & CONTENT GUIDANCE
+--------------------------------------------------------------------------------
+
+7. Introduction — razlog (motivation/reasons)
+   - Introduction should clearly state the REASON and motivation for the
+     hybrid approach: why combining paradigms matters, what gap it fills.
+   - Concrete dataset choices and detailed comparisons are left for the
+     Introduction section (not the abstract).
+
+8. Related Work
+   - Separate Related Work section is required.
+   - Position against: Murray et al. 2005, Lu et al. 2020, Xu et al. 2018,
+     cost-aware LSTM 2023, TDSC semi-supervised 2023.
+   - Framing: prior work commits to one paradigm; we combine all three
+     into one interpretable score via a hybrid model.
+
+9. t-SNE for final results (TSNE za koncne rezultate)
+   - Use t-SNE for the final results visualization (in addition to or
+     instead of UMAP for the results section figures).
+   - TODO: generate t-SNE visualization of the bottleneck/clustering results
+     for the Results section.
+
+10. UMAP
+    - UMAP is used in the pipeline (Model 3: UMAP+HDBSCAN clustering,
+      and for 2D visualization).
+    - Keep UMAP for the clustering pipeline; consider t-SNE for final
+      result figures (see point 9).
+
+11. Clustering — clear (GRUČENJE jasno)
+    - Make the clustering description clear and well-explained:
+      HDBSCAN on 8D bottleneck, 18 natural clusters, outlier failure rate
+      66.9%, approximate_predict for inference.
+
+12. Visualization (vizualizacija)
+    - Ensure visualizations are clear and well-labeled in the paper.
+    - Include dimensionality-reduction visualizations (UMAP and/or t-SNE).
+
+13. Color scale (barvna skala)
+    - Use a consistent, interpretable color scale for all visualizations
+      (clustering plots, AHI distributions, etc.).
+    - TODO: ensure all figures use a unified color scale.
+
+14. Aggregation (agregacija)
+    - Use "aggregation" terminology for the AHI combination process,
+      not "fusion".
+
+
+STATUS IN CURRENT DRAFTS (as of Aug 2026)
+--------------------------------------------------------------------------------
+[X] Hybrid model terminology — applied to main.tex, paper.tex, paper_full.tex
+[X] Failure Assessment in title — applied to all three files
+[X] Aggregated Health Index capitalization — applied
+[X] Combined supervised + unsupervised — reflected in abstract & contributions
+[X] Advantages of multi-paradigm — section exists in paper_full.tex
+[X] Introduction with motivation — exists in paper.tex, paper_full.tex
+[X] Related Work section — exists in paper.tex (TODO), paper_full.tex (done)
+[X] UMAP in pipeline — described in Methodology
+[X] Clear clustering description — described in Methodology
+[X] AHI Aggregation section — renamed from "AHI Fusion"
+[ ] t-SNE for final results — TODO: generate t-SNE figure for Results section
+[ ] Color scale consistency — TODO: verify all figures use unified color scale
+[ ] Visualization polish — TODO: ensure all figures are clear and labeled
+
+
+FILES AFFECTED
+--------------------------------------------------------------------------------
+- paper/main.tex         — abstract-only draft (current working file)
+- paper/paper.tex        — skeleton draft with TODO sections
+- paper/paper_full.tex   — full paper draft with all sections
+- paper/ARTICLE_PLAN.md  — overall writing plan & reference notes
+================================================================================
+
+- TODO: check whether we are managing HDD disks correctly and wiht priority, since they are >90% of the whole dataset

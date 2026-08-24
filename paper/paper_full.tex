@@ -50,7 +50,7 @@
 \renewcommand{\shortauthors}{Petek and Podgorelec}
 
 \begin{abstract}
-Hard disk drives remain among the most frequently replaced components in storage systems, and their unplanned failure causes data loss, downtime, and increased operational cost. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates, and most machine-learning approaches to the problem commit to a single learning paradigm -- typically supervised classification, unsupervised anomaly detection, or clustering -- evaluated in isolation. We present a system that instead fuses four independent models trained on the same SMART feature set -- a random forest classifier, an unsupervised autoencoder anomaly detector, a two-stage autoencoder-bottleneck classifier, and a UMAP+HDBSCAN density-based clustering model -- into a single interpretable Aggregated Health Index (AHI) via a weighted root-mean-square combination. Trained and evaluated on a full year of the Backblaze 2025 dataset (32M+ daily SMART records, 4,414 confirmed failures), the strongest individual component reaches 0.929 ROC-AUC and 89.1\% failure recall, while the componentized AHI score preserves per-model interpretability and remains robust when any single signal is weak or noisy. We discuss the resulting system's deployment as a lightweight, fully offline inference pipeline suitable for data-center fleet monitoring and edge/NAS devices, and outline the trade-offs of ensemble fusion versus single-model deployment.
+Hard disk drives remain among the most frequently replaced components in storage systems, and their unplanned failure causes data loss, downtime, and increased operational cost. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates, and most machine-learning approaches to the problem commit to a single learning paradigm -- typically supervised classification, unsupervised anomaly detection, or clustering -- evaluated in isolation. We present a hybrid model that combines four independent models trained on the same SMART feature set -- a random forest classifier, an unsupervised autoencoder anomaly detector, a two-stage autoencoder-bottleneck classifier, and a UMAP+HDBSCAN density-based clustering model -- into a single interpretable Aggregated Health Index (AHI) via a weighted root-mean-square aggregation. Trained and evaluated on a full year of the Backblaze 2025 dataset (32M+ daily SMART records, 4,414 confirmed failures), the strongest individual component reaches 0.929 ROC-AUC and 89.1\% failure recall, while the componentized AHI score preserves per-model interpretability and remains robust when any single signal is weak or noisy. We discuss the resulting system's deployment as a lightweight, fully offline inference pipeline suitable for data-center fleet monitoring and edge/NAS devices, and outline the trade-offs of the hybrid model versus single-model deployment.
 \end{abstract}
 
 \keywords{hard drive failure prediction, SMART data, ensemble learning, autoencoder, anomaly detection, HDBSCAN clustering, interpretable machine learning, edge AI}
@@ -67,11 +67,11 @@ Machine learning applied to raw SMART attribute values, rather than the manufact
 \textbf{Contributions.} In this paper we:
 \begin{itemize}
     \item combine four independently trained models spanning all three paradigms -- supervised classification, unsupervised anomaly detection, and density-based clustering -- into a single deployable pipeline trained on a full year of the Backblaze 2025 SMART dataset;
-    \item propose a weighted root-mean-square fusion, the Aggregated Health Index (AHI), that preserves the interpretability of each component while being more robust than any single model on its own;
+    \item propose a weighted root-mean-square aggregation, the Aggregated Health Index (AHI), that preserves the interpretability of each component while being more robust than any single model on its own;
     \item report end-to-end evaluation results (up to 0.929 ROC-AUC, 89.1\% failure recall for the strongest component) and discuss the practical trade-offs of deploying such an ensemble as a lightweight, fully offline system suitable for both data-center fleet monitoring and edge/NAS devices.
 \end{itemize}
 
-The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work on SMART-based failure prediction. Section~\ref{sec:method} describes the dataset, preprocessing, the four component models, and the AHI fusion formula. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:discussion} discusses deployment use cases, trade-offs, and limitations, and Section~\ref{sec:conclusion} concludes.
+The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work on SMART-based failure prediction. Section~\ref{sec:method} describes the dataset, preprocessing, the four component models, and the AHI aggregation formula. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:discussion} discusses deployment use cases, trade-offs, and limitations, and Section~\ref{sec:conclusion} concludes.
 
 \section{Related Work}
 \label{sec:related}
@@ -82,7 +82,7 @@ Lu et al.~\cite{lu2020smarter} performed one of the largest disk failure predict
 
 Several authors have addressed the severe class imbalance inherent in SMART datasets. The cost-aware LSTM approach of Ahmed and Green~\cite{ahmed2024costaware} explicitly targets the Backblaze dataset's imbalance ratio of over 11{,}000:1, using cost-sensitive deep learning to improve minority-class detection. Xu et al.~\cite{xu2018layerwise} proposed layerwise perturbation-based adversarial training to predict a continuous health degree rather than a binary label, extending the approach to semi-supervised settings. Similarly, the semi-supervised method of Zhou et al.~\cite{zhou2024proactive} reconstructs SMART data distributions to model healthy drive patterns and detects failures as deviations, mining two deterioration modes (slow and dramatic).
 
-A common thread across this literature is that each study commits to a single learning paradigm -- supervised classification, unsupervised anomaly detection, or semi-supervised reconstruction -- and evaluates it in isolation. Our work takes a complementary direction: rather than improving any single paradigm, we combine models from all three paradigms into one interpretable, componentized score, exploiting the strengths of each while mitigating its individual blind spot.
+A common thread across this literature is that each study commits to a single learning paradigm -- supervised classification, unsupervised anomaly detection, or semi-supervised reconstruction -- and evaluates it in isolation. Our work takes a complementary direction: rather than improving any single paradigm, we combine models from all three paradigms into one interpretable, componentized score via a hybrid model, exploiting the strengths of each while mitigating its individual blind spot.
 
 \section{Data and Methodology}
 \label{sec:method}
@@ -116,10 +116,10 @@ The strongest individual signal in the ensemble. Stage~1 trains an autoencoder (
 \subsubsection{Model 3: UMAP + HDBSCAN Clustering (Unsupervised).}
 Density-based clustering applied directly on the 8-dimensional bottleneck representation from Model~2's encoder. HDBSCAN~\cite{campello2013hdbscan,mcinnes2017hdbscan} clusters in the full 8D space (min\_cluster\_size = 50, Euclidean distance) without requiring a pre-specified cluster count. UMAP~\cite{mcinnes2018umap} reduces to 2D for visualization only. The clustering discovers 18 natural clusters, each assigned an empirical failure rate from the balanced training set. Outlier points (13.7\% of data) show a 66.9\% failure rate -- significantly above the dataset average -- making cluster membership a meaningful risk signal. At inference time, new drives are assigned to a cluster via \texttt{approximate\_predict}, and the cluster's failure rate serves as the risk score.
 
-\subsection{AHI Fusion}
+\subsection{AHI Aggregation}
 \label{sec:ahi}
 
-The four model outputs are fused into a single Aggregated Health Index (AHI) using a weighted root-mean-square (RMS) formula:
+The four model outputs are aggregated into a single Aggregated Health Index (AHI) using a weighted root-mean-square (RMS) formula:
 
 \begin{equation}
 \text{AHI} = \sqrt{w_K \cdot K^2 + w_R \cdot R^2 + w_A \cdot A^2 + w_C \cdot C^2} \times 100
@@ -150,7 +150,7 @@ Table~\ref{tab:results} summarizes the performance of each individual model on t
   \end{tabular}
 \end{table}
 
-The AHI fusion itself is not evaluated as a standalone classifier against the individual models; rather, its value lies in \emph{deployment robustness}. In practice, no single model dominates across all drive types, failure modes, and operating conditions. The RMS fusion ensures that a strong failure signal from \emph{any} component -- whether from the supervised classifier, the anomaly detector, or the cluster risk -- is preserved in the final score rather than diluted. The per-component breakdown (Table~\ref{tab:results}, rightmost column) remains available to the operator alongside the AHI, preserving interpretability: a high AHI driven primarily by $R$ (bottleneck classifier) indicates a different failure signature than one driven by $A$ (anomaly score), enabling targeted diagnostic action.
+The AHI aggregation itself is not evaluated as a standalone classifier against the individual models; rather, its value lies in \emph{deployment robustness}. In practice, no single model dominates across all drive types, failure modes, and operating conditions. The RMS aggregation ensures that a strong failure signal from \emph{any} component -- whether from the supervised classifier, the anomaly detector, or the cluster risk -- is preserved in the final score rather than diluted. The per-component breakdown (Table~\ref{tab:results}, rightmost column) remains available to the operator alongside the AHI, preserving interpretability: a high AHI driven primarily by $R$ (bottleneck classifier) indicates a different failure signature than one driven by $A$ (anomaly score), enabling targeted diagnostic action.
 
 \section{Discussion}
 \label{sec:discussion}
@@ -165,7 +165,7 @@ The system is designed for \textbf{offline, real-time inference}: given a single
     \item \textbf{Backup infrastructure:} integrating AHI into backup scheduling logic so that drives showing degradation are prioritized for backup verification.
 \end{itemize}
 
-\subsection{Advantages of Multi-Paradigm Fusion}
+\subsection{Advantages of the Multi-Paradigm Approach}
 
 The ensemble approach offers several advantages over single-model deployment:
 
@@ -181,14 +181,14 @@ The system assesses \emph{current} drive health state, not time-to-failure. It a
 
 The Backblaze dataset, while large, represents a single vendor mix and operating environment. Models trained on it may not generalize perfectly to drives from other manufacturers or operating conditions without retraining. Additionally, the dataset is a point-in-time snapshot; drive models and SMART attribute semantics evolve over time.
 
-Finally, the ensemble adds system complexity compared to deploying a single model. The weight assignments in the AHI formula are empirically tuned rather than learned; a data-driven weight optimization (e.g., Bayesian optimization or learned attention) could further improve fusion quality.
+Finally, the ensemble adds system complexity compared to deploying a single model. The weight assignments in the AHI formula are empirically tuned rather than learned; a data-driven weight optimization (e.g., Bayesian optimization or learned attention) could further improve aggregation quality.
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-We presented a multi-paradigm ensemble for hard drive failure prediction that fuses supervised classification, unsupervised anomaly detection, and density-based clustering into a single interpretable Aggregated Health Index. Trained on 32M+ SMART records from the Backblaze 2025 dataset, the system achieves up to 89.1\% failure recall and 0.929 ROC-AUC for its strongest component, while the AHI fusion provides a robust, componentized score suitable for deployment in data-center and edge environments.
+We presented a hybrid model for hard drive failure assessment that combines supervised classification, unsupervised anomaly detection, and density-based clustering into a single interpretable Aggregated Health Index. Trained on 32M+ SMART records from the Backblaze 2025 dataset, the system achieves up to 89.1\% failure recall and 0.929 ROC-AUC for its strongest component, while the AHI aggregation provides a robust, componentized score suitable for deployment in data-center and edge environments.
 
-Future work includes: (1) extending the system to predict a time-to-failure horizon using temporal models over SMART time series; (2) incorporating additional data sources such as drive location and environmental metrics, as shown beneficial by Lu et al.~\cite{lu2020smarter}; (3) learning the fusion weights via optimization rather than manual tuning; and (4) evaluating cross-vendor generalization with datasets from other storage operators.
+Future work includes: (1) extending the system to predict a time-to-failure horizon using temporal models over SMART time series; (2) incorporating additional data sources such as drive location and environmental metrics, as shown beneficial by Lu et al.~\cite{lu2020smarter}; (3) learning the aggregation weights via optimization rather than manual tuning; and (4) evaluating cross-vendor generalization with datasets from other storage operators.
 
 %\begin{acks}
 %% TODO: add if there is funding/support to acknowledge; omit section entirely if none.
