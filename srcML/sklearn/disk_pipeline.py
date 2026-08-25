@@ -41,7 +41,7 @@ def procesiraj_podatke(df_raw):
         df = df.rename(columns={"capacity_bytes": "capacity_gigabytes"})
         df['capacity_gigabytes'] = (df['capacity_gigabytes'] / (1024 ** 3)).round(2)
 
-    #Določanje jeSSD
+    #Določanje jeSSD — keyword matching na modelu
     if 'jeSSD' not in df.columns and 'model' in df.columns:
         ssd_keywords = ['SSD', 'MTFD', 'SSDSC', '850 PRO', '870 EVO', '860 PRO', '5300']
         df['jeSSD'] = df['model'].apply(lambda x: 1 if any(k in str(x).upper() for k in ssd_keywords) else 0)
@@ -83,7 +83,7 @@ def procesiraj_podatke(df_raw):
     df['error_per_gb'] = df['total_error_count'] / (df['capacity_gigabytes'] + 1e-5)
 
     #Izmet neinformativnih stolpcev
-    neinformativni = ['smart_190_raw', 'smart_194_raw', 'smart_199_raw', 'smart_10_raw']
+    neinformativni = ['smart_190_raw', 'smart_194_raw', 'smart_199_raw', 'smart_10_raw', 'rotation_rate']
     df.drop(columns=[c for c in neinformativni if c in df.columns], errors='ignore', inplace=True)
 
     return df

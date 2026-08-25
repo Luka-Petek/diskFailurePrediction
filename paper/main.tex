@@ -66,13 +66,11 @@ Hard disk drives are among the most frequently replaced components in storage sy
 
 Among the solutions, each one has a distinct blind spot. No single model covers all failure modes: gradual degradation may go unnoticed by a supervised classifier trained on binary labels, while explicit failure signals may be missed by an unsupervised detector that never saw them. Murray et al.~\cite{murray2005} established the foundational comparison of SVMs and clustering against manufacturer thresholds but did not combine paradigms. Ahmed and Green~\cite{ahmed2024costaware} addressed class imbalance with a cost-aware LSTM but remained within a single supervised paradigm. Xu et al.~\cite{xu2018layerwise} predicted a continuous health degree via adversarial training in a semi-supervised setting, while Zhou et al.~\cite{zhou2024proactive} used reconstruction-based anomaly detection to identify deterioration modes -- both, however, committed to one learning strategy. This is where a hybrid approach that combines multiple paradigms into a single, interpretable output, is standing out.
 
-We use the Backblaze 2025 hard drive SMART dataset~\cite{backblaze2025}, which contains over 32 million daily SMART records across a full calendar year, with 4{,}414 confirmed drive failure events. The dataset is overwhelmingly composed of HDDs ($>$95\%), reflecting Backblaze's production storage fleet~\cite{backblaze2025stats}. The failure-to-healthy ratio is approximately 1:7{,}300, making class imbalance a central challenge.
-
 \textbf{Contributions.} In this paper we:
 \begin{itemize}
-    \item combine four independently trained models -- a random forest classifier, an unsupervised autoencoder anomaly detector, an classifier built on bottleneck from autoencoder, and a UMAP clustering model -- into a single aggregated health index (AHI);
+    \item combine four independently trained models -- a random forest classifier, an unsupervised autoencoder anomaly detector, a classifier built on the autoencoder bottleneck, and a UMAP clustering model -- into a single aggregated health index (AHI);
     \item propose a weighted root-mean-square aggregation, the Aggregated Health Index (AHI), that keeps the interpretability of each component while being more robust than any single model on its own;
-    \item report end-to-end evaluation results (up to 0.929 ROC-AUC and 89.1\% failure recall for the strongest component) and discuss the practical trade-offs of deploying such a hybrid system as a lightweight, fully offline pipeline suitable for both data center monitoring and edge/NAS devices.
+    \item report results (best component reaches ROC-AUC 0.929 and 89.1\% failure recall) and reflect on the trade-offs of using this hybrid as a small, fully offline pipeline for data-center and edge/NAS use.
 \end{itemize}
 
 The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work on SMART-based failure prediction. Section~\ref{sec:method} describes the dataset, preprocessing, the four component models, and the AHI aggregation formula. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:discussion} discusses deployment use cases, trade-offs, and limitations, and Section~\ref{sec:conclusion} concludes.
@@ -84,6 +82,26 @@ Machine learning applied to raw SMART attribute values, rather than the manufact
 
 \section{Data and Methodology}
 \label{sec:method}
+
+\textbf{Dataset.} We use Backblaze's 2025 hard drive SMART dataset~\cite{backblaze2025}, which covers a full calendar year of daily records. The fleet is mostly HDDs~\cite{backblaze2025stats}, and failures are rare compared to healthy records (high class imbalance).
+
+\textbf{Two dataset variants.} We prepared two final learning datasets to match the learning setups:
+\begin{itemize}
+    \item \emph{Autoencoder anomaly detection:} trained on healthy-only rows sampled from many CSVs (small per-file caps to keep memory OK). A healthy hold-out split is used for early stopping and to set the anomaly threshold; failure rows are held out entirely and used only for evaluation (e.g., ROC-AUC, failure anomaly rate), not for training.
+    \item \emph{Supervised classifiers and clustering:} a balanced 50:50 set by taking all failure rows we found and sampling the same number of healthy rows at random. This avoids the extreme class imbalance during training.
+\end{itemize}
+
+\textbf{Preprocessing.} We convert capacity bytes to gigabytes, derive an SSD flag (\texttt{jeSSD}) from the model name, fill missing counters with 0, use simple medians for a few mechanical counters, and add three engineered features: \texttt{any\_critical\_error}, \texttt{total\_error\_count}, and \texttt{error\_per\_gb}. Neural models use MinMax scaling; the scikit-learn model uses the same processed features without the NN scaler.
+
+\textbf{Features.} We keep a compact 19-feature vector:
+\begin{itemize}
+  \item \texttt{capacity\_gigabytes}, \texttt{jeSSD}
+  \item SMART raw counters: 1, 3, 4, 5, 7, 9, 12, 187, 188, 191, 192, 193, 197, 198
+  \item Engineered: \texttt{any\_critical\_error}, \texttt{total\_error\_count}, \texttt{error\_per\_gb}
+\end{itemize}
+This mixes core SMART counters with three simple engineered features.
+
+\textbf{Models and aggregation.} We train four components on the same features: (1) a random forest classifier (scikit-learn) that outputs a failure probability; (2) a TensorFlow autoencoder trained only on healthy rows, where the reconstruction error is turned into a 0--1 anomaly score with a percentile threshold; (3) a small dense classifier trained on the autoencoder bottleneck (low-dimensional code) to predict failure probability; and (4) UMAP clustering on the bottleneck space, where cluster risk is the empirical failure rate of that cluster (outliers fall back to a default risk). To get one score, we compute an Aggregated Health Index (AHI) by a weighted root-mean-square of the four component scores and then clip the percentage for stability. We used fixed weights from validation (RF 0.30, bottleneck classifier 0.40, anomaly 0.20, clustering 0.10), and the final AHI can be explained from per-component contributions.
 
 \section{Results}
 \label{sec:results}

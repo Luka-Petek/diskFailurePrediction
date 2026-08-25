@@ -1,6 +1,6 @@
 {
   "model_type": "bottleneck_classifier",
-  "created_at": "2026-07-19T13:03:09",
+  "created_at": "2026-08-25T21:37:33",
   "feature_columns": [
     "capacity_gigabytes",
     "jeSSD",
@@ -24,7 +24,7 @@
   ],
   "bottleneck_dim": 8,
   "encoder_source": "C:\\Projects\\diskFailurePrediction\\srcML\\tensorflow_classification\\disk_clf_encoder.keras",
-  "threshold": 0.2825167775154114,
+  "threshold": 0.3495623469352722,
   "training": {
     "healthy_rows": 4414,
     "failure_rows": 4414,
@@ -32,41 +32,41 @@
     "val_rows": 1324,
     "test_rows": 1325,
     "epochs_requested": 100,
-    "epochs_finished": 68,
+    "epochs_finished": 100,
     "batch_size": 128,
     "class_weight_healthy": 1.0001618646811266,
     "class_weight_failure": 0.9998381877022654
   },
   "evaluation": {
-    "roc_auc": 0.9288572040482472,
-    "pr_auc": 0.9337197395840195,
-    "failure_recall": 0.8912386706948641,
-    "failure_precision": 0.8832335329341318,
-    "failure_f1": 0.8872180451127819,
+    "roc_auc": 0.7380669209352344,
+    "pr_auc": 0.7105203392672759,
+    "failure_recall": 0.904833836858006,
+    "failure_precision": 0.5995995995995996,
+    "failure_f1": 0.7212522576760987,
     "classification_report": {
       "healthy": {
-        "precision": 0.8904109589041096,
-        "recall": 0.8823529411764706,
-        "f1-score": 0.8863636363636364,
+        "precision": 0.8067484662576687,
+        "recall": 0.39668174962292607,
+        "f1-score": 0.531850353892821,
         "support": 663.0
       },
       "failure": {
-        "precision": 0.8832335329341318,
-        "recall": 0.8912386706948641,
-        "f1-score": 0.8872180451127819,
+        "precision": 0.5995995995995996,
+        "recall": 0.904833836858006,
+        "f1-score": 0.7212522576760987,
         "support": 662.0
       },
-      "accuracy": 0.8867924528301887,
+      "accuracy": 0.6505660377358491,
       "macro avg": {
-        "precision": 0.8868222459191206,
-        "recall": 0.8867958059356673,
-        "f1-score": 0.8867908407382091,
+        "precision": 0.7031740329286342,
+        "recall": 0.650757793240466,
+        "f1-score": 0.6265513057844598,
         "support": 1325.0
       },
       "weighted avg": {
-        "precision": 0.8868249543817509,
-        "recall": 0.8867924528301887,
-        "f1-score": 0.8867905183198133,
+        "precision": 0.7032522023122787,
+        "recall": 0.6505660377358491,
+        "f1-score": 0.6264798333679378,
         "support": 1325.0
       }
     }
