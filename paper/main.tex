@@ -64,23 +64,15 @@ Hard disk drives remain among the most frequently replaced components in storage
 
 Hard disk drives are among the most frequently replaced components in storage systems, and their unexpected failure is a leading cause of data loss, service unavailability, and increased operational cost~\cite{lu2020smarter}. To provide early warning, drive manufacturers embed Self-Monitoring, Analysis, and Reporting Technology (SMART) into virtually every modern drive. However, the threshold-based failure flags built into SMART firmware are deliberately conservative: manufacturers report failure detection rates of only 3--10\% at an acceptable false-alarm rate of roughly 0.1\% per year~\cite{murray2005}, leaving the majority of failures undetected until it is too late.
 
-Each paradigm has a distinct blind spot.
-No single model covers all failure modes:
-gradual degradation may go unnoticed by a supervised classifier trained on binary labels,
-while explicit failure signals may be missed by an unsupervised detector that never saw them.
-Most existing approaches rely on a single model type
--- Naive Bayes, SVM, or random forest --
-evaluated in isolation.
-This is where a hybrid approach that combines multiple paradigms
-into a single, interpretable output, is standing out.
+Among the solutions, each one has a distinct blind spot. No single model covers all failure modes: gradual degradation may go unnoticed by a supervised classifier trained on binary labels, while explicit failure signals may be missed by an unsupervised detector that never saw them. Murray et al.~\cite{murray2005} established the foundational comparison of SVMs and clustering against manufacturer thresholds but did not combine paradigms. Ahmed and Green~\cite{ahmed2024costaware} addressed class imbalance with a cost-aware LSTM but remained within a single supervised paradigm. Xu et al.~\cite{xu2018layerwise} predicted a continuous health degree via adversarial training in a semi-supervised setting, while Zhou et al.~\cite{zhou2024proactive} used reconstruction-based anomaly detection to identify deterioration modes -- both, however, committed to one learning strategy. This is where a hybrid approach that combines multiple paradigms into a single, interpretable output, is standing out.
 
 We use the Backblaze 2025 hard drive SMART dataset~\cite{backblaze2025}, which contains over 32 million daily SMART records across a full calendar year, with 4{,}414 confirmed drive failure events. The dataset is overwhelmingly composed of HDDs ($>$95\%), reflecting Backblaze's production storage fleet~\cite{backblaze2025stats}. The failure-to-healthy ratio is approximately 1:7{,}300, making class imbalance a central challenge.
 
 \textbf{Contributions.} In this paper we:
 \begin{itemize}
-    \item combine four independently trained models -- a random forest classifier, an unsupervised autoencoder anomaly detector, an autoencoder-bottleneck classifier, and a UMAP density-based clustering model -- into a single aggregated health index (AHI), trained on a full year of the Backblaze 2025 SMART dataset;
-    \item propose a weighted root-mean-square aggregation, the Aggregated Health Index (AHI), that preserves the interpretability of each component while being more robust than any single model on its own;
-    \item report end-to-end evaluation results (up to 0.929 ROC-AUC and 89.1\% failure recall for the strongest component) and discuss the practical trade-offs of deploying such a hybrid system as a lightweight, fully offline pipeline suitable for both data-center fleet monitoring and edge/NAS devices.
+    \item combine four independently trained models -- a random forest classifier, an unsupervised autoencoder anomaly detector, an classifier built on bottleneck from autoencoder, and a UMAP clustering model -- into a single aggregated health index (AHI);
+    \item propose a weighted root-mean-square aggregation, the Aggregated Health Index (AHI), that keeps the interpretability of each component while being more robust than any single model on its own;
+    \item report end-to-end evaluation results (up to 0.929 ROC-AUC and 89.1\% failure recall for the strongest component) and discuss the practical trade-offs of deploying such a hybrid system as a lightweight, fully offline pipeline suitable for both data center monitoring and edge/NAS devices.
 \end{itemize}
 
 The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work on SMART-based failure prediction. Section~\ref{sec:method} describes the dataset, preprocessing, the four component models, and the AHI aggregation formula. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:discussion} discusses deployment use cases, trade-offs, and limitations, and Section~\ref{sec:conclusion} concludes.
