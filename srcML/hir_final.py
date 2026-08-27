@@ -115,7 +115,7 @@ def _score_clustering(
         print(f"[OPOZORILO] Clustering scoring odpovedan ({exc}), fallback = 0.5", file=sys.stderr)
         return 0.5
 
-def _compute_hir(
+def _compute_ahi(
     sklearn_prob: float,
     tf_clf_prob: float,
     anomaly_score: float,
@@ -155,7 +155,7 @@ def _compute_hir(
         },
     }
 
-def predict_hir(
+def predict_ahi(
     smartctl_json_path: Path,
     sklearn_dir: Path,
     clf_dir: Path,
@@ -182,7 +182,7 @@ def predict_hir(
         raw_df,
     )
 
-    result = _compute_hir(sklearn_prob, tf_clf_prob, anomaly_score, cluster_score)
+    result = _compute_ahi(sklearn_prob, tf_clf_prob, anomaly_score, cluster_score)
 
     result["model_metadata"] = {
         "tf_clf":  {
@@ -238,7 +238,7 @@ def main() -> None:
         print(f"Napaka: datoteka ne obstaja: {input_path}", file=sys.stderr)
         sys.exit(1)
 
-    result = predict_hir(
+    result = predict_ahi(
         smartctl_json_path=input_path,
         sklearn_dir=Path(args.sklearn_dir),
         clf_dir=Path(args.clf_dir),
