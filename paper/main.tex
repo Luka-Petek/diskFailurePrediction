@@ -14,6 +14,7 @@
 \addbibresource{references.bib}
 
 \usepackage{graphicx}
+\usepackage{booktabs}
 
 \AtBeginDocument{%
   \providecommand\BibTeX{{%
@@ -93,7 +94,7 @@ Machine learning applied to raw SMART attribute values, rather than the manufact
 
 \textbf{Preprocessing.} We convert capacity bytes to gigabytes, derive an SSD flag (\texttt{jeSSD}) from the model name, fill missing counters with 0, use simple medians for a few mechanical counters, and add three engineered features: \texttt{any\_critical\_error}, \texttt{total\_error\_count}, and \texttt{error\_per\_gb}. Neural models use MinMax scaling; the scikit-learn model uses the same processed features without the NN scaler.
 
-\textbf{Features.} We keep a compact 19-feature vector:
+\textbf{Features.} We keep a compact 19 features:
 \begin{itemize}
   \item \texttt{capacity\_gigabytes}, \texttt{jeSSD}
   \item SMART raw counters: 1, 3, 4, 5, 7, 9, 12, 187, 188, 191, 192, 193, 197, 198
@@ -105,6 +106,35 @@ This mixes core SMART counters with three simple engineered features.
 
 \section{Results}
 \label{sec:results}
+
+As this is a hybrid approach to analysing hard drives, each of the four components is independently evaluated, and then their final contribution to the aggregated AHI score.
+
+The main metrics for the two supervised classifiers and the autoencoder anomaly detector are summarized in Table~\ref{tab:results}. The clustering model is evaluated differently and will be discussed separately below.
+
+\begin{table}[h]
+\centering
+\caption{Per-component evaluation on the test set.}
+\label{tab:results}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{ROC-AUC} & \textbf{Recall} & \textbf{Precision} & \textbf{F1} \\
+\midrule
+Random Forest & -- & 0.86 & 0.93 & 0.89 \\
+Autoencoder (anomaly) & 0.901 & 0.447 & 0.73 & 0.55 \\
+Bottleneck classifier & 0.929 & 0.891 & 0.883 & 0.887 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Random forest (Supervised SMART classifier) was trained on a balanced 50:50 dataset and evaluated with 5-fold cross-validation. It reaches about 90.15\% accuracy, with a failure recall of 0.86 and precision of 0.93. The model catches most failing drives, while keeping false alarms relatively low.
+
+Anomaly detection was trained on healthy rows, and evaluated against all 4414 failure rows. Reconstruction error does separate failures from healthy records reasonably well, with ROC-AUC of 0.901. However, with failure recall of only 44.7\% at the 99th percentile threshold, the model misses more than half of the actual failures.
+
+Bottleneck classifier is our strongest model. It consists of two parts. First, the autoencoder compresses the 19 features into an 8-dimensional bottleneck and then a small dense classifier is trained on those 8 dimensions, using a balanced 50:50 dataset. It reaches ROC-AUC of 0.929, failure recall of 89.1\% and F1 of 0.887 on the test set.
+
+Clustering model
+
+Aggregated health index (AHI) is simply a formula to combine all four models together.
 
 \section{Discussion}
 \label{sec:discussion}
