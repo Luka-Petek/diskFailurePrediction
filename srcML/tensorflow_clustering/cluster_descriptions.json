@@ -1,0 +1,211 @@
+{
+  "-1": {
+    "risk_label": "OUTLIER",
+    "failure_rate": 0.6686,
+    "n_samples": 1207,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": 2428.4,
+    "mean_smart197_pending": 1042.9,
+    "top_features": "smart_1_raw ↑,  smart_9_raw ↑,  smart_5_raw ↑,  smart_193_raw ↑",
+    "description": "FILL IN"
+  },
+  "0": {
+    "risk_label": "ELEVATED_RISK",
+    "failure_rate": 0.133,
+    "n_samples": 188,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": 223.3,
+    "mean_smart197_pending": 60.4,
+    "top_features": "smart_1_raw ↓,  smart_9_raw ↓,  smart_5_raw ↓,  smart_193_raw ↓",
+    "description": "FILL IN"
+  },
+  "1": {
+    "risk_label": "ELEVATED_RISK",
+    "failure_rate": 0.4949,
+    "n_samples": 99,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "2": {
+    "risk_label": "ELEVATED_RISK",
+    "failure_rate": 0.1113,
+    "n_samples": 476,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": 521.3,
+    "mean_smart197_pending": 5761.7,
+    "top_features": "smart_9_raw ↓,  smart_198_raw ↑,  smart_197_raw ↑,  smart_188_raw ↑",
+    "description": "FILL IN"
+  },
+  "3": {
+    "risk_label": "HIGH_RISK",
+    "failure_rate": 0.994,
+    "n_samples": 167,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": 6.0,
+    "mean_smart197_pending": 8384.0,
+    "top_features": "smart_9_raw ↓,  smart_197_raw ↑,  smart_1_raw ↓,  smart_5_raw ↓",
+    "description": "FILL IN"
+  },
+  "4": {
+    "risk_label": "ELEVATED_RISK",
+    "failure_rate": 0.1125,
+    "n_samples": 569,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "5": {
+    "risk_label": "ELEVATED_RISK",
+    "failure_rate": 0.1009,
+    "n_samples": 228,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": 149.8,
+    "mean_smart197_pending": 218.5,
+    "top_features": "smart_1_raw ↓,  smart_9_raw ↑,  smart_5_raw ↓,  smart_193_raw ↓",
+    "description": "FILL IN"
+  },
+  "6": {
+    "risk_label": "ELEVATED_RISK",
+    "failure_rate": 0.1519,
+    "n_samples": 928,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": 2384.5,
+    "mean_smart197_pending": 105.0,
+    "top_features": "smart_1_raw ↓,  smart_9_raw ↑,  smart_193_raw ↓,  smart_187_raw ↓",
+    "description": "FILL IN"
+  },
+  "7": {
+    "risk_label": "LOW_RISK",
+    "failure_rate": 0.0777,
+    "n_samples": 296,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": 0.0,
+    "mean_smart197_pending": 51.4,
+    "top_features": "smart_9_raw ↓,  smart_1_raw ↓,  smart_5_raw ↓,  smart_193_raw ↓",
+    "description": "FILL IN"
+  },
+  "8": {
+    "risk_label": "LOW_RISK",
+    "failure_rate": 0.0804,
+    "n_samples": 958,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": 2154.2,
+    "mean_smart197_pending": 56.9,
+    "top_features": "smart_9_raw ↓,  smart_193_raw ↓,  smart_1_raw ↓,  smart_187_raw ↓",
+    "description": "FILL IN"
+  },
+  "9": {
+    "risk_label": "HIGH_RISK",
+    "failure_rate": 0.8351,
+    "n_samples": 485,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "10": {
+    "risk_label": "HIGH_RISK",
+    "failure_rate": 0.9548,
+    "n_samples": 1372,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "11": {
+    "risk_label": "ELEVATED_RISK",
+    "failure_rate": 0.1817,
+    "n_samples": 567,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "12": {
+    "risk_label": "HIGH_RISK",
+    "failure_rate": 0.7524,
+    "n_samples": 105,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "13": {
+    "risk_label": "HIGH_RISK",
+    "failure_rate": 0.86,
+    "n_samples": 100,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "14": {
+    "risk_label": "HIGH_RISK",
+    "failure_rate": 0.868,
+    "n_samples": 341,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "15": {
+    "risk_label": "HIGH_RISK",
+    "failure_rate": 0.9792,
+    "n_samples": 337,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "16": {
+    "risk_label": "HIGH_RISK",
+    "failure_rate": 0.9252,
+    "n_samples": 214,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  },
+  "17": {
+    "risk_label": "HIGH_RISK",
+    "failure_rate": 0.9372,
+    "n_samples": 191,
+    "pct_ssd": NaN,
+    "mean_capacity_gb": NaN,
+    "mean_smart5_reallocated": NaN,
+    "mean_smart197_pending": NaN,
+    "top_features": "(no rows in this CSV)",
+    "description": "FILL IN"
+  }
+}
