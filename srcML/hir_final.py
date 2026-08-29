@@ -150,9 +150,9 @@ def _compute_ahi(
 
     ahi = float(np.clip(rms_score * 100, 3.0, 97.0))
 
-    if ahi >= 75.0:
+    if ahi >= 65.0:
         verdict = "CRITICAL"
-    elif ahi >= 40.0:
+    elif ahi >= 45.0:
         verdict = "WARNING"
     else:
         verdict = "HEALTHY"

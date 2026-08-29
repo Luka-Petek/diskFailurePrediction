@@ -148,7 +148,7 @@ AHI is simply a weighted root-mean-square (RMS) formula that combines all 4 mode
 \label{eq:ahi}
 \end{equation}
 
-\noindent where $K$ is the random forest failure probability ($w_K = 0.30$), $R$ is the bottleneck classifier failure probability ($w_R = 0.40$), $A$ is the autoencoder anomaly score normalized to $[0,1]$ ($w_A = 0.20$), and $C$ is the empirical failure rate of the assigned cluster ($w_C = 0.10$). All scores are in $[0,1]$, weights sum to 1, and the result is multiplied by 100 to express AHI as a percentage. The final value is clipped to $[3,\,97]$ to avoid extreme boundary values. Below 40\% means \emph{Healthy}, 40--75\% is \emph{Warning}, and above 75\% is \emph{Critical}.
+\noindent where $K$ is the random forest failure probability ($w_K = 0.30$), $R$ is the bottleneck classifier failure probability ($w_R = 0.40$), $A$ is the autoencoder anomaly score normalized to $[0,1]$ ($w_A = 0.20$), and $C$ is the empirical failure rate of the assigned cluster ($w_C = 0.10$). All scores are in $[0,1]$, weights sum to 1, and the result is multiplied by 100 to express AHI as a percentage. The final value is clipped to $[3,\,97]$ to avoid extreme boundary values. Below 45\% means \emph{Healthy}, 45--65\% is \emph{Warning}, and above 65\% is \emph{Critical}.
 
 We evaluated AHI on 100 balanced records (50 healthy, 50 failed) from the Backblaze 2023 dataset~\cite{backblaze2023}, which was not used in training at all. Figure~\ref{fig:ahi_rock} shows how the AHI scores look for both groups.
 

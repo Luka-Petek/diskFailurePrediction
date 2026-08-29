@@ -164,8 +164,8 @@ def _plot_color_rock(df: pd.DataFrame, out_path: Path, dataset_label: str = "in-
 
     # Zone lines (visual guides, not thresholds)
     for level, color, label in [
-        (40, "#f0c419", "WARNING  40"),
-        (75, "#ff5555", "CRITICAL  75"),
+        (45, "#f0c419", "WARNING  45"),
+        (65, "#ff5555", "CRITICAL  65"),
     ]:
         ax.axhline(level, color=color, lw=1.0, ls="--", alpha=0.65)
         ax.text(1.44, level, label, color=color, va="center", ha="right", fontsize=7.5)
