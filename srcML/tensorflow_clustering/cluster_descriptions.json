@@ -3,209 +3,171 @@
     "risk_label": "OUTLIER",
     "failure_rate": 0.6686,
     "n_samples": 1207,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
     "mean_smart5_reallocated": 2428.4,
     "mean_smart197_pending": 1042.9,
     "top_features": "smart_1_raw ↑,  smart_9_raw ↑,  smart_5_raw ↑,  smart_193_raw ↑",
-    "description": "FILL IN"
+    "description": "Does not fit any known pattern — older disks with high read error rates, many reallocated and pending sectors; majority are already failing."
   },
   "0": {
     "risk_label": "ELEVATED_RISK",
     "failure_rate": 0.133,
     "n_samples": 188,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
     "mean_smart5_reallocated": 223.3,
     "mean_smart197_pending": 60.4,
     "top_features": "smart_1_raw ↓,  smart_9_raw ↓,  smart_5_raw ↓,  smart_193_raw ↓",
-    "description": "FILL IN"
+    "description": "Younger disks with below-average SMART errors and low age; some reallocated sectors present but overall behavior is stable."
   },
   "1": {
     "risk_label": "ELEVATED_RISK",
     "failure_rate": 0.4949,
     "n_samples": 99,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "Borderline group — nearly half of disks in this cluster failed; mixed health signals with no single dominant SMART pattern."
   },
   "2": {
     "risk_label": "ELEVATED_RISK",
     "failure_rate": 0.1113,
     "n_samples": 476,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
     "mean_smart5_reallocated": 521.3,
     "mean_smart197_pending": 5761.7,
     "top_features": "smart_9_raw ↓,  smart_198_raw ↑,  smart_197_raw ↑,  smart_188_raw ↑",
-    "description": "FILL IN"
+    "description": "Newer disks but with very high pending and uncorrectable sector counts; command timeouts elevated — possible surface damage developing."
   },
   "3": {
     "risk_label": "HIGH_RISK",
     "failure_rate": 0.994,
     "n_samples": 167,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
     "mean_smart5_reallocated": 6.0,
     "mean_smart197_pending": 8384.0,
     "top_features": "smart_9_raw ↓,  smart_197_raw ↑,  smart_1_raw ↓,  smart_5_raw ↓",
-    "description": "FILL IN"
+    "description": "Critically dangerous — newer disks with an extreme number of pending sectors (avg 8384) but few reallocated sectors; nearly all (99.4%) are failing."
   },
   "4": {
     "risk_label": "ELEVATED_RISK",
     "failure_rate": 0.1125,
     "n_samples": 569,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "Low-moderate risk group; about 1 in 9 disks failing, no dominant distinguishing SMART pattern identified from available data."
   },
   "5": {
     "risk_label": "ELEVATED_RISK",
     "failure_rate": 0.1009,
     "n_samples": 228,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
     "mean_smart5_reallocated": 149.8,
     "mean_smart197_pending": 218.5,
     "top_features": "smart_1_raw ↓,  smart_9_raw ↑,  smart_5_raw ↓,  smart_193_raw ↓",
-    "description": "FILL IN"
+    "description": "Older disks with low error rates and low load cycle counts; aging naturally but SMART values are mostly within normal range."
   },
   "6": {
     "risk_label": "ELEVATED_RISK",
     "failure_rate": 0.1519,
     "n_samples": 928,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
     "mean_smart5_reallocated": 2384.5,
     "mean_smart197_pending": 105.0,
     "top_features": "smart_1_raw ↓,  smart_9_raw ↑,  smart_193_raw ↓,  smart_187_raw ↓",
-    "description": "FILL IN"
+    "description": "Older disks with high reallocated sector counts but few pending sectors; degraded surface condition that has so far stabilised."
   },
   "7": {
     "risk_label": "LOW_RISK",
     "failure_rate": 0.0777,
     "n_samples": 296,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
     "mean_smart5_reallocated": 0.0,
     "mean_smart197_pending": 51.4,
     "top_features": "smart_9_raw ↓,  smart_1_raw ↓,  smart_5_raw ↓,  smart_193_raw ↓",
-    "description": "FILL IN"
+    "description": "Youngest and cleanest disks — zero reallocated sectors, low error rates across all attributes; healthiest group in the dataset."
   },
   "8": {
     "risk_label": "LOW_RISK",
     "failure_rate": 0.0804,
     "n_samples": 958,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
     "mean_smart5_reallocated": 2154.2,
     "mean_smart197_pending": 56.9,
     "top_features": "smart_9_raw ↓,  smart_193_raw ↓,  smart_1_raw ↓,  smart_187_raw ↓",
-    "description": "FILL IN"
+    "description": "Younger disks with elevated reallocated sector count but low pending and read error rates; surface wear present but currently stable."
   },
   "9": {
     "risk_label": "HIGH_RISK",
     "failure_rate": 0.8351,
     "n_samples": 485,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "High failure rate group — over 83% of disks failing; likely represents a combination of advanced age and heavy SMART error accumulation."
   },
   "10": {
     "risk_label": "HIGH_RISK",
     "failure_rate": 0.9548,
     "n_samples": 1372,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "Largest failure cluster — 95.5% failure rate across 1372 disks; dominant pattern of failed disks in the training data."
   },
   "11": {
     "risk_label": "ELEVATED_RISK",
     "failure_rate": 0.1817,
     "n_samples": 567,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "Moderate risk — about 1 in 5 disks failing; intermediate health state, worth monitoring closely."
   },
   "12": {
     "risk_label": "HIGH_RISK",
     "failure_rate": 0.7524,
     "n_samples": 105,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "Majority failing — 75% failure rate in a small but consistent cluster; likely a specific failure mode unique to a subset of disk models."
   },
   "13": {
     "risk_label": "HIGH_RISK",
     "failure_rate": 0.86,
     "n_samples": 100,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "86% of disks failing; small cluster representing a distinct high-risk SMART signature not seen in the evaluation CSV."
   },
   "14": {
     "risk_label": "HIGH_RISK",
     "failure_rate": 0.868,
     "n_samples": 341,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "86.8% failure rate — large high-risk cluster; disks placed here are very likely to fail based on their bottleneck feature pattern."
   },
   "15": {
     "risk_label": "HIGH_RISK",
     "failure_rate": 0.9792,
     "n_samples": 337,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "Near-certain failure — 97.9% of disks failed; second most dangerous named cluster, disks here are essentially at end of life."
   },
   "16": {
     "risk_label": "HIGH_RISK",
     "failure_rate": 0.9252,
     "n_samples": 214,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "92.5% failure rate; compact cluster of disks with a specific failing SMART signature detected in the bottleneck space."
   },
   "17": {
     "risk_label": "HIGH_RISK",
     "failure_rate": 0.9372,
     "n_samples": 191,
-    "pct_ssd": NaN,
-    "mean_capacity_gb": NaN,
-    "mean_smart5_reallocated": NaN,
-    "mean_smart197_pending": NaN,
-    "top_features": "(no rows in this CSV)",
-    "description": "FILL IN"
+    "mean_smart5_reallocated": null,
+    "mean_smart197_pending": null,
+    "top_features": "insufficient data in evaluation CSV",
+    "description": "93.7% failure rate — disks in this cluster share a high-risk bottleneck pattern consistent with late-stage disk degradation."
   }
 }

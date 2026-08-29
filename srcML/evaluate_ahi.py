@@ -55,11 +55,18 @@ def _compute_ahi_for_row(raw_row: pd.DataFrame,
                           ae_model, ae_scaler, ae_meta,
                           clusterer, cluster_meta) -> dict:
     # Each scoring function handles its own preprocessing internally — pass raw row directly
-    s_skl = _score_sklearn(sklearn_pipeline, raw_row)
-    s_clf = _score_tf_clf(encoder, classifier, clf_scaler, raw_row)
-    s_an  = _score_anomaly(ae_model, ae_scaler, ae_meta, raw_row)
-    s_clu = _score_clustering(clusterer, cluster_meta, encoder, clf_scaler, raw_row)
-    return _compute_ahi(s_skl, s_clf, s_an, s_clu)
+    s_skl         = _score_sklearn(sklearn_pipeline, raw_row)
+    s_clf         = _score_tf_clf(encoder, classifier, clf_scaler, raw_row)
+    s_an          = _score_anomaly(ae_model, ae_scaler, ae_meta, raw_row)
+    cluster_result = _score_clustering(clusterer, cluster_meta, encoder, clf_scaler, raw_row)
+    result = _compute_ahi(s_skl, s_clf, s_an, cluster_result["score"])
+    result["cluster_info"] = {
+        "cluster_id":  cluster_result["cluster_id"],
+        "risk_label":  cluster_result["risk_label"],
+        "risk_score":  round(cluster_result["score"], 4),
+        "description": cluster_result["description"],
+    }
+    return result
 
 
 def evaluate_ahi(
