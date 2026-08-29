@@ -29,6 +29,7 @@ from srcML.hir_final import (
     _score_clustering,
     _compute_ahi,
 )
+from srcML.nn_preprocessing.preprocessing import build_balanced_dataset_from_csvs
 
 
 def _read_csv(csv_path: Path) -> pd.DataFrame:
@@ -61,9 +62,8 @@ def _compute_ahi_for_row(raw_row: pd.DataFrame,
     return _compute_ahi(s_skl, s_clf, s_an, s_clu)
 
 
-def evaluate_ahi_on_csv(
-    csv_path: Path,
-    n_per_class: int,
+def evaluate_ahi(
+    sample: pd.DataFrame,
     sklearn_dir: Path,
     clf_dir: Path,
     anomaly_dir: Path,
@@ -71,14 +71,8 @@ def evaluate_ahi_on_csv(
     random_state: int,
     output_csv: Optional[Path],
     plot_out: Optional[Path],
+    dataset_label: str,
 ) -> dict:
-    df = _read_csv(csv_path)
-    if df.empty:
-        raise RuntimeError(f"CSV je prazen: {csv_path}")
-    if "failure" not in df.columns:
-        raise RuntimeError("CSV nima stolpca 'failure'.")
-
-    sample = _balanced_sample(df, n_per_class=n_per_class, random_state=random_state)
     print(f"Vzorec: {len(sample)} diskov  ({sample['failure'].sum():.0f} failed, {(sample['failure']==0).sum():.0f} healthy)")
 
     print("Nalagam artefakte...")
@@ -125,7 +119,7 @@ def evaluate_ahi_on_csv(
         print(f"Rezultati shranjeni: {output_csv}")
 
     if plot_out is not None:
-        _plot_color_rock(result_df, plot_out)
+        _plot_color_rock(result_df, plot_out, dataset_label)
         print(f"Graf shranjen: {plot_out}")
 
     summary = {
@@ -140,7 +134,7 @@ def evaluate_ahi_on_csv(
     return summary
 
 
-def _plot_color_rock(df: pd.DataFrame, out_path: Path) -> None:
+def _plot_color_rock(df: pd.DataFrame, out_path: Path, dataset_label: str = "in-sample") -> None:
     BG   = "#111111"
     rng  = np.random.default_rng(seed=0)
 
@@ -197,7 +191,7 @@ def _plot_color_rock(df: pd.DataFrame, out_path: Path) -> None:
     n_h = int((df["label"] == 0).sum())
     n_f = int((df["label"] == 1).sum())
     ax.set_title(
-        f"AHI vs. actual disk failure  (n={n_h+n_f}, in-sample)",
+        f"AHI vs. actual disk failure  (n={n_h+n_f}, {dataset_label})",
         color="#eeeeee", fontsize=11, pad=10,
     )
 
@@ -208,8 +202,11 @@ def _plot_color_rock(df: pd.DataFrame, out_path: Path) -> None:
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description="Evaluate AHI on a CSV and create a color rock plot.")
-    p.add_argument("--data-csv",   type=str, required=True)
+    p = argparse.ArgumentParser(description="Evaluate AHI and create a color rock plot.")
+    p.add_argument("--data-csv",   type=str, default=None,
+                   help="Path to a single CSV file with failure column.")
+    p.add_argument("--data-dir",   type=str, default=None,
+                   help="Path to a directory of CSV files (e.g. DiskData2023). Scans recursively.")
     p.add_argument("--n-per-class", type=int, default=50,
                    help="Number of disks per class (failure=0 and failure=1). Default 50 → 100 total.")
     p.add_argument("--random-state", type=int, default=42)
@@ -228,9 +225,31 @@ def main() -> None:
 
     args = p.parse_args()
 
-    summary = evaluate_ahi_on_csv(
-        csv_path=Path(args.data_csv),
-        n_per_class=args.n_per_class,
+    if not args.data_csv and not args.data_dir:
+        p.error("Provide either --data-csv or --data-dir")
+
+    if args.data_dir:
+        data_dir = Path(args.data_dir)
+        print(f"Branje CSV datotek iz: {data_dir}")
+        healthy_df, failure_df = build_balanced_dataset_from_csvs(
+            data_dir=data_dir,
+            max_failure=args.n_per_class,
+            random_state=args.random_state,
+        )
+        sample = pd.concat([healthy_df, failure_df], ignore_index=True)
+        dataset_label = f"holdout 2023"
+    else:
+        csv_path = Path(args.data_csv)
+        df = _read_csv(csv_path)
+        if df.empty:
+            raise RuntimeError(f"CSV je prazen: {csv_path}")
+        if "failure" not in df.columns:
+            raise RuntimeError("CSV nima stolpca 'failure'.")
+        sample = _balanced_sample(df, n_per_class=args.n_per_class, random_state=args.random_state)
+        dataset_label = "in-sample"
+
+    summary = evaluate_ahi(
+        sample=sample,
         sklearn_dir=Path(args.sklearn_dir),
         clf_dir=Path(args.clf_dir),
         anomaly_dir=Path(args.anomaly_dir),
@@ -238,6 +257,7 @@ def main() -> None:
         random_state=args.random_state,
         output_csv=Path(args.output_csv),
         plot_out=Path(args.plot_out),
+        dataset_label=dataset_label,
     )
 
     print(json.dumps(summary, indent=2, ensure_ascii=False))
