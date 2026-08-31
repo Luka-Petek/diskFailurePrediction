@@ -4,9 +4,6 @@
 % !TeX TS-program = pdflatex
 % !BIB TS-program = biber
 
-%% for SiKDD 2026 / IS2026
-%% Based on the official IS2026 template (sample-is-2026.tex).
-
 \documentclass[sigconf,natbib=false]{acmart}
 \usepackage{csquotes}
 
@@ -53,7 +50,7 @@
 
 \begin{abstract}
 
-Unexpected disk failure is one of the most common causes of data loss and downtime in storage systems, yet the built-in SMART warnings on modern drives catch only a small fraction of actual failures. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates. Machine learning can thus be used to improve the predictive performance. Classical methods (SVM or Naive Bayes) perform reasonably well on SMART data, but most of them rely on a single model and do not combine different learning strategies. We combine 4 independently trained models -- a random forest classifier, an unsupervised autoencoder-based anomaly detector, a classifier built on the autoencoder bottleneck, and an HDBSCAN clustering model. Each model captures a different kind of failure signal and has its own interpretational value. All 4 predictions are combined into a single Aggregated Health Index (AHI). The best individual component achieves an AUC of 0.929 and an 89.1\% failure recall, and the final AHI can be decomposed into the individual contributions of each model, providing an explanation of the prediction.
+Unexpected disk failure is one of the most common causes of downtime in storage systems and data loss. However, the built-in SMART warnings on modern drives catch only a small fraction of actual failures. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates. Machine learning can be used to improve the predictive performance. Classical methods (SVM or Naive Bayes) perform reasonably well on SMART data, but most of them rely on a single model and do not combine different learning strategies. We combine 4 independently trained models -- a random forest classifier, an unsupervised autoencoder-based anomaly detector, a classifier built on the autoencoder bottleneck, and an HDBSCAN clustering model. Each model captures a different kind of failure signal and has its own interpretational value. All 4 predictions are combined into a single Aggregated Health Index (AHI). The best component achieves an AUC of 0.929 and an 89.1\% failure recall, and the final AHI can be decomposed into the individual contributions of each model, providing an explanation of the prediction.
 \end{abstract}
 
 \keywords{hard drive failure assessment, SMART data, hybrid model, autoencoder, anomaly detection, HDBSCAN clustering, interpretable machine learning}
@@ -67,7 +64,7 @@ Hard disk drives are among the most frequently replaced components in storage sy
 
 Machine learning methods are a viable approach to improving these basic failure predictions. Various machine learning methods and models have been recently used to accurately forecast imminent hard drive failures based on historical operational data, specifically SMART (Self-Monitoring Analysis and Reporting Technology) attributes~\cite{atekoja2024prediction}. However, each machine learning method has a distinct blind spot. No single model covers all failure modes: gradual degradation may go unnoticed by a supervised classifier trained on binary labels, while explicit failure signals may be missed by an unsupervised anomaly detector that never saw them. Murray et al.~\cite{murray2005} established a foundational comparison between SVMs and clustering against manufacturer thresholds but did not integrate the paradigms. Ahmed and Green~\cite{ahmed2024costaware} addressed class imbalance with a cost-aware LSTM but remained within a single supervised paradigm. Xu et al.~\cite{xu2018layerwise} predicted a continuous health degree with noise-based training in a semi-supervised setting, while Zhou et al.~\cite{zhou2024proactive} used reconstruction-based anomaly detection to identify deterioration modes -- both, however, committed to one learning strategy. This is where a hybrid approach that combines multiple paradigms into a single, interpretable output stands out.
 
-The main contributions of this paper are thus:
+The main contributions of this paper are:
 \begin{itemize}
     \item We combine four independently trained models -- a random forest classifier, an unsupervised autoencoder anomaly detector, a classifier built on the autoencoder bottleneck, and an HDBSCAN clustering model -- into a single Aggregated Health Index (AHI) using a weighted root-mean-square formula.
     \item We keep all four per-component scores visible alongside AHI, ensuring the final output is interpretable and traceable to each model's contribution.
@@ -101,7 +98,7 @@ Machine learning (ML) applied to raw SMART attribute values, rather than the man
   \item Engineered: \texttt{any\_critical\_error}, \texttt{total\_error\_count}, \texttt{error\_per\_gb}
 \end{itemize}
 
-\textbf{Models and aggregation.} We train four components on the same features: (1) a random forest classifier (scikit-learn) that outputs a failure probability; (2) a TensorFlow autoencoder trained only on healthy rows, where the reconstruction error is turned into a 0--1 anomaly score with a percentile threshold; (3) a small dense classifier trained on the autoencoder bottleneck to predict failure probability; and (4) HDBSCAN clustering on the bottleneck space, where cluster risk is the empirical failure rate of that cluster (outliers fall back to a default risk). To obtain a single score, we compute an Aggregated Health Index (AHI) as a weighted root-mean-square of the four component scores, then clip the percentage for stability. We used fixed weights from validation (RF 0.30, bottleneck classifier 0.40, anomaly 0.20, clustering 0.10), and the final AHI can be explained from per-component contributions.
+\textbf{Models and aggregation.} The full implementation is available at~\cite{petek2026github}. We train four components on the same features: (1) a random forest classifier (scikit-learn) that outputs a failure probability; (2) a TensorFlow autoencoder trained only on healthy rows, where the reconstruction error is turned into a 0--1 anomaly score with a percentile threshold; (3) a small dense classifier trained on the autoencoder bottleneck to predict failure probability; and (4) HDBSCAN clustering on the bottleneck space, where cluster risk is the empirical failure rate of that cluster (outliers fall back to a default risk). To obtain a single score, we compute an Aggregated Health Index (AHI) as a weighted root-mean-square of the four component scores, then clip the percentage for stability. We used fixed weights from validation (RF 0.30, bottleneck classifier 0.40, anomaly 0.20, clustering 0.10), and the final AHI can be explained from per-component contributions.
 
 \section{Results}
 \label{sec:results}
@@ -142,7 +139,7 @@ The clustering model also works on the same 8-dimensional bottleneck data repres
 
 \subsection{Aggregated Health Index}
 
-Aggregated Health Index (AHI) is simply a weighted root-mean-square (RMS) formula that combines all 4 model scores into one final value representing the current risk state of the disk:
+The Aggregated Health Index (AHI) is simply a weighted root-mean-square (RMS) formula that combines all 4 model scores into one final value representing the current risk state of the disk:
 
 \begin{equation}
 \mathrm{AHI} = \sqrt{\frac{w_K \cdot K^2 + w_R \cdot R^2 + w_A \cdot A^2 + w_C \cdot C^2}{\sum w}} \times 100
