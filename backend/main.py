@@ -308,7 +308,7 @@ async def predict_combined(request: Request, file: UploadFile = File(...)):
             models_predicting_failure += 1
         model_scores["sklearn"] = {
             "failure_probability": s_skl,
-            "hir_risk_score": skl_result.get("hir_risk_score"),
+            "ahi_risk_score": skl_result.get("ahi_risk_score"),
             "verdict": skl_result.get("verdict"),
             "weight": W_skl,
             "classification_fail": skl_result.get("models_output", {}).get("classification_fail", False),

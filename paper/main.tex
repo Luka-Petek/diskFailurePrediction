@@ -1,0 +1,183 @@
+% !TeX spellcheck = en_GB
+% !TeX encoding = UTF-8
+% !TeX root = main.tex
+% !TeX TS-program = pdflatex
+% !BIB TS-program = biber
+
+\documentclass[sigconf,natbib=false]{acmart}
+\usepackage{csquotes}
+
+\usepackage[datamodel=acmdatamodel,style=acmnumeric,backend=biber,sorting=none]{biblatex}
+\addbibresource{references.bib}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+\setcopyright{rightsretained}
+\copyrightyear{2026}
+\acmDOI{}
+\acmConference[Information Society 2026]{Information Society 2026: 29th international multiconference}{5--9 October 2026}{Ljubljana, Slovenia}
+\acmISBN{}
+\settopmatter{printccs=false,printacmref=false}
+
+\geometry{a4paper}
+
+\begin{document}
+
+\title[Combining Supervised and Unsupervised Learning for Hard Drive Failure Assessment]{Combining Supervised and Unsupervised Learning on SMART Data for Hard Drive Failure Assessment}
+
+\author{Luka Petek}
+\affiliation{%
+  \institution{University of Maribor, Faculty of Electrical Engineering and Computer Science}
+  \city{Maribor}
+  \country{Slovenia}
+}
+\email{luka.petek1@student.um.si}
+
+\author{Vili Podgorelec}
+\affiliation{%
+  \institution{University of Maribor, Faculty of Electrical Engineering and Computer Science}
+  \city{Maribor}
+  \country{Slovenia}
+}
+\email{vili.podgorelec@um.si}
+
+\renewcommand{\shortauthors}{Petek and Podgorelec}
+
+\begin{abstract}
+
+Unexpected disk failure is one of the most common causes of downtime in storage systems and data loss. However, the built-in SMART warnings on modern drives catch only a small fraction of actual failures. Manufacturer-embedded SMART thresholds detect only 3--10\% of failures at acceptably low false-alarm rates. Machine learning can be used to improve the predictive performance. Classical methods (SVM or Naive Bayes) perform reasonably well on SMART data, but most of them rely on a single model and do not combine different learning strategies. We combine 4 independently trained models -- a random forest classifier, an unsupervised autoencoder-based anomaly detector, a classifier built on the autoencoder bottleneck, and an HDBSCAN clustering model. Each model captures a different kind of failure signal and has its own interpretational value. All 4 predictions are combined into a single Aggregated Health Index (AHI). The best component achieves an AUC of 0.929 and an 89.1\% failure recall, and the final AHI can be decomposed into the individual contributions of each model, providing an explanation of the prediction.
+\end{abstract}
+
+\keywords{hard drive failure assessment, SMART data, hybrid model, autoencoder, anomaly detection, HDBSCAN clustering, interpretable machine learning}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:introduction}
+
+Hard disk drives are among the most frequently replaced components in storage systems, and their unexpected failure is a leading cause of data loss, service unavailability, and increased operational cost~\cite{lu2020smarter}. To provide early warning, drive manufacturers embed Self-Monitoring, Analysis, and Reporting Technology (SMART) into virtually every modern drive. However, the threshold-based failure flags built into SMART firmware are deliberately conservative: manufacturers report failure detection rates of only 3--10\% at an acceptable false-alarm rate of roughly 0.1\% per year~\cite{murray2005}, leaving the majority of failures undetected until it is too late.
+
+Machine learning methods are a viable approach to improving these basic failure predictions. Various machine learning methods and models have been recently used to accurately forecast imminent hard drive failures based on historical operational data, specifically SMART (Self-Monitoring Analysis and Reporting Technology) attributes~\cite{atekoja2024prediction}. However, each machine learning method has a distinct blind spot. No single model covers all failure modes: gradual degradation may go unnoticed by a supervised classifier trained on binary labels, while explicit failure signals may be missed by an unsupervised anomaly detector that never saw them. Murray et al.~\cite{murray2005} established a foundational comparison between SVMs and clustering against manufacturer thresholds but did not integrate the paradigms. Ahmed and Green~\cite{ahmed2024costaware} addressed class imbalance with a cost-aware LSTM but remained within a single supervised paradigm. Xu et al.~\cite{xu2018layerwise} predicted a continuous health degree with noise-based training in a semi-supervised setting, while Zhou et al.~\cite{zhou2024proactive} used reconstruction-based anomaly detection to identify deterioration modes -- both, however, committed to one learning strategy. This is where a hybrid approach that combines multiple paradigms into a single, interpretable output stands out.
+
+The main contributions of this paper are:
+\begin{itemize}
+    \item We combine four independently trained models -- a random forest classifier, an unsupervised autoencoder anomaly detector, a classifier built on the autoencoder bottleneck, and an HDBSCAN clustering model -- into a single Aggregated Health Index (AHI) using a weighted root-mean-square formula.
+    \item We keep all four per-component scores visible alongside AHI, ensuring the final output is interpretable and traceable to each model's contribution.
+    \item We report evaluation results and reflect on the trade-offs of using this hybrid as a small, fully offline pipeline for data-centre and edge deployment.
+\end{itemize}
+
+The remainder of this paper is organised as follows. Section~\ref{sec:related} reviews related work on SMART-based failure prediction. Section~\ref{sec:method} describes the dataset, preprocessing, the four component models, and the AHI aggregation formula. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:discussion} discusses deployment use cases, trade-offs, and limitations, while Section~\ref{sec:conclusion} concludes the paper.
+
+\section{Related Work}
+\label{sec:related}
+
+Machine learning (ML) applied to raw SMART attribute values, rather than the manufacturer's own threshold flags, has been shown to improve detection rates~\cite{murray2005,lu2020smarter}. Yet ML-based disk failure prediction remains fragmented. Supervised classifiers, such as the SVMs used by Murray et al.~\cite{murray2005}, achieve high precision when enough labelled failures are available but struggle with the extreme class imbalance typical of SMART datasets (often exceeding 10{,}000:1~\cite{ahmed2024costaware}). Unsupervised anomaly detectors, such as autoencoders trained on healthy drives only, do not require failure labels but cannot exploit known failure patterns when they exist. Clustering approaches group drives by operating regime and provide population-level risk context, but do not output a direct failure probability. Semi-supervised methods, such as the reconstruction-based approach of Zhou et al.~\cite{zhou2024proactive} and the health-degree prediction of Xu et al.~\cite{xu2018layerwise}, attempt to bridge this gap but still rely on a single learning strategy.
+
+\section{Data and Methodology}
+\label{sec:method}
+
+\textbf{Dataset.} We use Backblaze's 2025 hard drive SMART dataset~\cite{backblaze2025}, which covers a full calendar year of daily records. The fleet is mostly HDDs~\cite{backblaze2025stats}, and failures are rare compared to healthy records (high class imbalance), which was one of the main challenges.
+
+\textbf{Two dataset variants.} We prepared two final training datasets to match the learning setups:
+\begin{itemize}
+    \item \emph{Autoencoder anomaly detection:} trained on healthy-only rows. A healthy hold-out split is used for early stopping and to set the anomaly threshold; failure rows are used only for evaluation and not for training.
+    \item \emph{Supervised classifiers and clustering:} a balanced 50:50 set by taking all failure rows we found and sampling the same number of healthy rows at random. This avoids the extreme class imbalance during training. The final learning dataset comprises 4{,}414 failure and 4{,}414 healthy records.
+\end{itemize}
+
+\textbf{Preprocessing.} We convert capacity bytes to gigabytes, derive an SSD flag (\texttt{jeSSD}) from the model name, fill missing counters with 0, use medians for a few mechanical counters, and add three engineered features: \texttt{any\_critical\_error}, \texttt{total\_error\_count}, and \texttt{error\_per\_gb}. Neural models use MinMax scaling; the scikit-learn model uses the same processed features without the NN scaler.
+
+\textbf{Features.} We use a compact set of 19 features:
+\begin{itemize}
+  \item \texttt{capacity\_gigabytes}, \texttt{jeSSD}
+  \item SMART raw counters: 1, 3, 4, 5, 7, 9, 12, 187, 188, 191, 192, 193, 197, 198
+  \item Engineered: \texttt{any\_critical\_error}, \texttt{total\_error\_count}, \texttt{error\_per\_gb}
+\end{itemize}
+
+\textbf{Models and aggregation.} The full implementation is available at~\cite{petek2026github}. We train four components on the same features: (1) a random forest classifier (scikit-learn) that outputs a failure probability; (2) a TensorFlow autoencoder trained only on healthy rows, where the reconstruction error is turned into a 0--1 anomaly score with a percentile threshold; (3) a small dense classifier trained on the autoencoder bottleneck to predict failure probability; and (4) HDBSCAN clustering on the bottleneck space, where cluster risk is the empirical failure rate of that cluster (outliers fall back to a default risk). To obtain a single score, we compute an Aggregated Health Index (AHI) as a weighted root-mean-square of the four component scores, then clip the percentage for stability. We used fixed weights from validation (RF 0.30, bottleneck classifier 0.40, anomaly 0.20, clustering 0.10), and the final AHI can be explained from per-component contributions.
+
+\section{Results}
+\label{sec:results}
+
+As this is a hybrid approach, each of the 4 components is evaluated independently first, and then we assess how well they work together using the AHI. The main metrics are summarised in Table~\ref{tab:results}. The clustering model is evaluated separately and discussed below.
+
+\begin{table}[h]
+\fontsize{8pt}{8pt}\selectfont
+\centering
+\caption{Per-component evaluation on the held-out test set.}
+\label{tab:results}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{AUC} & \textbf{Recall} & \textbf{Precision} & \textbf{F1} \\
+\midrule
+Random Forest           & --    & 0.860 & 0.930 & 0.890 \\
+Autoencoder (anomaly)   & 0.901 & 0.447 & 0.730 & 0.550 \\
+Bottleneck classifier   & 0.929 & 0.891 & 0.883 & 0.887 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Random Forest Classifier}
+
+A random forest classifier was trained on a balanced 50:50 dataset and evaluated using 5-fold cross-validation. It reaches about 90.15\% accuracy, with a failure recall of 0.86 and a precision of 0.93. The model catches most failing drives while keeping false alarms relatively low. The random forest results are solid and therefore serve as the basis for the final prediction. By combining the remaining models, we aim to improve the final result by addressing and potentially eliminating the random forest model's shortcomings.
+
+\subsection{Autoencoder Anomaly Detector}
+
+The anomaly detection model was trained only on healthy rows and evaluated on all 4{,}414 failure rows. Reconstruction error reasonably separates failures from healthy records, with an AUC of 0.901. However, with a failure recall of only 0.447 at the 99th-percentile threshold, the model misses more than half of the actual failures. Its main value is that it does not require any failure labels during training, and it catches a different kind of problem than supervised classifiers do, which could potentially contribute to the overall predictive performance of our combined hybrid model.
+
+\subsection{Bottleneck Classifier}
+
+The bottleneck classifier is the strongest individual model among the four in terms of predictive performance. It consists of two parts. First, the autoencoder compresses the 19 input features into an 8-dimensional bottleneck — a latent data representation — and then a small dense classifier is trained on those 8 dimensions using a balanced 50:50 dataset. It achieves an AUC of 0.929, a failure recall of 0.891, and an F1-score of 0.887 on the test set.
+
+\subsection{HDBSCAN Clustering}
+
+The clustering model also works on the same 8-dimensional bottleneck data representation from the autoencoder. HDBSCAN~\cite{campello2013hdbscan,mcinnes2017hdbscan} is applied directly in that 8-dimensional data space; the number of clusters is determined automatically from the data density. In our training set, 18 clusters and one outlier group emerged. Each cluster is assigned a risk score equal to its empirical failure rate in the training data. When evaluating a new disk, it is assigned to the nearest cluster, and that cluster's failure rate becomes $C$ in Equation~\ref{eq:ahi}.
+
+\subsection{Aggregated Health Index}
+
+The Aggregated Health Index (AHI) is simply a weighted root-mean-square (RMS) formula that combines all 4 model scores into one final value representing the current risk state of the disk:
+
+\begin{equation}
+\mathrm{AHI} = \sqrt{\frac{w_K \cdot K^2 + w_R \cdot R^2 + w_A \cdot A^2 + w_C \cdot C^2}{\sum w}} \times 100
+\label{eq:ahi}
+\end{equation}
+
+\noindent where $K$ is the random forest failure probability ($w_K = 0.30$), $R$ is the bottleneck classifier failure probability ($w_R = 0.40$), $A$ is the autoencoder anomaly score normalized to $[0,1]$ ($w_A = 0.20$), and $C$ is the empirical failure rate of the assigned cluster ($w_C = 0.10$). All scores are within the range $[0,1]$, weights sum to 1, and the result is multiplied by 100 to express AHI as a percentage. The final value is clipped to $[3,\,97]$ to avoid extreme boundary values. Below 45\% means \emph{Healthy}, 45--65\% is \emph{Warning}, and above 65\% is \emph{Critical}.
+
+We evaluated AHI on 100 balanced records (50 healthy, 50 failed) from the Backblaze 2023 dataset~\cite{backblaze2023}, which was not used in training at all. Figure~\ref{fig:ahi_rock} shows how the AHI scores look for both groups.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{figures/ahi_color_rock_holdout2023.png}
+  \caption{AHI score distribution for 100 holdout disks (50 healthy, 50 failed) from the Backblaze 2023 dataset. Each dot represents one disk; vertical position is AHI (\%), color encodes AHI level from low (green) to high (red).}
+  \Description{Scatter plot showing AHI percentage scores for 100 holdout disks split into two groups: 50 healthy and 50 failed. Healthy disks cluster around 33.7 percent with low spread, while failed disks show higher scores around 58.7 percent but with much greater spread, illustrating both the separation power and the higher variance in the failure group.}
+  \label{fig:ahi_rock}
+\end{figure}
+
+We can see that AHI correctly identified most failure records -- the mean AHI for healthy disks is $33.7\%$ ($\sigma = 8.4\%$) and for failed disks it is $58.7\%$ ($\sigma = 18.0\%$), which is about a 25-percentage-point difference. On the other hand, there are some visible problems in the failure group -- the standard deviation is much larger ($\sigma = 18.0\%$ vs.\ $\sigma = 8.4\%$), meaning AHI is less consistent for failing disks. This points to some false negatives -- disks that are failing but have unusual SMART patterns, so they receive a lower AHI score, which can be the main area for future improvement.
+
+\section{Discussion}
+\label{sec:discussion}
+
+Looking at the results, we can see that no single model is the best at everything. The bottleneck classifier has the best individual numbers, while the autoencoder-based anomaly detector catches a different kind of failure -- one it can find even without seeing any failure examples during training. The clustering model adds something different on top of that: each cluster has a human-readable description of its dominant SMART pattern, so we can see not just the AHI score, but also what type of disk behaviour is causing it.
+
+The 2023 evaluation is completely out-of-sample -- no 2023 records were used at any stage of training -- so the $\sim$25 percentage-point separation we see is realistic, not an in-sample optimistic one. The higher variance in the failure group is a known limitation. Some disks fail without showing obvious SMART problems (so-called silent failures), and those will naturally get a lower AHI regardless of the models used. To improve this, we would need either more sensor data beyond standard SMART attributes or periodic adjustment of the weights as the fleet changes over time.
+
+Two further limitations are worth noting. First, all training data comes from a single storage provider (Backblaze), so results may not generalise directly to other hardware vendors or real-life scenarios. Second, the system outputs the current health state rather than an estimated time to failure — predicting a remaining useful life horizon is left for future work.
+
+The entire pipeline runs offline and relies on a single disk snapshot, so it can run on edge devices or NAS systems without a network connection.
+
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
+
+In this paper, we built and evaluated a hybrid system that combines four independent models into a single Aggregated Health Index (AHI): a random forest classifier, an autoencoder-based anomaly detector, a bottleneck classifier, and an HDBSCAN clustering model. Each model captures a different kind of failure signal, and combining them with a weighted RMS formula yields a result more robust than any single model. On 100 holdout records from the Backblaze 2023 dataset, mean AHI was $33.7\%$ ($\sigma = 8.4\%$) for healthy disks and $58.7\%$ ($\sigma = 18.0\%$) for failed disks - a separation of about 25 percentage points.
+
+For future work, it would be good to tune the weights based on data rather than setting them manually, perform a full SMART feature analysis for each cluster to improve the cluster descriptions, and extend the system to NVMe drives, which have a different set of SMART attributes than traditional HDDs.
+
+\printbibliography
+
+\end{document}

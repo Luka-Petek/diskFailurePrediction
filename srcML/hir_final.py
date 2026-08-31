@@ -1,6 +1,6 @@
 #  python srcML/hir_final.py --input DiskJson/disk_data_sda.json
 #
-#  HIR (Health Index Rating) — kombinirana formula vseh 4 modelov:
+#  AHI (Aggregated Health Index) — kombinirana formula vseh 4 modelov:
 #    Impl 0  — Sklearn Random Forest        (utez 0.30)
 #    Impl 2  — TF Bottleneck Classifier     (utez 0.40)  ← najboljsi rezultati
 #    Impl 1  — TF Anomaly Detection AE      (utez 0.20)
@@ -61,6 +61,12 @@ def _load_clustering_artifacts(clustering_dir: Path) -> tuple:
     clusterer = joblib.load(clustering_dir / "clf_hdbscan.pkl")
     with open(clustering_dir / "hdbscan_metadata.json", encoding="utf-8") as f:
         cluster_meta = json.load(f)
+    desc_path = clustering_dir / "cluster_descriptions.json"
+    cluster_descriptions = {}
+    if desc_path.exists():
+        with open(desc_path, encoding="utf-8") as f:
+            cluster_descriptions = json.load(f)
+    cluster_meta["descriptions"] = cluster_descriptions
     return clusterer, cluster_meta
 
 def _score_sklearn(pipeline, raw_df: "pd.DataFrame") -> float:
@@ -91,31 +97,44 @@ def _score_clustering(
     clusterer, cluster_meta,
     encoder, scaler,
     raw_df: "pd.DataFrame",
-) -> float:
+) -> dict:
+    fallback_score = float(cluster_meta["cluster_risk"].get("-1", {}).get("risk_score", 0.5))
+    fallback_desc  = cluster_meta.get("descriptions", {}).get("-1", {}).get("description", "")
+    fallback = {"score": fallback_score, "cluster_id": "-1",
+                "risk_label": "OUTLIER", "description": fallback_desc}
+
     try:
         import hdbscan as hdbscan_lib
     except ImportError:
-        return float(cluster_meta["cluster_risk"].get("-1", {}).get("risk_score", 0.5))
+        return fallback
 
     try:
         X = prepare_features(raw_df)
         X_scaled   = scaler.transform(X).astype("float32")
         bottleneck = encoder.predict(X_scaled, batch_size=1, verbose=0)
 
-        labels, _strengths     = hdbscan_lib.approximate_predict(clusterer, bottleneck)
-        cluster_id             = str(int(labels[0]))
+        labels, _strengths = hdbscan_lib.approximate_predict(clusterer, bottleneck)
+        cluster_id         = str(int(labels[0]))
 
         cluster_risks = cluster_meta["cluster_risk"]
-        if cluster_id in cluster_risks:
-            return float(cluster_risks[cluster_id]["risk_score"])
-        #  neznan cluster → fallback na outlier risk
-        return float(cluster_risks.get("-1", {}).get("risk_score", 0.5))
+        descriptions  = cluster_meta.get("descriptions", {})
+
+        info = cluster_risks.get(cluster_id) or cluster_risks.get("-1", {})
+        desc = descriptions.get(cluster_id, {}).get("description", "") or \
+               descriptions.get("-1", {}).get("description", "")
+
+        return {
+            "score":       float(info.get("risk_score", 0.5)),
+            "cluster_id":  cluster_id,
+            "risk_label":  info.get("risk_label", "UNKNOWN"),
+            "description": desc,
+        }
 
     except Exception as exc:
         print(f"[OPOZORILO] Clustering scoring odpovedan ({exc}), fallback = 0.5", file=sys.stderr)
-        return 0.5
+        return fallback
 
-def _compute_hir(
+def _compute_ahi(
     sklearn_prob: float,
     tf_clf_prob: float,
     anomaly_score: float,
@@ -129,17 +148,17 @@ def _compute_hir(
         + W_CLUSTER * cluster_score ** 2
     )
 
-    hir = float(np.clip(rms_score * 100, 3.0, 97.0))
+    ahi = float(np.clip(rms_score * 100, 3.0, 97.0))
 
-    if hir >= 75.0:
+    if ahi >= 65.0:
         verdict = "CRITICAL"
-    elif hir >= 40.0:
+    elif ahi >= 45.0:
         verdict = "WARNING"
     else:
         verdict = "HEALTHY"
 
     return {
-        "hir_score":  round(hir, 2),
+        "ahi_score":  round(ahi, 2),
         "verdict":    verdict,
         "components": {
             "sklearn_failure_prob":  round(sklearn_prob,   4),
@@ -155,7 +174,7 @@ def _compute_hir(
         },
     }
 
-def predict_hir(
+def predict_ahi(
     smartctl_json_path: Path,
     sklearn_dir: Path,
     clf_dir: Path,
@@ -173,16 +192,23 @@ def predict_hir(
     raw_df = pretvori_json_v_surovi_df(smartctl_dict)
 
     print("Racunam signale...", file=sys.stderr)
-    sklearn_prob  = _score_sklearn(pipeline, raw_df)
-    tf_clf_prob   = _score_tf_clf(encoder, classifier, clf_scaler, raw_df)
-    anomaly_score = _score_anomaly(ae_model, ae_scaler, ae_meta, raw_df)
-    cluster_score = _score_clustering(
+    sklearn_prob   = _score_sklearn(pipeline, raw_df)
+    tf_clf_prob    = _score_tf_clf(encoder, classifier, clf_scaler, raw_df)
+    anomaly_score  = _score_anomaly(ae_model, ae_scaler, ae_meta, raw_df)
+    cluster_result = _score_clustering(
         clusterer, cluster_meta,
         encoder, clf_scaler,          # encoder se deli z TF clf
         raw_df,
     )
 
-    result = _compute_hir(sklearn_prob, tf_clf_prob, anomaly_score, cluster_score)
+    result = _compute_ahi(sklearn_prob, tf_clf_prob, anomaly_score, cluster_result["score"])
+
+    result["cluster_info"] = {
+        "cluster_id":  cluster_result["cluster_id"],
+        "risk_label":  cluster_result["risk_label"],
+        "risk_score":  round(cluster_result["score"], 4),
+        "description": cluster_result["description"],
+    }
 
     result["model_metadata"] = {
         "tf_clf":  {
@@ -205,7 +231,7 @@ def predict_hir(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="HIR — kombinirana napoved zdravja diska (4 modeli)."
+        description="AHI — kombinirana napoved zdravja diska (4 modeli)."
     )
     parser.add_argument(
         "--input", type=str, required=True,
@@ -238,7 +264,7 @@ def main() -> None:
         print(f"Napaka: datoteka ne obstaja: {input_path}", file=sys.stderr)
         sys.exit(1)
 
-    result = predict_hir(
+    result = predict_ahi(
         smartctl_json_path=input_path,
         sklearn_dir=Path(args.sklearn_dir),
         clf_dir=Path(args.clf_dir),

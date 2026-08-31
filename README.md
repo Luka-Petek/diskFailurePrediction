@@ -4,7 +4,7 @@
 
 <img src="frontend/src/assets/logo-wordmark.svg" alt="DiskGuard" width="320" />
 
-**Hard drive failure prediction & Health Index Rating — 4 ML models fused into one real-time verdict.**
+**Hard drive failure prediction & Aggregated Health Index — 4 ML models fused into one real-time verdict.**
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](frontend/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?logo=fastapi&logoColor=white)](backend/)
@@ -22,14 +22,14 @@
 
 ## About the Project
 
-A machine learning system that predicts hard drive failures from real-time **SMART** sensor data. Four independent models — spanning supervised deep learning, unsupervised anomaly detection, and density-based clustering — are fused into a single interpretable score: the **Health Index Rating (HIR)**.
+A machine learning system that predicts hard drive failures from real-time **SMART** sensor data. Four independent models — spanning supervised deep learning, unsupervised anomaly detection, and density-based clustering — are fused into a single interpretable score: the **Aggregated Health Index (AHI)**.
 
 Built on the [Backblaze 2025](https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data) open dataset: **32M+ records**, **365 daily CSV files**, **4,414 confirmed failure events**.
 
-> **For a detailed ML engineering breakdown** — preprocessing logic, model architectures, training configs, and HIR fusion math — see [`srcML/README.md`](srcML/README.md).
+> **For a detailed ML engineering breakdown** — preprocessing logic, model architectures, training configs, and AHI fusion math — see [`srcML/README.md`](srcML/README.md).
 
 - **89.1% failure recall** — catches 9 out of 10 failing disks before they die
-- **4 ML techniques, one final score** — RF, deep AE, bottleneck classifier and HDBSCAN each vote independently; results fused into a single HIR verdict
+- **4 ML techniques, one final score** — RF, deep AE, bottleneck classifier and HDBSCAN each vote independently; results fused into a single AHI verdict
 - **32M+ real-world sensor records** — trained on a full year of Backblaze production fleet data, not synthetic benchmarks
 - **Lightweight inference** — suitable for embedded systems, NAS devices, and edge deployments
 - **Instant real-time prediction** — plug in any `smartctl -j` JSON output, get a risk score and verdict in seconds
@@ -41,7 +41,7 @@ Built on the [Backblaze 2025](https://www.backblaze.com/cloud-storage/resources/
 
 ## Model Performance Summary
 
-| Model | Method | ROC-AUC | Failure Recall | HIR Weight |
+| Model | Method | ROC-AUC | Failure Recall | AHI Weight |
 |---|---|---|---|---|
 | **Model 0** — Sklearn RF | Random Forest (19 SMART features) | — | 86.0 % | 0.30 |
 | **Model 1** — Anomaly AE | Unsupervised Autoencoder (12-dim bottleneck) | 0.901 | 44.7 % | 0.20 |
@@ -85,7 +85,7 @@ diskFailurePrediction/
 │   │   └── logs/                       #   TensorBoard Embedding Projector logs
 │   ├── nn_preprocessing/
 │   │   └── preprocessing.py            #   Shared feature prep, CSV loading, dataset balancing
-│   └── hir_final.py                    #   ★ Final HIR scoring — combines all 4 models
+│   └── hir_final.py                    #   ★ Final AHI scoring — combines all 4 models
 │
 ├── backend/                            # FastAPI inference server
 ├── frontend/                           # React + Vite dashboard
@@ -99,7 +99,7 @@ diskFailurePrediction/
 
 ### Dashboard
 
-Score clamped to **[3, 97]** · Verdicts: **HEALTHY** < 40 · **WARNING** 40–75 · **CRITICAL** > 75
+Score clamped to **[3, 97]** · Verdicts: **HEALTHY** < 45 · **WARNING** 45–65 · **CRITICAL** > 65
 
 ![Dashboard](Graphs/dashbaord.png)
 
@@ -181,11 +181,11 @@ python srcML/tensorflow_clustering/umap_hdbscan.py --data-dir DiskData
 
 ---
 
-## Health Index Rating (HIR) - Clean and final result
+## Aggregated Health Index (AHI) - Clean and final result
 
 All four models are fused into a single score using a **weighted root-mean-square** formula. RMS is preferred over a linear average because it amplifies large individual signals — a disk that looks catastrophic on one axis cannot be "averaged away" by healthy scores elsewhere.
 
-![HIR Formula](Graphs/hir_formula.png)
+![AHI Formula](Graphs/hir_formula.png)
 
 | Symbol | Source | Weight |
 |---|---|---|
@@ -193,6 +193,10 @@ All four models are fused into a single score using a **weighted root-mean-squar
 | R | TF Bottleneck Classifier probability | **0.40** |
 | A | Anomaly AE normalized score | 0.20 |
 | C | HDBSCAN cluster failure rate | 0.10 |
+
+**Holdout evaluation on 100 disks from the Backblaze 2023 dataset** (not used in training). Mean AHI: 33.7% (healthy) vs 58.7% (failed) — ~25 percentage point separation.
+
+![AHI holdout distribution](Graphs/ahi_color_rock_holdout2023.png)
 
 ### Run on any disk:
 ```bash
@@ -221,7 +225,7 @@ python srcML/hir_final.py --input disk_data.json
 
 ## API & Frontend
 
-The **FastAPI backend** exposes `/api/predict/combined`, which runs all four models and returns the fused HIR verdict — this is the endpoint the **React/Vite dashboard** calls when you upload a scan. A legacy `/api/analyze-smart-json` alias (sklearn-only) is kept for backward compatibility.
+The **FastAPI backend** exposes `/api/predict/combined`, which runs all four models and returns the fused AHI verdict — this is the endpoint the **React/Vite dashboard** calls when you upload a scan. A legacy `/api/analyze-smart-json` alias (sklearn-only) is kept for backward compatibility.
 
 ```bash
 curl -X POST http://localhost:8000/api/predict/combined \
