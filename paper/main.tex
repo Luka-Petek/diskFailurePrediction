@@ -71,7 +71,7 @@ The main contributions of this paper are thus:
 \begin{itemize}
     \item We combine four independently trained models -- a random forest classifier, an unsupervised autoencoder anomaly detector, a classifier built on the autoencoder bottleneck, and an HDBSCAN clustering model -- into a single Aggregated Health Index (AHI) using a weighted root-mean-square formula.
     \item We keep all four per-component scores visible alongside AHI, ensuring the final output is interpretable and traceable to each model's contribution.
-    \item We report evaluation results and reflect on the trade-offs of using this hybrid as a small, fully offline pipeline for data-centre and edge/NAS deployment.
+    \item We report evaluation results and reflect on the trade-offs of using this hybrid as a small, fully offline pipeline for data-centre and edge deployment.
 \end{itemize}
 
 The remainder of this paper is organised as follows. Section~\ref{sec:related} reviews related work on SMART-based failure prediction. Section~\ref{sec:method} describes the dataset, preprocessing, the four component models, and the AHI aggregation formula. Section~\ref{sec:results} reports evaluation results. Section~\ref{sec:discussion} discusses deployment use cases, trade-offs, and limitations, while Section~\ref{sec:conclusion} concludes the paper.
@@ -101,7 +101,7 @@ Machine learning (ML) applied to raw SMART attribute values, rather than the man
   \item Engineered: \texttt{any\_critical\_error}, \texttt{total\_error\_count}, \texttt{error\_per\_gb}
 \end{itemize}
 
-\textbf{Models and aggregation.} We train four components on the same features: (1) a random forest classifier (scikit-learn) that outputs a failure probability; (2) a TensorFlow autoencoder trained only on healthy rows, where the reconstruction error is turned into a 0--1 anomaly score with a percentile threshold; (3) a small dense classifier trained on the autoencoder bottleneck (low-dimensional code) to predict failure probability; and (4) HDBSCAN clustering on the bottleneck space, where cluster risk is the empirical failure rate of that cluster (outliers fall back to a default risk). To obtain a single score, we compute an Aggregated Health Index (AHI) as a weighted root-mean-square of the four component scores, then clip the percentage for stability. We used fixed weights from validation (RF 0.30, bottleneck classifier 0.40, anomaly 0.20, clustering 0.10), and the final AHI can be explained from per-component contributions.
+\textbf{Models and aggregation.} We train four components on the same features: (1) a random forest classifier (scikit-learn) that outputs a failure probability; (2) a TensorFlow autoencoder trained only on healthy rows, where the reconstruction error is turned into a 0--1 anomaly score with a percentile threshold; (3) a small dense classifier trained on the autoencoder bottleneck to predict failure probability; and (4) HDBSCAN clustering on the bottleneck space, where cluster risk is the empirical failure rate of that cluster (outliers fall back to a default risk). To obtain a single score, we compute an Aggregated Health Index (AHI) as a weighted root-mean-square of the four component scores, then clip the percentage for stability. We used fixed weights from validation (RF 0.30, bottleneck classifier 0.40, anomaly 0.20, clustering 0.10), and the final AHI can be explained from per-component contributions.
 
 \section{Results}
 \label{sec:results}

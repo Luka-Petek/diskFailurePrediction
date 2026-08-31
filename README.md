@@ -99,7 +99,7 @@ diskFailurePrediction/
 
 ### Dashboard
 
-Score clamped to **[3, 97]** · Verdicts: **HEALTHY** < 40 · **WARNING** 40–75 · **CRITICAL** > 75
+Score clamped to **[3, 97]** · Verdicts: **HEALTHY** < 45 · **WARNING** 45–65 · **CRITICAL** > 65
 
 ![Dashboard](Graphs/dashbaord.png)
 
@@ -193,6 +193,10 @@ All four models are fused into a single score using a **weighted root-mean-squar
 | R | TF Bottleneck Classifier probability | **0.40** |
 | A | Anomaly AE normalized score | 0.20 |
 | C | HDBSCAN cluster failure rate | 0.10 |
+
+**Holdout evaluation on 100 disks from the Backblaze 2023 dataset** (not used in training). Mean AHI: 33.7% (healthy) vs 58.7% (failed) — ~25 percentage point separation.
+
+![AHI holdout distribution](Graphs/ahi_color_rock_holdout2023.png)
 
 ### Run on any disk:
 ```bash
